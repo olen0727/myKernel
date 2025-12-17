@@ -179,7 +179,8 @@ interface Habit {
   userId: UUID;                         // 所屬使用者 (FK -> User)
   areaId: AreaID;                       // 隸屬領域 (FK -> Area)
   name: string;                         // 習慣名稱
-  frequency: 'daily' | 'weekly' | 'custom'; // 頻率設定
+  frequency: 'daily' | 'weekly';        // 頻率設定 (Daily 或 Weekly)
+  weekDay?: number;                     // 僅 Weekly 需設定：1=週一 ... 7=週日
   isActive: boolean;                    // 是否啟用
   createdAt: DateTime;
   updatedAt: DateTime;
@@ -307,3 +308,25 @@ type HabitID = UUID;
 type MetricID = UUID;
 type JournalID = UUID;
 ```
+
+---
+
+## 13. WorkbenchItem (工作台項目)
+
+用於記錄使用者在 Workbench 中「Doing」與「Todo」區塊的自定義排序與焦點狀態。
+
+*   **Todo 區塊邏輯**：採「混合排序」機制。
+    *   **置頂排序區 (Pinned)**：存在於 `WorkbenchItem (section='todo')` 的任務，依 `order` 排序。
+    *   **一般區 (Default)**：其餘 Active Project Tasks，依 `dueDate` 或 `createdAt` 排序，接續在置頂區之後。
+
+```typescript
+interface WorkbenchItem {
+  id: UUID;                     // 主鍵
+  userId: UUID;                 // 所屬使用者 (FK -> User)
+  taskId: UUID;                 // 關聯的任務 (FK -> Task)
+  section: 'doing' | 'todo';    // 所在區塊 (Doing / Todo)
+  order: number;                // 在該區塊中的排序
+  addedAt: DateTime;            // 加入時間
+}
+```
+

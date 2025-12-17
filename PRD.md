@@ -259,15 +259,342 @@ Metrics 為獨立存在的觀測項目，可於 Journal 中被重複量測，並
 
 ## 3.0 全站畫面布局 (Layout)
 
----
+### 說明
+系統採用 **左側導航 (Sidebar) + 頂部工具列 (Top Bar) + 主要內容區 (Main Content)** 的經典佈局，確保操作效率與資訊呈現的最大化。
+
+### 布局
+
+*   **左側導航欄 (Sidebar)**:
+    *   **頂部**: App名稱 (Kernel) 及 收折 Sidebar 按紐。
+    *   **快速捕捉按鈕**: `(+) New Resource`，隨時開啟 Capture Modal 紀錄想法。
+    *   **核心導航**: Inbox, Projects, Areas, Resources, Metrics, Journal。
+    *   **近期開啟 (Recent)**: 顯示近期開啟的六個資源/專案/領域。
+    *   **底部**: 會員資訊摘要 (頭像、名稱、方案)。
+
+*   **頂部工具列 (Top Bar)**:
+    *   **全域搜尋 (Global Search)** (middle): 快速查找資源、專案、領域 (Command Palette 形式)。
+
+*   **主要內容區 (Main Content)**:
+    *   顯示各功能模組的核心內容，支援響應式設計。
+
+### 行為
+
+*   **App 名稱**: 點擊可回到首頁 (預設為 Inbox List)。
+*   **收折按鈕**: 點擊可收折 Sidebar (只顯示收折/展開按鈕、快速捕捉圖示、核心導航圖示、會員頭像)。
+*   **全域搜尋框**: 
+    *   點擊彈出類似 Command Palette 的 Dropdown。
+    *   預設內容為近期開啟的 10 個資源/專案/領域。
+    *   輸入文字後即時顯示對應查找內容。
+*   **近期開啟 (Recent)**: 點擊標題可以 Show/Hide 下方顯示的內容清單。
+
+![Kernel 3.0 Layout Wireframe Specific](./wireframe/3.0_layout.png)
+
 
 ## 3.1 會員系統 (Membership & Auth System)
 
+### 說明
+管理使用者的身分驗證、個人檔案與偏好設定。
+*   **安全優先**: 採用標準 OAuth 2.0 與 JWT 機制。
+*   **個人化**: 支援個人資料管理與介面偏好設定 (Theme/Language)。
+
+### 3.1.1 登入與註冊頁 (Authentication Page)
+
+*   **說明**:
+    *   使用者的入口大門。
+    *   **身分驗證提供者**: 目前僅支援 **GitHub** 與 **Google** 第三方登入。
+*   **布局**:
+    *   **置中卡片式設計**: 聚焦於登入按鈕。
+    *   **背景**: 沉穩的深色背景配上極光/流光效果 (Brand Glow)。
+*   **元件**:
+    *   **Logo Area**: Kernel 品牌標誌。
+    *   **Social Connections**: 兩個主要按鈕 (Continue with Google, Continue with GitHub)。
+    *   **Footer**: 服務條款連結。
+*   **行為**:
+    *   **OAuth 流程**: 點擊按鈕後導向 Provider 授權頁面，回調後自動建立帳號或登入。
+*   **API Format**:
+    ```typescript
+    // POST /auth/social
+    interface SocialLoginRequest {
+      provider: 'google' | 'github';
+      token: string; // OAuth Access Token or Code
+    }
+    ```
+*   **UI 示意圖**:
+
+![Login Page V2 UI](./wireframe/3.1.1_login.png)
+
+### 3.1.2 帳號設定頁 (Account Settings Page)
+
+*   **說明**:
+    *   管理個人資料、安全性與系統偏好。
+*   **布局**:
+    *   **左側導航 (Sidebar)**: 功能分頁 (Profile, Account, Billing, Notifications)。
+    *   **右側內容 (Main)**: 表單輸入區，區塊分明。
+*   **元件**:
+    *   **Avatar Uploader**: 圓形頭像，支援點擊更換。
+    *   **Form Groups**: 包含 Label, Input (Disabled state for Email), Helper Text。
+    *   **Preferences**: 主題切換 (Dark/Light)、語言下拉選單。
+*   **行為**:
+    *   **即時/手動儲存**: 關鍵資料修改需點擊 "Save Changes"，偏好設定 (Theme) 可即時生效。
+*   **API Format**:
+    (請參考 `./doc/dataModel.md` 中的 User 定義)
+    ```typescript
+    // GET /user/profile
+    interface UserProfile {
+      id: UUID;
+      email: string;
+      displayName: string;
+      avatarUrl: URL;
+      preferences: {
+        theme: 'dark' | 'light';
+        language: string;
+      };
+    }
+    ```
+*   **UI 示意圖**:
+
+![Settings Page UI](./wireframe/3.1.2_settings.png)
+
+
 ## 3.2 收件匣 (Inbox)
+
+### 說明
+Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) 皆匯集於此，設計核心在於「降低捕捉門檻」與「高效率分流」。
+
+*   **快速捕捉 (Quick Capture)**: 支援全域快捷鍵開啟，隨時保留靈感，不打斷當前工作流。
+*   **資源分流 (Quick Dispatch)**: 提供高效率的互動介面，將資源快速歸位至 PARA 系統 (Projects/Areas/Trash/Archive)。
+
+### 3.2.1 收件匣清單頁 (Inbox List Page)
+
+*   **說明**:
+    *   顯示所有狀態為 `Pending` 的資源列表。
+    *   作為 Inbox 的預設視圖，設計目標是「鼓勵清空 (Inbox Zero)」。
+*   **布局**:
+    *   **頂部**: 頁面標題 "Inbox"、資源計數器 (e.g., "Inbox (3)")、排序/篩選工具列 (預設依建立時間倒序)。
+    *   **列表區**: 佔據主要畫面，以單欄列表呈現每筆資源。
+*   **元件**:
+    *   **清單項目 (List Item)**:
+        *   **類型圖示**: 區分純文字筆記、連結 (Link)、檔案 (File)。
+        *   **標題 (Title)**: 資源的主要描述。
+        *   **摘要 (Snippet)**: 連結網域 (Domain) 或 內文前 50 字預覽。
+        *   **時間戳記**: 顯示「多久前建立 (e.g., 2h ago)」，增加處理急迫感。
+        *   **懸停動作 (Hover Actions)**: `Move to Project/Area`, `Archive`, `Delete` 快速按鈕。
+    *   **空狀態 (Empty State)**: 當清單清空時，顯示 "Inbox Zero" 的獎勵插圖與激勵文字。
+*   **行為**:
+    *   **點擊項目**: 於右側滑出「資源預覽/編輯窗格」或跳轉至「資源內容編輯頁」(視螢幕寬度而定)。
+    *   **批量操作**: 支援多選 (Shift/Cmd + Click) 後進行批量歸檔、刪除。
+    *   **拖曳排序**: 允許基本排序調整 (雖主要依賴時間，但支援手動優先級調整)。
+*   **資料模型**:
+    *   **Resource Schema**:
+        ```typescript
+        Resource {
+          id: Identifier
+          title: string
+          content: Markdown
+          status: 'pending' | 'processed' | 'archived'
+          linkedProjects?: ProjectID[]
+          linkedAreas?: AreaID[]
+          sourceLink?: URL
+          tags: Tag[]
+          createdAt: DateTime
+          updatedAt: DateTime
+        }
+        ```
+    *   查詢條件: `status = 'Pending'` AND `is_deleted = false`
+    *   預設排序: `created_at DESC`
+
+### 3.2.2 資源內容編輯頁 (Resource Content Page)
+
+*   **說明**: 檢視資源完整內容並進行深度整理與分類的頁面。
+*   **布局**:
+    *   **主內容欄**: 標題輸入框 (Title)、Plate.js 編輯器 (Content)。若是 URL 類型，顯示 OpenGraph 預覽卡片。
+    *   **屬性側欄 (Properties Sidebar)**:
+        *   **已分流目標**: 顯示已建立關聯的 Project/Area。
+        *   **分類選擇器**: Project Selector, Area Selector。
+        *   **標籤 (Tags)**: 標籤輸入與管理。
+        *   **來源 (Source)**: URL 連結。
+*   **行為**:
+    *   **自動儲存**: 編輯過程中即時 Autosave。
+    *   **分流確認**: 
+        *   當使用者選擇了 Project 或 Area 後，需顯示一個顯性的「Process & Next」按鈕，點擊後將狀態更新為 `Processed` 並自動導向 Inbox 下一筆待處理項目。
+        *   若使用者未點擊按鈕 (例如直接切換頁面)，只要已建立關聯，狀態亦自動變更為 `Processed`。
+
+![Resource Editor/Processing UI](./wireframe/3.2.2_resource_editor.png)
+
+
+### 3.2.3 快速捕捉視窗 (Quick Capture Modal)
+
+*   **說明**: 隨時隨地開啟的浮動視窗，用於極速輸入。
+*   **布局**:
+    *   畫面正中央顯示對話框 (Dialog)。
+    *   極簡設計：僅包含一個多行輸入框與簡易工具列。
+*   **行為**:
+    *   **智慧解析**:
+        *   若輸入內容為 URL，自動抓取標題與 Metadata 並轉為連結類型，並將該 URL 儲存為參考連結 (Source Link)。
+        *   若為純文字，第一行自動設為標題。
+    *   **快捷鍵**:
+        *   `Cmd/Ctrl + Enter`: 儲存並關閉。
+        *   `Esc`: 取消。
+*   **UI 示意圖**:
+
+![Inbox UI Wireframe](./wireframe/3.2.1_inbox_list.png)
+
 
 ## 3.3 專案管理 (Projects)
 
+### 說明
+管理所有具備明確結束條件的任務集合。
+*   **目標導向 (Goal-Oriented)** 設計，每個行動都應服務於更長遠的目標。
+*   **多視圖切換**: 支援 **看板 (Kanban)** 與 **清單 (List)** 視圖，適應不同管理需求。
+
+### 3.3.1 專案列表頁 (Project List Page)
+
+*   **說明**:
+    *   除專案列表外，新增 **工作台 (Workbench)** 概念，作為跨專案的任務聚合視圖，讓使用者聚焦於「今天該做什麼」。
+*   **布局**:
+    *   頁面分為上下兩部分，頂部標題 "Projects" 維持在最上方。
+    *   **上半部 - 工作台 (Workbench)**:
+        *   **左側 (Doing)**: 「當前正在處理」的工作焦點。使用者主動拖曳選入。
+        *   **右側 (Todo)**: 顯示所有 `Active` 專案中的未完成任務聚合清單。
+    *   **下半部 - 專案列表 (Project List)**:
+        *   包含狀態篩選按鈕 (Active/Completed/Archived) 與專案卡片網格/列表。
+*   **行為**:
+    *   **Workbench 互動**:
+        *   **選入任務**: 從右側 Todo 拖曳任務至左側 Doing，代表鎖定焦點。
+        *   **完成任務**: 在 Doing 區勾選完成，該任務以灰底顯示 (未離開頁面前可 Undo)。
+    *   **Todo 來源**: 自動聚合所有 Status=`Active` 專案內的未完成 Tasks。
+    *   **版面調整**: 使用者可上下拖曳 Workbench 與 Project List 之間的分界線，自定義兩區域的高度比例。
+*   **API Format**:
+    (請參考 `./doc/dataModel.md` 中的 Project 與 Task 定義)
+    ```typescript
+    // GET /projects
+    interface ProjectListResponse {
+      projects: Project[]; // Filtered by status
+      workbench: {
+        doing: Task[];     // Client-side local storage or specialized list
+        todo: Task[];      // Aggregated from active projects
+      }
+    }
+    ```
+
+
+
+### 3.3.2 專案詳情頁 (Project Detail Page)
+
+*   **說明**: 單一專案的執行中樞，整合任務、資源與筆記。
+*   **布局**:
+    *   **兩欄式佈局**: 主內容區 (70%) + 右側資訊欄 (30%)。
+    *   **頁頭**: 僅顯示專案名稱 (Project Name)。
+    *   **主內容區 (Main Content)**:
+        *   **專案進度 (Project Progress)**: 顯示 `x / y 任務完成` 及對應百分比進度條。
+        *   **專案摘要 (Project Summary)**: 支援 Markdown 語法的文字區塊，用於描述專案目標與背景。
+        *   **任務清單區 (Task Lists)**: 垂直排列的多個任務清單群組 (Grouped by TaskList)。
+    *   **右側側欄 (Context Sidebar)**:
+        *   **狀態 (Status)**: Badge 顯示。
+        *   **截止日期 (Due Date)**: 日期顯示。
+        *   **所屬領域 (Area)**: 顯示關聯 Area。
+        *   **關聯資源 (Linked Resources)**: 顯示關鍵參考資料連結。
+*   **元件**:
+    *   **任務清單 (Task List)**: 包含標題與其下的任務項目 (Checklist Item)。
+    *   **任務項目**: 支援勾選完成状态、拖曳排序。
+*   **行為**:
+    *   **任務管理**: 在清單內直接新增、勾選完成任務。系統會自動重新計算上方進度條。
+    *   **清單管理**: 可新增多個任務清單 (e.g., "Design Phase", "Backend Dev") 來分類任務。
+*   **資料模型**:
+    *   Structure: `Project` -> `TaskLists` -> `Tasks`
+    *   API Format:
+    ```typescript
+    interface ProjectDetail extends Project {
+      taskLists: {
+        id: UUID;
+        name: string;
+        order: number;
+        tasks: Task[];
+      }[];
+      resources: Resource[];
+    }
+    ```
+    (詳細定義請參考 `./doc/dataModel.md`)
+*   **UI 示意圖**:
+
+![Project Detail V2 UI](./wireframe/3.3.2_project_detail.png)
+
+
+
 ## 3.4 領域維護 (Areas)
+
+### 說明
+用於描述長期存在、無明確結束時間的人生責任範圍或生活面向。
+*   **長期視角**: Area 不會被「完成」，只能被「維護」。
+*   **責任歸屬**: 所有的 Project 與 Habit 都應歸屬於某個 Area，以確保行動與長期目標一致。
+
+### 3.4.1 領域列表頁 (Area List Page)
+
+*   **說明**:
+    *   展示使用者的人生版圖全貌。
+    *   強調視覺化的「領域感」，而非單純的清單。
+*   **布局**:
+    *   **網格視圖**: 採用較大尺寸的卡片網格 (Grid Layout)，強調封面圖視覺。
+*   **元件**:
+    *   **領域卡片 (Area Card)**:
+        *   **上半部**: 滿版封面圖 (Cover Image)。
+        *   **下半部**: 領域名稱、狀態燈號 (Active/Hidden)、關鍵統計 (Active Projects / Habits)。
+*   **行為**:
+    *   **點擊卡片**: 進入「領域詳情頁」。
+    *   **僅檢視狀態**: 列表頁不提供狀態切換功能，僅顯示當前狀態 (Active/Hidden)。
+*   **API Format**:
+    ```typescript
+    // GET /areas
+    interface AreaListResponse {
+      id: UUID;
+      name: string;
+      coverImage: URL;
+      status: 'active' | 'hidden';
+      stats: {
+        activeProjects: number;
+        activeHabits: number;
+      };
+    }[]
+    ```
+*   **UI 示意圖**:
+
+![Area List UI](./wireframe/3.4.1_area_list.png)
+
+### 3.4.2 領域詳情頁 (Area Detail Page)
+
+*   **說明**:
+    *   單一領域的控制中心 (Hub)。
+    *   負責該領域下的「專案 (Projects) 索引」與「習慣 (Habits) 管理」。
+*   **布局**:
+    *   **頁頭 (Header)**: 滿版背景圖 + 領域標題 + 核心統計數據。
+    *   **兩欄式佈局**:
+        *   **主內容區 (Main)**: 上方為習慣管理 (Habit Management)，下方為進行中專案 (Active Projects)。
+        *   **右側側欄 (Sidebar)**: 領域描述 (Description)、關鍵資源連結 (Linked Resources)、區域狀態設定 (Hidden Toggle)。
+*   **元件**:
+    *   **習慣管理器 (Habit Manager)**:
+        *   **清單呈現**: 每一列 **最前方** 以標籤 (Tag) 樣式顯示頻率，後方跟隨習慣名稱。
+            *   樣式範例: `[Daily]` 閱讀 30 分鐘、`[Weekly - Mon]` 檢視週計畫。
+        *   **頻率設定**: 僅支援 `Daily` 與 `Weekly` (需指定星期幾)。
+        *   **操作**: 提供 **啟用/暫停** 開關、**編輯** 按鈕。
+        *   (注意：此處不進行打卡，打卡行為位於日記功能)。
+    *   **專案列表 (Project List)**: 嵌入精簡版的專案卡片，點擊跳轉至 Project Detail。
+*   **行為**:
+    *   **習慣管理**: 新增、編輯、暫停/啟用習慣。
+    *   **內容編輯**: 可直接點擊並編輯側欄的 **領域描述 (Description)**。
+    *   **狀態切換**: 在側欄下方提供 "Hidden Area" 開關，將此領域隱藏或重新啟用。
+*   **API Format**:
+    ```typescript
+    // GET /areas/:id/dashboard
+    interface AreaDetailResponse {
+      area: Area;
+      habits: Habit[]; // List for management
+      projects: Project[]; // Active projects
+      resources: Resource[]; // Pinned resources
+    }
+    ```
+*   **UI 示意圖**:
+
+![Area Detail V2 UI](./wireframe/3.4.2_area_detail.png)
 
 ## 3.5 資源庫 (Resources)
 
