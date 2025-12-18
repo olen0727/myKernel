@@ -213,9 +213,11 @@ interface HabitLog {
 interface Metric {
   id: UUID;                             // 主鍵
   userId: UUID;                         // 所屬使用者 (FK -> User)
-  name: string;                         // 指標名稱 (e.g., 體重, 睡眠時數)
-  unit: string;                         // 單位 (e.g., kg, hours, count)
-  inputType: 'number' | 'rating';       // 輸入類型
+  name: string;                         // 指標名稱
+  unit?: string;                        // 單位 (僅用於 number 類型, e.g., kg, km)
+  inputType: 'number' | 'rating' | 'select' | 'time' | 'sleep'; // 輸入類型 (sleep 為專屬睡眠模組)
+  options?: string[];                   // 僅用於 select 類型 (選項清單)
+  isSystem?: boolean;                   // 是否為系統預設指標 (系統指標不可刪除, 如睡眠追蹤)
   isActive: boolean;                    // 是否啟用
   createdAt: DateTime;
   updatedAt: DateTime;
@@ -231,10 +233,13 @@ interface Metric {
 ```typescript
 interface MetricEntry {
   id: UUID;                             // 主鍵
-  metricId: MetricID;                   // 所屬指標 (FK -> Metric)
-  journalId: JournalID;                 // 所屬日記 (FK -> Journal)
+  metricId: UUID;                       // 所屬指標 (FK -> Metric)
+  journalId: UUID;                      // 所屬日記 (FK -> Journal)
   date: Date;                           // 日期
-  value: number;                        // 量測數值
+  value: number | string;               // 儲存值
+                                        // - number: 數值/評分
+                                        // - string: 選項名稱 / 時間戳記 ("HH:mm")
+                                        // - JSON string: 睡眠數據 (e.g., '{"sleepAt":"23:00","wakeUpAt":"07:00"}')
 }
 ```
 
