@@ -77,10 +77,10 @@ interface Resource {
 ```
 
 **狀態轉換規則：**
-- `pending` → `processed` (建立關聯後自動或手動觸發)
+- `pending` → `processed` (建立關聯後自動觸發)
 - `pending` → `archived` (直接封存)
 - `processed` → `archived` (退出關注)
-- `archived` → `processed` (重新啟用並建立關聯)
+- `archived` → `processed` (重新啟用並建立關聯, 前提為必須有有效(active)之專案或領域)
 
 ---
 

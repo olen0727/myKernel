@@ -1,6 +1,6 @@
 # **Product Requirement Document (PRD): Kernel**
 
-**Version**: 2.1  **Language**: Traditional Chinese (繁體中文) **Status**: Planning
+**Version**: 2.1  **Language**: Traditional Chinese (繁體中文)  **Status**: Planning
 
 ---
 
@@ -199,7 +199,7 @@ Habit 隸屬於單一領域（Area），並以每日是否執行為主要記錄�
 
 Journal 本身不承載長期結構或核心資料，
 
-而是以「日期」為索引，彙整並呈現該日所對應的行為、狀態與觀察紀錄。
+呈現該日所對應的行為、狀態與觀察紀錄。
 
 在 Journal 中，使用者可進行以下紀錄行為：
 
@@ -374,15 +374,18 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
     *   **列表區**: 佔據主要畫面，以單欄列表呈現每筆資源。
 *   **元件**:
     *   **清單項目 (List Item)**:
-        *   **類型圖示**: 區分純文字筆記、連結 (Link)、檔案 (File)。
+        *   **類型圖示**: 目前僅支援筆記 (Note) 類型。
         *   **標題 (Title)**: 資源的主要描述。
-        *   **摘要 (Snippet)**: 連結網域 (Domain) 或 內文前 50 字預覽。
+        *   **摘要 (Snippet)**: 顯示內文前 50 字預覽。
         *   **時間戳記**: 顯示「多久前建立 (e.g., 2h ago)」，增加處理急迫感。
-        *   **懸停動作 (Hover Actions)**: `Move to Project/Area`, `Archive`, `Delete` 快速按鈕。
+        *   **懸停動作 (Hover Actions)**: `Link to Project/Area` (開啟分流選單), `Archive`, `Delete` 快速按鈕。
     *   **空狀態 (Empty State)**: 當清單清空時，顯示 "Inbox Zero" 的獎勵插圖與激勵文字。
 *   **行為**:
     *   **點擊項目**: 於右側滑出「資源預覽/編輯窗格」或跳轉至「資源內容編輯頁」(視螢幕寬度而定)。
-    *   **批量操作**: 支援多選 (Shift/Cmd + Click) 後進行批量歸檔、刪除。
+    *   **資源分流 (Link/Dispatch)**: 
+        *   點擊 `Link to Project/Area` 按鈕後，彈出 **Command Palette 形式** 的下拉選單。
+        *   選單支援搜尋與 **多選 (Multi-select)** 專案或領域。
+        *   選擇完畢後點擊確認，將資源關聯至選中目標並根據狀態邏輯自動標記為 `Processed`。
     *   **拖曳排序**: 允許基本排序調整 (雖主要依賴時間，但支援手動優先級調整)。
 *   **資料模型**:
     *   **Resource Schema**:
@@ -409,10 +412,10 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 *   **布局**:
     *   **主內容欄**: 標題輸入框 (Title)、Plate.js 編輯器 (Content)。若是 URL 類型，顯示 OpenGraph 預覽卡片。
     *   **屬性側欄 (Properties Sidebar)**:
-        *   **已分流目標**: 顯示已建立關聯的 Project/Area。
-        *   **分類選擇器**: Project Selector, Area Selector。
+        *   **已分流目標**: 顯示 `linkedProjects` 與 `linkedAreas` 中的所有關聯目標。
+        *   **分流工具 (Dispatch Tool)**: 透過 Command Palette 形式的選單，新增或移除關聯的 Project / Area。
         *   **標籤 (Tags)**: 標籤輸入與管理。
-        *   **來源 (Source)**: URL 連結。
+        *   **參考連結 (Source Link)**: 可選欄位 (URL)，若存在則顯示外部連結圖示與連結。
 *   **行為**:
     *   **自動儲存**: 編輯過程中即時 Autosave。
     *   **分流確認**: 
@@ -428,10 +431,14 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 *   **布局**:
     *   畫面正中央顯示對話框 (Dialog)。
     *   極簡設計：僅包含一個多行輸入框與簡易工具列。
-*   **行為**:
-    *   **智慧解析**:
-        *   若輸入內容為 URL，自動抓取標題與 Metadata 並轉為連結類型，並將該 URL 儲存為參考連結 (Source Link)。
-        *   若為純文字，第一行自動設為標題。
+    *   **智慧解析 (Smart Parsing)**:
+        *   **情境 A：輸入僅包含 URL**
+            *   系統自動抓取該 URL 的標題與 Metadata，並轉換為 Markdown 內容存入 `content`。
+            *   該 URL 同步儲存至 `sourceLink` 欄位。
+        *   **情境 B：輸入包含自定義內容 (不論是否含 URL)**
+            *   第一行自動設為標題 (Title)。
+            *   其餘內容存入筆記主體 (Content)。
+            *   此情境下不自動轉存 `sourceLink`，以內容原樣為主。
     *   **快捷鍵**:
         *   `Cmd/Ctrl + Enter`: 儲存並關閉。
         *   `Esc`: 取消。
@@ -524,7 +531,7 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 ## 3.4 領域維護 (Areas)
 
 ### 說明
-用於描述長期存在、無明確結束時間的人生責任範圍或生活面向。
+用於描述長期存在、無明確結束時間的人生責任範圍 or 生活面向。
 *   **長期視角**: Area 不會被「完成」，只能被「維護」。
 *   **責任歸屬**: 所有的 Project 與 Habit 都應歸屬於某個 Area，以確保行動與長期目標一致。
 
@@ -598,6 +605,43 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 
 ## 3.5 資源庫 (Resources)
 
+### 說明
+資源庫是系統中「已處理資訊」的長期存放與檢索中樞。
+*   **低噪音檢索**: 僅顯示已明確歸類的資訊，排除 Inbox 的雜訊。
+*   **多維度索引**: 支援透過專案、領域及標籤進行交叉篩選。
+*   **長期回溯**: 即使專案已完成，關聯的資源仍保留在此供隨時調閱。
+
+### 3.5.1 資源庫清單頁 (Resource Library Page)
+
+*   **說明**: 
+    *   展示所有狀態為 `Processed` 與 `Archived` 的資源。
+    *   預設視圖僅顯示 `Processed`，以維持介面簡潔。
+*   **布局**:
+    *   **頂部**: 標題 "Resources"、全域過濾列 (Filter Bar)。
+    *   **內容區**: 以單欄列表 (List View) 呈現。
+*   **元件**:
+    *   **過濾列 (Filter Bar)**:
+        *   **狀態篩選**: 下拉選單 (Processed / Archived / All)。
+        *   **關聯篩選**: 按 Project 或 Area 進行過濾。
+        *   **標籤篩選器**: 點擊標籤進行聯集/交集篩選。
+    *   **資源清單項目 (List Item)**:
+        *   **圖示**: 筆記 (Note) 圖示。
+        *   **主要資訊**: 標題與內文摘要預覽。
+        *   **參考連結指標 (Source Link Indicator)**: 若該筆記具備 `sourceLink`，於標題旁顯示一個小型的外部連結圖示。
+        *   **關聯標記 (Context Badges)**: 顯示該資源所屬的所有 Project 與 Area 標籤 (Badges)。
+        *   **標籤列表**: 呈現該資源的 Tags。
+        *   **狀態指示器**: 若資源為 `Archived`，項目背景或文字加深/淡化，並加註「Archived」標記。
+*   **行為**:
+    *   **搜尋**: 輸入關鍵字即時連動清單。
+    *   **點擊跳轉**: 進入「資源內容編輯頁 (3.2.2)」。
+    *   **快速操作 (Quick Actions)**: 
+        *   **重現分流 (Re-link)**: 開啟 Command Palette 選單更新關聯的 Project / Area。
+        *   **變更狀態**: 封存 (Archive) 或 取消封存 (Restore)。
+        *   **刪除**: 移至垃圾桶。
+*   **資料查詢邏輯**:
+    *   **預設查詢**: `status = 'Processed' AND is_deleted = false`。
+    *   **搜尋範圍**: 標題 (title)、內容 (content)、標籤 (tags)。
+
 ## 3.6 指標管理 (Metrics)
 
 ## 3.7 日記 (Journal)
@@ -612,9 +656,9 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 
 # **5. 系統技術架構 (Tech Stack)**
 
-- **Frontend**: Next.js 14 (App Router), TailwindCSS, **shadcn/ui**.
-- **Editor**: **Plate.js** (基於 Slate.js，提供 Notion-like 體驗與強大的 Plugin 生態)。
-- **Backend**: **Supabase** (PostgreSQL, Auth, Storage, Realtime).
+- **Frontend**: Next.js 14 (App Router), TailwindCSS, **shadcn/ui**.
+- **Editor**: **Plate.js** (基於 Slate.js，提供 Notion-like 體驗與強大的 Plugin 生態)。
+- **Backend**: **Supabase** (PostgreSQL, Auth, Storage, Realtime).
 - **State Management**: Zustand (UI) + React Query (Data).
 - **Deployment**: Vercel.
 
