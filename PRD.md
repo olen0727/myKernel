@@ -1,6 +1,6 @@
 # **Product Requirement Document (PRD): Kernel**
 
-**Version**: 2.1  **Language**: Traditional Chinese (繁體中文)  **Status**: Planning
+**Version**: 2.2  **Language**: Traditional Chinese (繁體中文)  **Status**: Planning
 
 ---
 
@@ -128,6 +128,7 @@ Project 代表一段需要被推進並做出明確決策結果的行動歷程，
         - Active → Completed （達成目標）
         - Active → Archived （中止 / 擱置）
         - Archived → Active （重啟專案）
+        
 
 ---
 
@@ -222,8 +223,6 @@ Journal 的設計目的在於提供一個低干擾、可回溯的每日視角，
 Metrics 為獨立存在的觀測項目，可於 Journal 中被重複量測，並用於分析趨勢、關聯性與長期變化。
 
 ---
-
-## ~~1.4 用戶旅程 (User Journey)~~
 
 # 2. 非功能性需求 (**Non-Functional Requirements)**
 
@@ -427,7 +426,7 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 *   **說明**:
     *   除專案列表外，新增 **工作台 (Workbench)** 概念，作為跨專案的任務聚合視圖，讓使用者聚焦於「今天該做什麼」。
 *   **布局**:
-    *   頁面分為上下兩部分，頂部標題 "Projects" 維持在最上方。
+    *   頁面分為上下兩部分，頂部標題 "Projects" 旁邊新增 [New Project (+)] 按紐。
     *   **上半部 - 工作台 (Workbench)**:
         *   **左側 (Doing)**: 「當前正在處理」的工作焦點。使用者主動拖曳選入。
         *   **右側 (Todo)**: 顯示所有 `Active` 專案中的未完成任務聚合清單。
@@ -439,6 +438,10 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
         *   **完成任務**: 在 Doing 區勾選完成，該任務以灰底顯示 (未離開頁面前可 Undo)。
     *   **Todo 來源**: 自動聚合所有 Status=`Active` 專案內的未完成 Tasks。
     *   **版面調整**: 使用者可上下拖曳 Workbench 與 Project List 之間的分界線，自定義兩區域的高度比例。
+    *   **新增專案 (Create Project)**:
+        *   **點擊 [+] 按紐開啟 [Create Modal]。**
+        *   **欄位：Project Name (必填), Related Area (選填), Due Date (選填)。**
+        *   **提交後行為：點擊確認後，系統將自動建立專案並直接跳轉至該專案的詳情頁，以便用戶立即開始拆解任務。**
 *   **API Format**:
     (請參考 `./doc/dataModel.md` 中的 Project 與 Task 定義)
     ```typescript
@@ -452,14 +455,12 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
     }
     ```
 
-
-
 ### 3.3.2 專案詳情頁 (Project Detail Page)
 
 *   **說明**: 單一專案的執行中樞，整合任務、資源與筆記。
 *   **布局**:
     *   **兩欄式佈局**: 主內容區 (70%) + 右側資訊欄 (30%)。
-    *   **頁頭**: 僅顯示專案名稱 (Project Name)。
+    *   **頁頭**: 顯示專案名稱 (Project Name) 右側新增Delete按鈕。
     *   **主內容區 (Main Content)**:
         *   **專案進度 (Project Progress)**: 顯示 `x / y 任務完成` 及對應百分比進度條。
         *   **專案摘要 (Project Summary)**: 支援 Markdown 語法的文字區塊，用於描述專案目標與背景。
@@ -469,12 +470,21 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
         *   **截止日期 (Due Date)**: 日期顯示。
         *   **所屬領域 (Area)**: 顯示關聯 Area。
         *   **關聯資源 (Linked Resources)**: 顯示關鍵參考資料連結。
+        *   **封存 (Archive)**: 按鈕。
+        *   **刪除 (Delete)**: 按鈕。
 *   **元件**:
     *   **任務清單 (Task List)**: 包含標題與其下的任務項目 (Checklist Item)。
     *   **任務項目**: 支援勾選完成状态、拖曳排序。
 *   **行為**:
     *   **任務管理**: 在清單內直接新增、勾選完成任務。系統會自動重新計算上方進度條。
     *   **清單管理**: 可新增多個任務清單 (e.g., "Design Phase", "Backend Dev") 來分類任務。
+    *   **編輯與管理 Actions**:
+        *   **標題編輯**: 點擊專案名稱可直接進行原地編輯 (Inline Edit)。
+        *   **Archive**: 將專案移至 Archive 狀態 (非刪除，可還原)。
+        *   **Delete**: 硬刪除 (Hard Delete) 專案與其下所有任務 (需二次確認)。
+    *   **任務與清單操作**:
+        *   **Task Actions**: 懸停於任務時顯示 **[Edit]** (筆) 與 **[Delete]** (垃圾桶) 按紐。點擊文字亦可進入編輯模式。
+        *   **List Actions**: 清單標題旁的選單提供 **[Rename]** 與 **[Delete List]** (刪除清單及內含任務)。
 *   **資料模型**:
     *   Structure: `Project` -> `TaskLists` -> `Tasks`
     *   API Format:
@@ -495,7 +505,6 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 ![Project Detail V2 UI](./wireframe/3.3.2_project_detail.png)
 
 
-
 ## 3.4 領域維護 (Areas)
 
 ### 說明
@@ -509,7 +518,7 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
     *   展示使用者的人生版圖全貌。
     *   強調視覺化的「領域感」，而非單純的清單。
 *   **布局**:
-    *   **網格視圖**: 採用較大尺寸的卡片網格 (Grid Layout)，強調封面圖視覺。
+    *   **網格視圖**: 採用較大尺寸的卡片網格 (Grid Layout)，強調封面圖視覺。 列表的最後一個位置顯示 [New Area (+)] 卡片。
 *   **元件**:
     *   **領域卡片 (Area Card)**:
         *   **上半部**: 滿版封面圖 (Cover Image)。
@@ -517,6 +526,8 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 *   **行為**:
     *   **點擊卡片**: 進入「領域詳情頁」。
     *   **僅檢視狀態**: 列表頁不提供狀態切換功能，僅顯示當前狀態 (Active/Hidden)。
+    *   **新增領域 (Create Area)**:
+        *   開啟 [Create Modal]，輸入 Name 並選擇預設封面圖。提交後直接跳轉至領域詳情頁。
 *   **API Format**:
     ```typescript
     // GET /areas
@@ -544,19 +555,24 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
     *   **頁頭 (Header)**: 滿版背景圖 + 領域標題 + 核心統計數據。
     *   **兩欄式佈局**:
         *   **主內容區 (Main)**: 上方為習慣管理 (Habit Management)，下方為進行中專案 (Active Projects)。
-        *   **右側側欄 (Sidebar)**: 領域描述 (Description)、關鍵資源連結 (Linked Resources)、區域狀態設定 (Hidden Toggle)。
+        *   **右側側欄 (Sidebar)**: 領域描述 (Description)、關鍵資源連結 (Linked Resources)、區域狀態設定 (Hidden Toggle)、刪除領域按鈕 (Delete Area)。
 *   **元件**:
     *   **習慣管理器 (Habit Manager)**:
         *   **清單呈現**: 每一列 **最前方** 以標籤 (Tag) 樣式顯示頻率，後方跟隨習慣名稱。
             *   樣式範例: `[Daily]` 閱讀 30 分鐘、`[Weekly - Mon]` 檢視週計畫。
         *   **頻率設定**: 僅支援 `Daily` 與 `Weekly` (需指定星期幾)。
-        *   **操作**: 提供 **啟用/暫停** 開關、**編輯** 按鈕。
+        *   **操作**: 提供 **啟用/暫停** 開關、**編輯** 按鈕以及 [Delete] 按紐。
         *   (注意：此處不進行打卡，打卡行為位於日記功能)。
     *   **專案列表 (Project List)**: 嵌入精簡版的專案卡片，點擊跳轉至 Project Detail。
 *   **行為**:
-    *   **習慣管理**: 新增、編輯、暫停/啟用習慣。
+    *   **習慣管理**: 新增、編輯、暫停/啟用習慣。 支援刪除錯誤建立的習慣。
     *   **內容編輯**: 可直接點擊並編輯側欄的 **領域描述 (Description)**。
     *   **狀態切換**: 在側欄下方提供 "Hidden Area" 開關，將此領域隱藏或重新啟用。
+    *   **編輯詳情**:
+        *   **點擊 Header 封面圖: 上傳更換圖片。**
+        *   **點擊 Area 標題: 原地重命名。**
+    *   **刪除領域 (Delete)**:
+        *   **側欄最下方提供 [Delete Area] 紅色按紐 (需二次確認)，用於移除錯誤建立的領域 (非隱藏)。**
 *   **API Format**:
     ```typescript
     // GET /areas/:id/dashboard
@@ -650,6 +666,9 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
     *   **新增指標**：開啟 Modal 引導選擇類型並設定屬性（如選項、單位）。
     *   **排序拖曳**：影響在日記中出現的先後順序。
     *   **狀態切換**：快速切換 `isActive`。
+    *   **編輯與刪除**：
+        *   **[Edit]**: 修改指標名稱、單位或選項清單。
+        *   **[Delete]**: 硬刪除指標 (需警告會遺失歷史數據)。
 
 ### 3.6.4 指標數據紀錄邏輯
 
@@ -793,27 +812,3 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 
 # **5. 系統技術架構 (Tech Stack)**
 
-- **Frontend**: Next.js 14 (App Router), TailwindCSS, **shadcn/ui**.
-- **Editor**: **Plate.js** (基於 Slate.js，提供 Notion-like 體驗與強大的 Plugin 生態)。
-- **Backend**: **Supabase** (PostgreSQL, Auth, Storage, Realtime).
-- **State Management**: Zustand (UI) + React Query (Data).
-- **Deployment**: Vercel.
-
-# 6. 開發階段 (Roadmap)
-
-## 6.0 Phase 0 (Foundation)
-
-
-## 6.1 Phase 1 (Core)
-
-
-## 6.2 Phase 2 (Prototype)
-
-
-## 6.3 Phase 3 (Function)
-
-
-## 6.4 Phase 4 (Secure)
-
-
-## 6.5 Phase 5 (Prod)
