@@ -323,38 +323,6 @@ Metrics 為獨立存在的觀測項目，可於 Journal 中被重複量測，並
 
 ![Login Page V2 UI](./wireframe/3.1.1_login.png)
 
-### 3.1.2 帳號設定頁 (Account Settings Page)
-
-*   **說明**:
-    *   管理個人資料、安全性與系統偏好。
-*   **布局**:
-    *   **左側導航 (Sidebar)**: 功能分頁 (Profile, Account, Billing, Notifications)。
-    *   **右側內容 (Main)**: 表單輸入區，區塊分明。
-*   **元件**:
-    *   **Avatar Uploader**: 圓形頭像，支援點擊更換。
-    *   **Form Groups**: 包含 Label, Input (Disabled state for Email), Helper Text。
-    *   **Preferences**: 主題切換 (Dark/Light)、語言下拉選單。
-*   **行為**:
-    *   **即時/手動儲存**: 關鍵資料修改需點擊 "Save Changes"，偏好設定 (Theme) 可即時生效。
-*   **API Format**:
-    (請參考 `./doc/dataModel.md` 中的 User 定義)
-    ```typescript
-    // GET /user/profile
-    interface UserProfile {
-      id: UUID;
-      email: string;
-      displayName: string;
-      avatarUrl: URL;
-      preferences: {
-        theme: 'dark' | 'light';
-        language: string;
-      };
-    }
-    ```
-*   **UI 示意圖**:
-
-![Settings Page UI](./wireframe/3.1.2_settings.png)
-
 
 ## 3.2 收件匣 (Inbox)
 
@@ -715,8 +683,7 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 *   **快速切換日期 (Date Navigation)**：
     *   **日曆選擇器**：點擊頂部日期開啟 Calendar 小視窗進行快速選轉。
     *   **快捷按鈕**：提供 `< Today >` 按紐，快速移動至前後一日或重置回今日。
-    *   **鍵盤快捷鍵**：支援 `[` (左括號) 回到前一天，`]` (右括號) 前往下一天。
-        *   *限制：僅在日曆選擇器視窗開啟期間有效，以防止編輯日記內文時誤觸。*
+    *   **鍵盤快捷鍵**：支援 `Ctrl + [` (前一天) 與 `Ctrl + ]` (下一天)，方便在日記視圖中快速導覽前後日期的紀錄。
 *   **任務勾選同步**：
     *   在日記中「檢視」任務。若用戶在日記中勾選完成任務，狀態將與專案管理同步。
     *   目的是讓用戶在寫筆記時，不需切換頁面就能標記今日成果。
@@ -731,7 +698,46 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 *   **自動初始化**：用戶每日首次進入 Journal 頁面時，系統自動為該日期建立 `Journal` 實體。
 *   **持久化**：所有的 `HabitLog`、`MetricEntry` 與 `DailyNote` 皆即時儲存。
 
-## ~~3.8 全域設定 (Settings) (暫不執行)~~
+## 3.8 全域設定 (Settings)
+
+### 說明
+全域設定是控制產品體驗、帳號安全與訂閱狀態的核心入口。用戶點擊左側導航欄底部的「會員資訊摘要」即可進入。
+*   **模組化設計**：透過分頁 (Tabs) 組織不同功能的配置。
+*   **即時呈現**：部分設定 (如 Theme) 應支援即時生效，無需手動儲存。
+
+### 3.8.1 一般設定 (General & Account)
+
+*   **帳號資訊**：
+    *   顯示登入方式 (Google / GitHub) 與對應的 Email。
+    *   **顯示名稱 (Display Name)**：提供輸入框允許用戶修改系統內的稱呼。
+    *   **頭像管理**：顯示當前頭像，點擊可開啟上傳/更換介面。
+*   **早期存取 (Early Access)** - *針對 Phase 2 規劃*：
+    *   **推薦碼輸入 (Referral Code)**：輸入特定的邀請碼/推薦碼，轉換為「終身免費會員」或取得特殊權限。
+
+### 3.8.2 外觀樣式 (Appearance)
+
+*   **主題切換 (Theme)**：
+    *   提供兩個選項：**深色模式 (Kernel Dark)**、**淺色模式 (Kernel Light)**。
+    *   (備註：未來可擴充「跟隨系統」選項)。
+*   **系統字型 (System Font)**：
+    *   提供 3-4 種字型清單切換（如：Inter, Roboto, Noto Sans TC 等）。
+    *   *注意：字型更換僅影響導航欄、清單與標題，不影響 Plate.js 編輯器內部的撰寫體驗。*
+
+### 3.8.3 快捷鍵配置 (Keyboard Shortcuts)
+
+列出系統主要快捷鍵，並允許用戶（未來）自定義或僅供查看：
+*   **快速捕捉 (Quick Capture)**：預設 `Ctrl + Q`。
+*   **切換日記日期 (Toggle Journal Date)**：預設 `Ctrl + [` (前一天) / `Ctrl + ]` (後一天)。
+*   **全域搜尋 (Global Search)**：預設 `Cmd/Ctrl + K`。
+
+### 3.8.4 訂閱管理 (Billing & Subscription)
+
+管理財務與付費權限的核心分頁：
+*   **方案狀態**：顯示目前等級（免費 / 推薦碼 / Pro）。
+*   **訂閱動作**：升級方案 (Upgrade)、取消訂閱 (Cancel)。
+*   **付款資訊**：
+    *   **目前方式**：顯示綁定的信用卡後四碼與發卡組織圖示。
+    *   **付款歷史**：以表格顯示日期、項目、金額，並提供「下載發票 (Invoice)」連結。
 
 ## 3.9 儀表板 (Dashboard)
 

@@ -45,9 +45,22 @@ erDiagram
 interface User {
   id: UUID;                     // 主鍵
   email: string;                // 登入用電子郵件
+  provider: 'google' | 'github'; // 登入提供者
   displayName: string;          // 顯示名稱
   avatarUrl?: URL;              // 頭像圖片連結
-  plan: 'free' | 'pro';         // 方案類型
+  
+  // 訂閱與權限
+  plan: 'free' | 'pro' | 'founder'; // 方案類型 (founder 為早期推薦碼激活之終身會員)
+  subscriptionStatus: 'active' | 'past_due' | 'canceled' | 'incomplete'; 
+  referralCodeUsed?: string;    // 若是透過推薦碼加入，紀錄該代碼
+  
+  // 系統偏好
+  preferences: {
+    theme: 'dark' | 'light';    // 主題切換
+    fontFamily: string;         // 系統字型 (不含編輯器)
+    language: 'zh-TW' | 'en';   // 介面語言
+  };
+
   createdAt: DateTime;
   updatedAt: DateTime;
 }
