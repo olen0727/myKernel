@@ -1,6 +1,6 @@
 # **Product Requirement Document (PRD): Kernel**
 
-**Version**: 2.2  **Language**: Traditional Chinese (繁體中文)  **Status**: Planning
+**Version**: 2.3  **Language**: Traditional Chinese (繁體中文)  **Status**: Planning
 
 ---
 
@@ -256,6 +256,11 @@ Metrics 為獨立存在的觀測項目，可於 Journal 中被重複量測，並
 
 # **3. 功能詳細規格 (Detailed Functional Specs)**
 
+> [!NOTE] 
+> 本章節專注於 UI 行為與功能邏輯。
+> 詳細的 **API 契約 (Inputs/Outputs)** 請參閱 `doc/interface_contracts.md`。
+> 詳細的 **資料實體 (Data Schema)** 請參閱 `doc/dataModel.md`。
+
 ## 3.0 全站畫面布局 (Layout)
 
 ### 說明
@@ -310,14 +315,6 @@ Metrics 為獨立存在的觀測項目，可於 Journal 中被重複量測，並
     *   **Footer**: 服務條款連結。
 *   **行為**:
     *   **OAuth 流程**: 點擊按鈕後導向 Provider 授權頁面，回調後自動建立帳號或登入。
-*   **API Format**:
-    ```typescript
-    // POST /auth/social
-    interface SocialLoginRequest {
-      provider: 'google' | 'github';
-      token: string; // OAuth Access Token or Code
-    }
-    ```
 *   **UI 示意圖**:
 
 ![Login Page V2 UI](./wireframe/3.1.1_login.png)
@@ -354,24 +351,6 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
         *   選單支援搜尋與 **多選 (Multi-select)** 專案或領域。
         *   選擇完畢後點擊確認，將資源關聯至選中目標並根據狀態邏輯自動標記為 `Processed`。
     *   **拖曳排序**: 允許基本排序調整 (雖主要依賴時間，但支援手動優先級調整)。
-*   **資料模型**:
-    *   **Resource Schema**:
-        ```typescript
-        Resource {
-          id: Identifier
-          title: string
-          content: Markdown
-          status: 'pending' | 'processed' | 'archived'
-          linkedProjects?: ProjectID[]
-          linkedAreas?: AreaID[]
-          sourceLink?: URL
-          tags: Tag[]
-          createdAt: DateTime
-          updatedAt: DateTime
-        }
-        ```
-    *   查詢條件: `status = 'Pending'` AND `is_deleted = false`
-    *   預設排序: `created_at DESC`
 
 ### 3.2.2 資源內容編輯頁 (Resource Content Page)
 
@@ -428,10 +407,14 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 *   **布局**:
     *   頁面分為上下兩部分，頂部標題 "Projects" 旁邊新增 [New Project (+)] 按紐。
     *   **上半部 - 工作台 (Workbench)**:
-        *   **左側 (Doing)**: 「當前正在處理」的工作焦點。使用者主動拖曳選入。
+        *   **左側 (Doing)**: 「當前正在處理」的工作焦點。使用者主動拖曳右側 Todo 清單中的 Task 選入。
         *   **右側 (Todo)**: 顯示所有 `Active` 專案中的未完成任務聚合清單。
     *   **下半部 - 專案列表 (Project List)**:
         *   包含狀態篩選按鈕 (Active/Completed/Archived) 與專案卡片網格/列表。
+        *   **專案卡片 (Project Card)**:
+            *   **狀態標籤 (Status Tag)**: 根據專案狀態顯示不同顏色的標籤 (Active/Completed/Archived)。
+            *   **專案名稱 (Project Name)**: 顯示專案名稱，點擊進入專案詳情頁。
+            *   **專案進度 (Project Progress)**: 顯示專案內已完成task/未完成task、進度百分比(進度條形式)。
 *   **行為**:
     *   **Workbench 互動**:
         *   **選入任務**: 從右側 Todo 拖曳任務至左側 Doing，代表鎖定焦點。
@@ -442,18 +425,6 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
         *   **點擊 [+] 按紐開啟 [Create Modal]。**
         *   **欄位：Project Name (必填), Related Area (選填), Due Date (選填)。**
         *   **提交後行為：點擊確認後，系統將自動建立專案並直接跳轉至該專案的詳情頁，以便用戶立即開始拆解任務。**
-*   **API Format**:
-    (請參考 `./doc/dataModel.md` 中的 Project 與 Task 定義)
-    ```typescript
-    // GET /projects
-    interface ProjectListResponse {
-      projects: Project[]; // Filtered by status
-      workbench: {
-        doing: Task[];     // Client-side local storage or specialized list
-        todo: Task[];      // Aggregated from active projects
-      }
-    }
-    ```
 
 ### 3.3.2 專案詳情頁 (Project Detail Page)
 
@@ -485,22 +456,6 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
     *   **任務與清單操作**:
         *   **Task Actions**: 懸停於任務時顯示 **[Edit]** (筆) 與 **[Delete]** (垃圾桶) 按紐。點擊文字亦可進入編輯模式。
         *   **List Actions**: 清單標題旁的選單提供 **[Rename]** 與 **[Delete List]** (刪除清單及內含任務)。
-*   **資料模型**:
-    *   Structure: `Project` -> `TaskLists` -> `Tasks`
-    *   API Format:
-    ```typescript
-    interface ProjectDetail extends Project {
-      taskLists: {
-        id: UUID;
-        name: string;
-        order: number;
-        tasks: Task[];
-      }[];
-      resources: Resource[];
-    }
-    ```
-    (詳細定義請參考 `./doc/dataModel.md`)
-*   **UI 示意圖**:
 
 ![Project Detail V2 UI](./wireframe/3.3.2_project_detail.png)
 
@@ -528,21 +483,6 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
     *   **僅檢視狀態**: 列表頁不提供狀態切換功能，僅顯示當前狀態 (Active/Hidden)。
     *   **新增領域 (Create Area)**:
         *   開啟 [Create Modal]，輸入 Name 並選擇預設封面圖。提交後直接跳轉至領域詳情頁。
-*   **API Format**:
-    ```typescript
-    // GET /areas
-    interface AreaListResponse {
-      id: UUID;
-      name: string;
-      coverImage: URL;
-      status: 'active' | 'hidden';
-      stats: {
-        activeProjects: number;
-        activeHabits: number;
-      };
-    }[]
-    ```
-*   **UI 示意圖**:
 
 ![Area List UI](./wireframe/3.4.1_area_list.png)
 
@@ -573,19 +513,9 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
         *   **點擊 Area 標題: 原地重命名。**
     *   **刪除領域 (Delete)**:
         *   **側欄最下方提供 [Delete Area] 紅色按紐 (需二次確認)，用於移除錯誤建立的領域 (非隱藏)。**
-*   **API Format**:
-    ```typescript
-    // GET /areas/:id/dashboard
-    interface AreaDetailResponse {
-      area: Area;
-      habits: Habit[]; // List for management
-      projects: Project[]; // Active projects
-      resources: Resource[]; // Pinned resources
-    }
-    ```
-*   **UI 示意圖**:
 
 ![Area Detail V2 UI](./wireframe/3.4.2_area_detail.png)
+
 
 ## 3.5 資源庫 (Resources)
 
@@ -622,9 +552,6 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
         *   **重現分流 (Re-link)**: 開啟 Command Palette 選單更新關聯的 Project / Area。
         *   **變更狀態**: 封存 (Archive) 或 取消封存 (Restore)。
         *   **刪除**: 移至垃圾桶。
-*   **資料查詢邏輯**:
-    *   **預設查詢**: `status = 'Processed' AND is_deleted = false`。
-    *   **搜尋範圍**: 標題 (title)、內容 (content)、標籤 (tags)。
 
 ## 3.6 指標管理 (Metrics)
 
@@ -810,5 +737,6 @@ Inbox 是資訊進入系統的緩衝區。所有未分類的資源 (Resources) �
 
 # 4. 設計風格 (Design Guide)
 
-# **5. 系統技術架構 (Tech Stack)**
+# 5. 系統技術架構 (Tech Stack)
 
+# 6. Roadmap
