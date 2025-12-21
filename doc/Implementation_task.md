@@ -1,137 +1,131 @@
-# Kernel Implementation Tasks
-> Based on PRD v2.3 & Tech Stack
+# **Kernel 實作任務清單 (Implementation Tasks)**
 
-此文件列出 Kernel 專案從初始化到上線的完整實作細節。
+本文件依據
 
-## Phase 1: 基礎建設與環境 (Foundation)
-目標：建立穩固的開發地基，確保所有核心依賴與環境變數配置正確。
+PRD.md 中的 Roadmap 規劃，將開發流程拆解為可執行的細部任務。
 
-- [ ] **1.1 專案初始化**
-    - [ ] 使用 `create-t3-app` 初始化專案 (Next.js 15, TypeScript, Tailwind, tRPC, Prisma)。
-    - [ ] 設定 Git Repository 與 `.gitignore`。
-    - [ ] 配置 `.editorconfig` 與 `prettier` / `eslint` 規則。
-- [ ] **1.2 核心依賴安裝**
-    - [ ] **UI 基礎**: `shadcn/ui` (init), `lucide-react`, `tailwindcss-animate`, `clsx`, `tailwind-merge`.
-    - [ ] **狀態與邏輯**: `zustand` (Store), `nuqs` (URL State), `date-fns` (Time).
-    - [ ] **表單與驗證**: `react-hook-form`, `zod`, `@hookform/resolvers`.
-    - [ ] **編輯器**: `tiptap` 相關套件 (`@tiptap/react`, `@tiptap/starter-kit`, etc).
-    - [ ] **日誌**: `pino`.
-- [ ] **1.3 環境變數配置**
-    - [ ] 建立 `.env` 檔案。
-    - [ ] 設定 Supabase 連線資訊 (`DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`).
-    - [ ] 設定 NextAuth / Supabase Auth 相关密鑰。
-- [ ] **1.4 多語系架構設置 (i18n)**
-    - [ ] 安裝 `next-intl` 或 `i18next` + `react-i18next` (適配 App Router)。
-    - [ ] 配置 `middleware.ts` 進行 Locale 偵測與重新導向 (預設 `zh-TW`)。
-    - [ ] 建立字典檔結構 `src/messages/{locale}.json`。
-    - [ ] 封裝 `I18nProvider` (Server/Client Component 支援)。
-- [ ] **1.5 Hello World 驗證**
-    - [ ] 啟動開發伺服器 `npm run dev`。
-    - [ ] 確認首頁可存取，且 `/en` 與 `/zh-TW` 路由切換正常。
+**標記 `[🔍 驗證點]` 的項目代表需要您介入測試與確認的關鍵里程碑。**
 
 ---
 
-## Phase 2: 全站頁面實作 (All Pages Prototype)
-目標：完成所有 UI/UX 互動，使用 Mock Data 驗證各種狀態。
+## **Phase 1: 基礎建設與環境 (Foundation)**
 
-### 2.1 Mock Data Factory
-- [ ] **建立 Mock Data 架構 (`src/mocks`)**
-    - [ ] 設定 `faker.js`。
-    - [ ] 定義 TypeScript Interfaces (User, Resource, Project, Area, Task, Habit, Metric, Log).
-- [ ] **實作假資料生成器**
-    - [ ] `mockResources`: 包含各種類型 (Note/URL)、狀態 (Pending/Processed/Archived) 與內容長度。
-    - [ ] `mockProjects`: 包含進度 (0% - 100%)、截止日期 (Overdue/Future)。
-    - [ ] `mockAreas`: 包含封面圖與關聯習慣。
-    - [ ] `mockMetrics`: 包含不同類型指標 (Number, Rating, Select)。
-- [ ] **2.2 頁面實作 (需全面整合 i18n)**
-    - [ ] **原則**: 所有 Hardcoded Text 需抽取至 `messages/*.json`。
-    - [ ] **Auth Pages**
-        - [ ] Login Page (`3.1.1`): 實作 OAuth 按鈕 (Google/GitHub) 與表單驗證 UI。
-- [ ] **Inbox Pages**
-    - [ ] Inbox List (`3.2.1`): 實作資源列表，支援 Hover Action。
-    - [ ] Quick Capture Modal (`3.2.3`): 實作全域快捷鍵開啟、自動解析 URL/Text 邏輯 (模擬)。
-- [ ] **Resource Pages**
-    - [ ] Resource Library (`3.5.1`): 實作篩選器 (Filter Bar)，整合 `nuqs` 同步 URL 狀態。
-    - [ ] Resource Editor (`3.2.2`): 整合 TipTap 編輯器，實作 Properties Sidebar (Project/Area 選擇器)。
-- [ ] **Project Pages**
-    - [ ] Workbench (`3.3.1`): 實作 `Doing` vs `Todo` 雙欄位，整合 `@dnd-kit/core` 拖拉排序。
-    - [ ] Project Detail (`3.3.2`): 實作 Kanban/List 切換與進度條可視化。
-- [ ] **Area Pages**
-    - [ ] Area List (`3.4.1`): 實作 Grid Layout 與封面圖卡片。
-    - [ ] Area Detail (`3.4.2`): 實作習慣管理器 (Habit Manager) UI (新增/暫停/刪除)。
-- [ ] **Metrics & Journal**
-    - [ ] Metrics Config (`3.6.3`): 實作指標增刪改查 UI。
-    - [ ] Daily Journal (`3.7`): 實作每日回顧介面，整合習慣打卡與指標填寫表單。
-- [ ] **Dashboard & Settings**
-    - [ ] Dashboard (`3.9`): 使用 `recharts` 實作熱力圖 (Heatmap) 與趨勢圖。
-    - [ ] Theme Toggle: 使用 `next-themes` 實作深色模式切換。
+**目標**：確保本地開發環境運作正常，技術棧基底建立完成。
 
-### 2.3 互動細節優化
-- [ ] **全域通知**: 設定 `sonner` Toast，在操作成功/失敗時顯示提示。
-- [ ] **Command Palette**: 使用 `cmdk` 實作全域搜尋 (整合 Mock Data)。
-- [ ] **RWD 檢查**: 確保 Sidebar 在行動裝置可收折 (使用 `sheet` 或 `drawer`)。
+- [ ]  **1.1 專案初始化 (Project Initialization)**
+    - [ ]  使用 Vite 初始化 React + TypeScript 專案 (`npm create vite@latest`)。
+    - [ ]  設定 `.editorconfig`, `.prettierrc`, `.eslintrc.cjs` 以統一程式碼風格。
+    - [ ]  設定 `tsconfig.json` 的 Path Aliases (e.g. `@/components`, `@/lib`)。
+    - [ ]  清理預設樣板檔案。
+    - [ ]  **[🔍 驗證點] 確認專案可成功啟動 (`npm run dev`) 且無 Lint 錯誤。**
+- [ ]  **1.2 設計系統建置 (Design System Setup)**
+    - [ ]  安裝 TailwindCSS v3.4 並初始化設定 (`npx tailwindcss init -p`)。
+    - [ ]  定義 CSS Variables 於 `index.css` (包含 `Reflective Dawn` 主題色票)。
+    - [ ]  安裝與設定 `shadcn/ui` (`npx shadcn-ui@latest init`)。
+    - [ ]  透過 `@fontsource` 安裝並設定字型 (Newsreader, Inter)。
+    - [ ]  安裝基礎圖示庫 `lucide-react` 與動畫庫 `framer-motion`。
+    - [ ]  安裝 `usehooks-ts`。
+    - [ ]  **[🔍 驗證點] 檢查首頁字型是否正確載入 (Newsreader/Inter)，並測試 Tailwind 設定是否生效。**
+- [ ]  **1.3 佈局實作 (Layout Implementation)**
+    - [ ]  建立 `Sidebar` 組件 (支援折疊/展開動畫)。
+    - [ ]  建立 `TopBar` 組件 (包含 Theme Toggle 與 User Avatar)。
+    - [ ]  建立 `AppLayout` 整合 Sidebar 與 MainContent。
+    - [ ]  設定 React Router DOM 並建立基礎路由介面 (Routes)。
+    - [ ]  **[🔍 驗證點] 測試 Sidebar 收折動畫順暢度，確認 RWD 響應式行為 (TopBar 在小螢幕的表現)。**
 
 ---
 
-## Phase 3: 資料庫與邏輯 (Backend Integration)
-目標：串接真實數據，實作業務邏輯。
+## **Phase 2: 全站頁面實作 (All Pages Prototype)**
 
-- [ ] **3.1 Database Schema**
-    - [ ] 定義 `schema.prisma` (User, Account, Session, Resource, Project, Task, Area, Habit, Metric, JournalLog).
-    - [ ] 執行 `prisma db push` 同步至 Supabase。
-- [ ] **3.2 tRPC Routers Implementation**
-    - [ ] **Resources Router**: CRUD, `process` (分流), `archive`.
-        - [ ] 實作 `cheerio` URL 解析邏輯 (fetch title/meta)。
-    - [ ] **Projects Router**: CRUD, `updateProgress`, `sortTasks`.
-    - [ ] **Areas Router**: CRUD, `toggleHabit`.
-    - [ ] **Journal Router**: `getDailyView`, `logHabit`, `logMetric`.
-    - [ ] **Search Router**: Global search query.
-- [ ] **3.3 前端串接**
-    - [ ] 將所有 Mock Data 替換為 `trpc.useQuery`。
-    - [ ] 將所有 Action (Create/Update/Delete) 替換為 `trpc.useMutation`。
-    - [ ] 實作 Loading Skeleton 與 Error Handling。
-- [ ] **3.4 Authentication & RLS**
-    - [ ] 整合 Supabase Auth (Client & Server Side)。
-    - [ ] 設定 PostgreSQL RLS Policy (僅允許 CRUD `auth.uid() = user_id` 的資料)。
+**目標**：在不串接真實資料庫的情況下，完成全站所有關鍵頁面的 UI/UX 互動。
 
----
-
-## Phase 4: 測試與安全性 (QA & Security)
-目標：確保品質與安全。
-
-- [ ] **4.1 單元測試 (Unit Test)**
-    - [ ] 設定 `vitest`。
-    - [ ] 測試 Utils (如 Date formatter, Progress calculation)。
-    - [ ] 測試 Custom Hooks。
-- [ ] **4.2 End-to-End 測試 (E2E)**
-    - [ ] 設定 `playwright`。
-    - [ ] 測試腳本：User Login Flow。
-    - [ ] 測試腳本：Create Resource -> Process to Project -> Complete Task。
-- [ ] **4.3 安全性檢查**
-    - [ ] 檢查 TipTap 輸出是否經過 `dompurify` 處理。
-    - [ ] 檢查 Input 是否經過 `zod` 驗證。
-    - [ ] 檢查 API 是否有未授權存取漏洞。
+- [ ]  **2.1 儀表板與收件匣 (Dashboard & Inbox)**
+    - [ ]  安裝 `recharts` 並實作 Dashboard 模擬圖表 (Mock Data)。
+    - [ ]  實作 `InboxPage` 列表視圖。
+    - [ ]  實作 `QuickCaptureModal` (包含 UI 動畫)。
+    - [ ]  **[🔍 驗證點] 測試 Quick Capture 彈窗的快捷鍵喚醒 (`Cmd+Q` / `Ctrl+Q`) 與關閉體驗。**
+- [ ]  **2.2 專案管理 (Project Management)**
+    - [ ]  安裝 `@dnd-kit/core` 相關套件。
+    - [ ]  實作 `ProjectListPage` (含 Workbench Doing/Todo 區域)。
+    - [ ]  實作 `ProjectDetailPage` (含 Task List 與 Kanban 切換)。
+    - [ ]  實作 看板拖曳與任務排序功能 (純前端 Mock State)。
+    - [ ]  **[🔍 驗證點] 實際操作 Kanban 拖曳任務，確認動畫流暢且無卡頓 (Drag & Drop UX)。**
+- [ ]  **2.3 領域與資源 (Areas & Resources)**
+    - [ ]  實作 `AreaListPage` (Grid View)。
+    - [ ]  實作 `AreaDetailPage` (Header Cover + Habit List)。
+    - [ ]  實作 `ResourceLibraryPage` (含篩選器 Filter Bar UI)。
+    - [ ]  實作 `ResourceEditor` 頁面 (Layout 框架)。
+    - [ ]  **[🔍 驗證點] 測試 Resource Library 篩選器介面互動 (Tag 多選、狀態切換) 是否直覺。**
+- [ ]  **2.4 日記與編輯器 (Journal & Editor)**
+    - [ ]  安裝 `@udecode/plate-common` 與相關插件。
+    - [ ]  設定 Plate Editor 基礎組件 (Toolbar, Editor Area)。
+    - [ ]  實作 `JournalPage` (日期導航器, 整合 Plate Editor)。
+    - [ ]  **[🔍 驗證點] 在編輯器中輸入 Markdown (如 `# Heading`, `list`)，確認即時預覽與 Slash Command 功能正常。**
 
 ---
 
-## Phase 5: 部署與監控 (Deployment)
-目標：生產環境上線。
+## **Phase 3: 資料庫整合與邏輯實作 (Backend Integration)**
 
-- [ ] **5.1 監控配置**
-    - [ ] 設定 Sentry (Frontend & Backend) 捕捉 Crash。
-    - [ ] 設定 PostHog 追蹤基礎 Usage。
-- [ ] **5.2 Vercel 部署**
-    - [ ] 設定 Build Command (`prisma generate && next build`).
-    - [ ] 設定 Environment Variables (Production)。
-    - [ ] 部署並驗證 Production URL。
-- [ ] **5.3 Dogfooding**
-    - [ ] 遷移個人真實資料。
-    - [ ] 進行為期一週的日常使用測試。
+**目標**：將靜態頁面轉化為動態應用 (Local-First Realization)。
+
+- [ ]  **3.1 資料庫架構與實例 (RxDB Setup)**
+    - [ ]  安裝 `rxdb`, `rxjs` 與 `dexie-encrypted`。
+    - [ ]  定義 `Resource`, `Project`, `Task` Schema。
+    - [ ]  定義 `Area`, `Journal`, `Metric` Schema。
+    - [ ]  建立 RxDB 初始化程式碼 (含 Encryption Password 機制)。
+    - [ ]  **[🔍 驗證點] 透過 Console 檢查 RxDB 是否成功初始化，並確認 Schema 驗證機制運作正常。**
+- [ ]  **3.2 服務層實作 (Service Logic)**
+    - [ ]  實作 `ResourceService` (Create, Update, Dispatch logic)。
+    - [ ]  實作 `ProjectService` (Task Management, Progress Calculation)。
+    - [ ]  實作 `JournalService` (Aggregation logic)。
+    - [ ]  將 UI 組件的 Mock Data 替換為 `useRxQuery` Hooks。
+    - [ ]  **[🔍 驗證點] 實際建立一筆 Resource 與 Project，確認資料能持久化儲存 (重整頁面後資料不消失)。**
+- [ ]  **3.3 身分驗證與同步 (Auth & Sync)**
+    - [ ]  撰寫 `docker-compose.yml` 啟動本地 CouchDB。
+    - [ ]  實作 `LoginPage` UI (Google/GitHub 按鈕)。
+    - [ ]  初始化 Python FastAPI 專案。
+    - [ ]  實作 FastAPI: OAuth Callback 與 JWT 發放。
+    - [ ]  實作 FastAPI: CouchDB Provisioning (User DB Creation)。
+    - [ ]  前端實作: RxDB Replication Plugin 設定 (連接 CouchDB)。
+    - [ ]  **[🔍 驗證點] 執行登入流程，確認後端自動建立了 `userdb-{uuid}`，且前端能成功同步資料至 CouchDB。**
+- [ ]  **3.4 核心功能邏輯 (Feature Logic)**
+    - [ ]  Python: 整合 `trafilatura` 與 `beautifulsoup4`。
+    - [ ]  實作 API: `/parse-url` endpoint。
+    - [ ]  前端: Quick Capture 整合 Parse URL API。
+    - [ ]  **[🔍 驗證點] 在 Quick Capture 輸入外部文章連結，確認能抓取到標題並解析出內文 Markdown。**
 
 ---
 
-## Phase 6 ~ 10: Launch Plan
-(依照 PRD Roadmap 執行)
-- [ ] Phase 6: Closed Beta (邀請制)
-- [ ] Phase 7: Open Beta (公開註冊)
-- [ ] Phase 8: Global Launch (多語系 & 收費)
+## **Phase 4: 測試與安全性 (QA & Security)**
+
+**目標**：確保系統穩定與資安合規。
+
+- [ ]  **4.1 單元與組件測試 (Unit/Component Testing)**
+    - [ ]  設定 Vitest。
+    - [ ]  撰寫 Data Model 驗證測試。
+    - [ ]  撰寫 Utility Functions 測試 (e.g. Date Utils)。
+    - [ ]  **[🔍 驗證點] 執行 `npm run test`，確認所有核心邏輯測試通過。**
+- [ ]  **4.2 端對端測試 (E2E Testing)**
+    - [ ]  設定 Playwright。
+    - [ ]  撰寫 "User Journey" 測試腳本 (Signup -> Capture -> Dispatch)。
+    - [ ]  **[🔍 驗證點] 執行 E2E 測試腳本，確認關鍵路徑自動化測試通過。**
+- [ ]  **4.3 安全性強化 (Security)**
+    - [ ]  檢查 CouchDB Security Object 設定。
+    - [ ]  驗證 IndexedDB 本地加密有效性。
+    - [ ]  **[🔍 驗證點] 嘗試未授權存取 CouchDB 資料庫應被拒絕；檢查 IndexedDB 儲存內容應為加密編碼。**
+
+---
+
+## **Phase 5: 部署與初期驗證 (Deployment)**
+
+**目標**：上線與驗證。
+
+- [ ]  **5.1 後端部署 (Backend)**
+    - [ ]  準備 Dockerfile (FastAPI + CouchDB 配置)。
+    - [ ]  部署至雲端環境 (Fly.io/AWS)。
+    - [ ]  設定 Domain 與 SSL 憑證。
+- [ ]  **5.2 前端部署 (Frontend)**
+    - [ ]  執行 Build 檢查。
+    - [ ]  部署至 Vercel/Netlify。
+    - [ ]  設定 Environment Variables。
+    - [ ]  **[🔍 驗證點] 訪問正式環境網址，完整執行一次「註冊 -> 記錄筆記 -> 同步」流程，確認生產環境運作正常。**
