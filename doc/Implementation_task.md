@@ -12,11 +12,11 @@ PRD.md 中的 Roadmap 規劃，將開發流程拆解為可執行的細部任務
 
 **目標**：確保本地開發環境運作正常，技術棧基底建立完成。
 
-- [ ]  **1.1 專案初始化 (Project Initialization)**
-    - [ ]  使用 Vite 初始化 React + TypeScript 專案 (`npm create vite@latest`)。
+- [x]  **1.1 專案初始化 (Project Initialization)** [/]
+    - [x]  使用 Vite 初始化 React + TypeScript 專案 (手動配置完成)。
     - [ ]  設定 `.editorconfig`, `.prettierrc`, `.eslintrc.cjs` 以統一程式碼風格。
-    - [ ]  設定 `tsconfig.json` 的 Path Aliases (e.g. `@/components`, `@/lib`)。
-    - [ ]  清理預設樣板檔案。
+    - [x]  設定 `tsconfig.json` 的 Path Aliases (e.g. `@/components`, `@/lib`)。
+    - [x]  清理預設樣板檔案 (並建立基礎進入點)。
     - [ ]  **[🔍 驗證點] 確認專案可成功啟動 (`npm run dev`) 且無 Lint 錯誤。**
 - [ ]  **1.2 設計系統建置 (Design System Setup)**
     - [ ]  安裝 TailwindCSS v3.4 並初始化設定 (`npx tailwindcss init -p`)。
@@ -51,16 +51,22 @@ PRD.md 中的 Roadmap 規劃，將開發流程拆解為可執行的細部任務
     - [ ]  實作 看板拖曳與任務排序功能 (純前端 Mock State)。
     - [ ]  **[🔍 驗證點] 實際操作 Kanban 拖曳任務，確認動畫流暢且無卡頓 (Drag & Drop UX)。**
 - [ ]  **2.3 領域與資源 (Areas & Resources)**
-    - [ ]  實作 `AreaListPage` (Grid View)。
-    - [ ]  實作 `AreaDetailPage` (Header Cover + Habit List)。
-    - [ ]  實作 `ResourceLibraryPage` (含篩選器 Filter Bar UI)。
-    - [ ]  實作 `ResourceEditor` 頁面 (Layout 框架)。
+    - [ ]  實作 `AreaListPage` (Grid View)。
+    - [ ]  實作 `AreaDetailPage` (Header Cover + Habit List)。
+    - [ ]  實作 `ResourceLibraryPage` (含篩選器 Filter Bar UI)。
+    - [ ]  實作 `ResourceEditor` 頁面 (含側邊欄分流工具與標籤管理 UI)。
     - [ ]  **[🔍 驗證點] 測試 Resource Library 篩選器介面互動 (Tag 多選、狀態切換) 是否直覺。**
 - [ ]  **2.4 日記與編輯器 (Journal & Editor)**
-    - [ ]  安裝 `@udecode/plate-common` 與相關插件。
+    - [ ]  安裝 `@udecode/plate-common` 與相關插件。
     - [ ]  設定 Plate Editor 基礎組件 (Toolbar, Editor Area)。
-    - [ ]  實作 `JournalPage` (日期導航器, 整合 Plate Editor)。
-    - [ ]  **[🔍 驗證點] 在編輯器中輸入 Markdown (如 `# Heading`, `list`)，確認即時預覽與 Slash Command 功能正常。**
+    - [ ]  實作 `JournalPage` (日期導航器, 整合 Habits/Metrics/Footprints 顯示邏輯)。
+    - [ ]  **[🔍 驗證點] 在編輯器中輸入 Markdown (如 `# Heading`, `list`)，確認即時預覽與 Slash Command 功能正常。**
+- [ ]  **2.5 指標與其他頁面 (Metrics & Others)**
+    - [ ]  實作 `MetricsListPage` 頁面 (CRUD 與排序 UI)。
+    - [ ]  實作 `SettingsPage` 全域設定頁面 (Tabs 切換與偏好設定 UI)。
+    - [ ]  實作 `LoginPage` 登入頁面 UI (靜態 Mock)。
+    - [ ]  實作 TopBar 全域搜尋 (Global Search / Command Palette 交互)。
+    - [ ]  **[🔍 驗證點] 測試 Command Palette (`Cmd+K`) 喚醒與搜尋結果呈現；確認 Settings Tabs 切換順暢。**
 
 ---
 
