@@ -1,0 +1,426 @@
+# **Product Requirement Document (PRD): Kernel**
+
+**Version**: 3.0  **Language**: Traditional Chinese (繁體中文)  **Status**: Planning
+
+---
+
+# **1. 產品概述 (Product Overview)**
+
+## **1.1 產品願景 (Vision)**
+
+**Kernel** 是一款專為高效能知識工作者設計，整合資訊管理、目標執行與量化追蹤的個人效能系統。它旨在解決現代人資訊焦慮、執行力不足與生活缺乏反思的問題。透過整合 PARA 方法論、原子習慣 (Atomic Habits) 與量化自我 (Quantified Self) 概念，打造一個從「快速捕捉」到「深度執行」再到「系統回顧」，形成一個可持續運作的個人系統。
+
+> 這不是另一個「更強大的筆記工具」，而是一個讓個人知識管理、建立習慣、目標執行與自我觀察能夠可持續運作的完整系統。
+> 
+
+## **1.2 目標用戶 (Target Audience)**
+
+- **軟體工程師/開發者**: 需要管理多個 side projects、學習新技術棧、並保持深度工作狀態，重視數據隱私與離線操作體驗。
+- **創意工作者/PM**: 需要捕捉大量靈感，並將其轉化為可執行的專案。
+- **自我成長追求者**: 熱衷於數據化生活、習慣養成與日記反思。
+
+## **1.3 核心概念與產品詞彙定義**
+
+### 資源（Resource）
+
+用於表示**一筆可被保存、引用與回溯的內容單位**，如文章、筆記、外部參考連結、會議重點或任何具有資訊價值的內容。
+
+Resource 為**獨立存在的資訊實體**，不以資料夾、分類或實體檔案形式管理，而是透過與專案（Projects）與領域（Areas）的關聯，建立其存在脈絡與使用情境。
+
+每一筆資源皆具備明確的狀態，用以反映其是否已完成決策與是否仍屬於當前關注重心。
+
+資源可乘載以下內容：
+
+- 標題
+- 資源內容 (Content)
+- 參考連結 (URL)
+- 關聯專案
+- 關聯領域
+- 標籤
+- 資源狀態 - 資源具備以下三種狀態：
+    - **Pending**
+        
+        表示該資源尚未完成決策，尚未被歸屬至任何專案或領域。
+        
+        Pending 狀態之資源僅存在於 Inbox，用以承載尚待處理的內容。
+        
+    - **Processed**
+        
+        表示該資源已完成決策，並已至少關聯一個進行中專案（Project）或啟用中領域（Area），
+        
+        因而具備明確的使用脈絡，並可出現在資源庫中供後續查詢與使用。
+        
+    - **Archived**
+        
+        表示該資源已退出當前關注重心，
+        
+        不再具備任何有效的進行中專案或啟用中領域關聯。
+        
+        Archived 資源預設不顯示於資源庫列表，但仍可透過搜尋與篩選進行回溯。
+        
+
+---
+
+### 收件匣（Inbox）
+
+用於承載尚未完成決策的資源（Resources）之暫存視圖。
+
+Inbox 並非獨立資料實體，而是所有 status = Pending 之 Resource 的集合視角，用以集中處理尚未被歸屬至任何專案（Project）或領域（Area）的內容。
+
+Inbox 的設計目的在於促進決策與分流，而非作為長期存放或分類空間。
+
+所有進入 Inbox 的資源，皆必須經由以下其中一種行為被處理：
+
+- 分流至至少一個專案（Project）或領域（Area），並將狀態轉為 Processed
+- 封存（Archived），表示暫時不納入當前關注重心
+- 移除（Delete），表示不再保留該資源
+
+系統不允許資源在未建立任何關聯的情況下，直接由 Pending 轉為 Processed，以避免形成無上下文之資源堆積。
+
+---
+
+### 資源庫（Resource Library）
+
+用於**陳列、瀏覽與查詢已完成決策之資源（Resources）**的聚合視圖。
+
+資源庫包含所有狀態為 Processed 與 Archived 之資源，
+
+並作為使用者回溯、搜尋與再利用資源的主要入口。
+
+資源庫本身並非實體儲存位置，而是一個依據資源狀態所組成的聚合視圖（Aggregated View）。
+
+資源是否顯示於資源庫，取決於其當前狀態：
+
+- 狀態為 Pending 之資源，代表尚未完成決策，僅存在於 Inbox，不顯示於資源庫
+- 狀態為 Processed 之資源，代表具備有效關聯脈絡，預設顯示於資源庫
+- 狀態為 Archived 之資源，代表已退出當前關注重心，預設不顯示於資源庫列表，但可透過搜尋或篩選條件被查詢與回溯
+
+資源庫的設計目的在於提供一個低噪音、可回溯的資源查詢空間，而非暫存或待處理區域。
+
+---
+
+### 專案（Project）
+
+用於管理具備明確目標、可被完成之工作單位。
+
+Project 代表一段需要被推進並做出明確決策結果的行動歷程，其存在目的在於將目標拆解為可執行的任務（Tasks），並追蹤行動的完成與中止結果。
+
+每一個專案皆必須關聯至少一個領域（Area），
+
+以確保其行動具有明確的長期責任脈絡，而非獨立存在的工作片段。
+
+專案可承載以下內容：
+
+- 專案名稱
+- 任務（Tasks）與任務清單（Task Lists）
+- 專案進度（依任務完成情況計算）
+- 專案摘要與說明
+- 隸屬領域 (Area) (非必要)
+- 相關資源（Resources）之關聯
+- 截止日期
+- 專案狀態 - 專案具備明確且有限的狀態，用以反映其行動推進與決策結果：
+    - Active（進行中）：專案目前仍在推進，尚未達成其完成條件
+    - Completed（已完成）：專案目標已達成，行動層級正式結束，為終態狀態
+    - Archived（封存）：專案在未完成的情況下被中止或擱置，代表一個未完成但已被放下的決定
+        
+        專案僅允許以下狀態轉換：
+        
+        - Active → Completed （達成目標）
+        - Active → Archived （中止 / 擱置）
+        - Archived → Active （重啟專案）
+
+---
+
+### 任務（Tasks）
+
+用於描述專案（Project）中可執行、可完成的具體行動單位。
+
+Task 隸屬於單一專案（Project），並用以拆解專案目標、追蹤執行進度與完成狀態。
+
+任務本身不承載長期狀態或知識內容，而僅代表「是否已完成」的執行結果。
+
+任務可依需求被組織於多個任務清單（Task Lists）之下，以反映不同階段或工作流程，但所有任務皆服務於其所屬專案之完成。
+
+任務完成情況將用於計算與呈現專案進度，惟不影響資源（Resource）、日記（Journal）或指標（Metrics）之狀態。
+
+---
+
+### 領域（Area）
+
+用於描述長期存在、無明確結束時間的人生責任範圍或生活面向。
+
+Area 並非用於管理任務或推進目標，而是作為專案（Projects）與習慣（Habits）的結構性背景，
+
+用以界定使用者在不同人生面向中所承擔的持續責任。
+
+領域本身不具備完成狀態，
+
+其狀態僅反映該責任範圍目前是否仍屬於使用者的關注視野。
+
+領域可承載與影響以下內容：
+
+- 長期維持行為之習慣（Habits）
+- 隸屬於該領域之專案（Projects）
+- 與該領域相關之資源（Resources）關聯
+- 領域狀態 - 領域僅具備以下兩種狀態：
+    - Active（啟用中）：該領域仍屬於當前關注的人生版圖
+    - Hidden（隱藏）：該領域暫時退出關注視野，但不代表其重要性被否定
+    
+    領域不具備完成或封存之語意，狀態僅代表注意力的退場，而非責任的結束。
+    
+
+---
+
+### 習慣（Habits）
+
+用於描述為維持某一領域（Area）而需持續重複進行的行為承諾。
+
+Habit 隸屬於單一領域（Area），並以每日是否執行為主要記錄方式。
+
+習慣不以完成為目標，亦不具備結束條件，其存在目的在於支持長期狀態的維持，而非推進特定成果。
+
+在日記（Journal）中，習慣以每日勾選清單（Checklist）形式呈現，用於記錄該行為於當日是否發生，而不進行評價、累積成就或連續性計算。
+
+習慣之勾選僅代表行為發生與否，不直接影響指標（Metrics）數值，亦不轉化為任務或資源。
+
+---
+
+### 封存（Archive）
+
+本產品中不存在傳統意義上的檔案封存機制。
+
+封存代表資源（Resource）狀態轉換為 Archived，用以表示該資源不再屬於當前關注重心，但仍可被搜尋與回溯，且不影響資料完整性。
+
+---
+
+### 日記（Journal）
+
+用於記錄**每日狀態與觀察結果的時間型容器**。
+
+Journal 本身不承載長期結構或核心資料，
+
+呈現該日所對應的行為、狀態與觀察紀錄。
+
+在 Journal 中，使用者可進行以下紀錄行為：
+
+- 勾選當日習慣（Habits）之執行情況
+- 填寫指標（Metrics）之當日數值
+- 檢視當日仍在進行中的專案（Projects）
+- 檢視中尚未分流或封存決策之資源 (Pending Resources)
+- 撰寫當日的文字記錄與摘要
+
+Journal 不負責建立、管理或評價專案、習慣與指標本身，僅作為這些結構在特定日期下的**使用與觀察介面**。
+
+Journal 的設計目的在於提供一個低干擾、可回溯的每日視角，協助使用者理解狀態的變化，而非追求效率、連續性或績效評分。
+
+---
+
+### 指標（Metrics）
+
+由使用者定義的「需被長期觀察與量化的狀態」。
+
+Metrics 為獨立存在的觀測項目，可於 Journal 中被重複量測，並用於分析趨勢、關聯性與長期變化。
+
+---
+
+# 2. 系統架構與資料規格 (System & Data Specs)
+
+## 2.1 資料模型(Data Model)
+
+請參閱 dataModel.md
+
+## 2.2 API 契約 (Inputs/Outputs)
+
+請參閱 interface_contracts.md
+
+## 2.3 非功能性需求 (**Non-Functional Requirements)**
+
+### 多語系支援 (i18n)
+
+系統未來可支援多語系擴展，開發階段首先支援繁體中文
+
+### **離線優先 (Local-first)**
+
+- 所有讀寫操作 (CRUD) 必須直接對本地資料庫進行，介面反應不得受網路延遲影響。
+- 網路恢復後，系統需在背景自動與遠端 CouchDB 完成雙向同步，無需用戶手動干預。
+- 當多裝置產生衝突時，系統需具備預設合併策略 (Default Strategy)。
+- 每個使用者在後端 CouchDB 擁有獨立的資料庫檔案，實體隔離數據。
+
+### **保密性 (Confidentiality)**
+
+敏感數據（如密碼、支付資訊）必須經過加密（例如 256-bit AES），在傳輸和儲存時都不能被未經授權者讀取。
+
+### **完整性 (Integrity)**
+
+防止數據在儲存或傳輸過程中被惡意篡改或意外損壞。
+
+### **授權與訪問控制 (Authorization & Access Control)**
+
+基於用戶角色和權限，限制對特定數據和功能的訪問。
+
+### **防護與防禦 (Protection & Defense)**
+
+抵禦各種網路攻擊，如 DDoS、SQL 注入、跨站腳本（XSS）等。
+
+### **事件日誌與監控 (Logging & Monitoring)**
+
+記錄所有安全相關事件及重要操作，以便追溯和調查。
+
+# **3. UI/UX交互與功能邏輯 (UX/UI & Functional Flows)**
+
+請參閱 UXUI.md
+
+# 4. 設計風格 (Design System)
+
+請參考 designSystem.md。
+
+# 5. 系統技術架構 (Tech Stack)
+
+- 本專案採用 **Local-First (本地優先)** 架構，確保在無網路環境下仍具備完整操作體驗。
+- 核心技術棧為 **Vite + React + RxDB**，實現純前端的依賴反轉 (Inversion of Control)。
+- 後端架構採用 **CouchDB** 進行多端狀態同步，並搭配 **Python FastAPI** 微服務處理網頁解析與 AI 邏輯，兩者皆透過 Docker 部署。
+
+## 5.1 前端應用層 (Frontend Layer)
+
+- **Core Framework**: [React 18+](https://react.dev/) - 採用 Functional Components 與 Custom Hooks 架構。
+- **Build Tool**: [Vite](https://vitejs.dev/) - 提供極速的 HMR 開發體驗與最佳化打包。
+- **Language**: [TypeScript](https://www.typescriptlang.org/) - 強型別語言，確保複雜資料模型與 API 契約的安全性。
+- **Routing**: **React Router v6** - 處理 SPA 路由與 Deep Linking。
+- **State Management**:
+    - **Domain State**: **RxDB Hooks** - 直接綁定資料庫查詢流 (Query Streams)，資料變更即時反應於 UI。
+    - **UI State**: **React Context / Zustand** - 管理非持久化的介面狀態 (如 Modal 開關、Sidebar 收合)。
+- **Utilities**:
+    - **Date Handling**: **date-fns** - 輕量級且功能強大的日期處理函式庫 (處理 Journal 日期邏輯)。
+    - **Drag & Drop**: **dnd-kit** - 現代化、輕量且無障礙的拖曳套件 (用於 Kanban 與 Task 排序)。
+    - **Fonts**: **@fontsource** - 自託管 Google Fonts (Newsreader, Inter)，確保離線環境字型顯示正常。
+    - **Hooks**: **usehooks-ts** - 提供 `useDarkMode`、`useLocalStorage` 等實用 Hooks，簡化主題切換與本地存取邏輯。
+
+## 5.2 介面與互動 (UI/UX Layer)
+
+> 依據 `designSystem.md` 規範實作 **Reflective Dawn** 主題。
+
+- **Styling Engine**: [TailwindCSS v3.4+](https://tailwindcss.com/) - Utility-first CSS 框架，配合 CSS Variables 實現動態主題切換。
+- **Component Library**: [shadcn/ui](https://ui.shadcn.com/) - 基於 **Radix UI** 的無頭組件 (Headless Components)，兼顧可訪問性 (A11y) 與樣式客製化彈性。
+- **Data Visualization**: **Recharts** - 專為 React 設計的組合式圖表庫 (用於 Metrics 與 Dashboard 可視化)。
+- **Motion**: **Framer Motion** - 處理微交互 (Micro-interactions) 與轉場動畫，提升操作的物理觸感。
+- **Rich Text Editor**:
+    - **Engine**: [Plate.js](https://platejs.org/) - 基於 Slate.js 的高擴充性編輯器，支援 Markdown 語法、Block-based 編輯。
+    - **Features**: Slash Command、Markdown Shortcuts、Drag & Drop。
+- **Iconography**: [Lucide React](https://lucide.dev/) - 風格統一且可客製化的 SVG 圖示庫。
+
+## 5.3 資料與後端層 (Data & Backend Layer)
+
+- **Local Database (Client-Side)**:
+    - **RxDB**: Reactive Database，負責前端資料的 CRUD 與即時查詢。
+    - **Storage Adapter**: **Dexie.js (IndexedDB)** - 瀏覽器端的高效能儲存引擎。
+- **Remote Database (Sync Node)**:
+    - **Apache CouchDB**: 用於多裝置間的 Master-Master Replication 同步節點。
+    - **Deployment**: Docker Container，確保部署環境一致性。
+- **Microservices (Optional)**:
+    - **Python (FastAPI)**:
+        - **Auth & Provisioning**: 負責處理 OAuth 登入回調，並 **動態建立用戶專屬的 CouchDB 資料庫與設定存取權限 (Security Provisioning)**。
+        - **AI & Compute**: 預留作為 AI 運算 (Embeddings, NLP) 與 **外部內容解析** 的服務節點。
+    - **Content Parsing**:
+        - **Trafilatura**: 專用於從網頁中提取核心文章內容並轉換為 Markdown，過濾廣告與導航雜訊 (Smart Parsing)。
+        - **BeautifulSoup4**: 用於解析 HTML Metadata 與 Open Graph 標籤 (預覽卡片資料來源)。
+
+## 5.4 測試策略 (Testing Strategy)
+
+- **Unit/Integration Test**: [Vitest](https://vitest.dev/) - 提供快速的單元測試環境，並與 Vite 設定共用。
+- **Component Test**: **React Testing Library** - 驗證組件渲染與基本交互。
+- **E2E Test**: [Playwright](https://playwright.dev/) - 針對關鍵路徑 (Critical Paths) 進行端對端測試，確保離線與同步流程正常。
+
+## 5.5 安全技術實作 (Security Implementation)
+
+- **Local Encryption**: 使用 **RxDB Encryption Plugin** 對 IndexedDB 內的敏感欄位進行加密 (AES-256)，防止本地資料外洩。
+- **Transport Security**: 全程採用 HTTPS/TLS 1.3 傳輸，CouchDB 同步流量強制加密。
+- **Authentication**: 採用 CouchDB 內建的 Session Auth 或 JWT 機制進行裝置驗證。
+
+# 6. Roadmap: AI Coding 敏捷開發路線圖
+
+- 本專案採用 AI 輔助開發模式，強調「快速迭代」、「可視化優先」與「真實回饋」。
+- 本專案採用Mock-First Development策略
+
+## Phase 1: 基礎建設與環境 (Foundation)
+
+**目標**：確保本地開發環境運作正常，技術棧基底建立完成。
+
+1.  **專案初始化 (Project Initialization)**:
+    *   初始化 Vite + React + TypeScript 專案架構。
+    *   設定 ESLint, Prettier 與路徑別名 (Path Aliases)。
+2.  **設計系統建置 (Design System Setup)**:
+    *   安裝並設定 TailwindCSS v3.4 (CSS Variables, Dark Mode)。
+    *   建置 `shadcn/ui` 基礎設施。
+    *   實作 "Reflective Dawn" 主題 Tokens (色票、排版)。
+    *   設定 `@fontsource` 離線字型 (Newsreader, Inter)。
+3.  **佈局實作 (Layout Implementation)**:
+    *   建立全站佈局 `AppLayout` (Sidebar + TopBar + MainContent)。
+    *   實作響應式側邊欄行為 (折疊/展開)。
+
+## Phase 2: 全站頁面實作 (All Pages Prototype)
+
+**目標**：在不串接真實資料庫的情況下，完成全站所有關鍵頁面的 UI/UX 互動，並確保 Mock Data 覆蓋各種狀態。
+
+1.  **儀表板與收件匣 (Dashboard & Inbox)**:
+    *   實作 `Dashboard` 頁面 (含 Recharts 模擬圖表)。
+    *   實作 `Inbox` 清單與快速捕捉視窗 (Quick Capture Modal)。
+2.  **專案管理 (Project Management)**:
+    *   實作 `ProjectList` 頁面 (Workbench 視圖)。
+    *   實作 `ProjectDetail` 頁面 (Kanban/List 切換，整合 dnd-kit)。
+3.  **領域與資源 (Areas & Resources)**:
+    *   實作 `AreaList` 與 `AreaDetail` 頁面。
+    *   實作 `ResourceLibrary` 頁面 (篩選器介面)。
+4.  **日記與編輯器 (Journal & Editor)**:
+    *   實作 `Journal` 每日視圖 (日期導航功能)。
+    *   整合 `Plate.js` 編輯器 (支援 Markdown 語法)。
+5.  **指標與其他頁面 (Metrics & Others)**:
+    *   實作 `MetricsList` 頁面 (CRUD 與排序)。
+    *   實作 `Settings` 全域設定頁面 (Tabs 切換)。
+    *   實作 `Login` 登入頁面 UI (靜態)。
+    *   實作 TopBar 全域搜尋 (Global Search / Command Palette)。
+
+## Phase 3: 資料庫整合與邏輯實作 (Backend Integration)
+
+**目標**：將靜態頁面轉化為動態應用。
+
+1.  **資料庫架構與實例 (RxDB Schema & Instance)**:
+    *   定義資料模型 Schemas (Resource, Project, Task, Area, Journal, Metrics)。
+    *   初始化 RxDB 實例並掛載加密 Adapter。
+2.  **服務層實作 (Service Layer Implementation)**:
+    *   實作服務層類別 (`ResourceService`, `ProjectService` 等)。
+    *   將前端 Mock Data Hooks 替換為 RxDB Query Hooks。
+3.  **身分驗證與同步 (Authentication & Sync)**:
+    *   實作登入頁面 (UI)。
+    *   架設本地 CouchDB (Docker)。
+    *   開發 Python FastAPI 服務 (負責 Auth 與資料庫開通)。
+    *   連接 RxDB Replication 至 CouchDB。
+4.  **核心功能邏輯 (Feature Logic)**:
+    *   實作智慧解析邏輯 (透過 FastAPI Proxy)。
+    *   實作日記聚合 (Aggregation) 邏輯。
+
+## Phase 4: 測試與安全性 (QA & Security)
+
+**目標**：確保系統穩定，資料與存取權限無誤。
+
+1.  **單元與組件測試 (Unit & Component Testing)**:
+    *   設定 Vitest 環境。
+    *   撰寫核心邏輯測試 (Data Models)。
+2.  **端對端測試 (E2E Testing)**:
+    *   設定 Playwright 環境。
+    *   測試關鍵流程：註冊 -> 捕捉 -> 分流 -> 同步。
+3.  **安全性強化 (Security Hardening)**:
+    *   稽核 CouchDB Security Objects 設定。
+    *   驗證本地資料庫加密機制。
+
+## Phase 5: 部署與初期驗證 (Deployment & Alpha)
+
+**目標**：將服務推上雲端，進行真實環境測試。
+
+1.  **後端部署 (Backend Deployment)**:
+    *   部署 CouchDB 與 Python 服務至雲端 (如 Fly.io / AWS EC2)。
+    *   設定網域與 SSL。
+2.  **前端部署 (Frontend Deployment)**:
+    *   打包並部署前端 (Vercel / Netlify)。
+3.  **Alpha 測試 (Alpha Testing)**:
+    *   邀請種子用戶 (Self-hosters) 進行測試。
+    *   監控同步效能與衝突狀況。
