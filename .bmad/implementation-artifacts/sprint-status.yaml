@@ -1,0 +1,111 @@
+# generated: 2026-01-12
+# project: Kernel
+# project_key: kernel
+# tracking_system: file-system
+# story_location: .bmad/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-01-12
+project: Kernel
+project_key: kernel
+tracking_system: file-system
+story_location: .bmad/implementation-artifacts
+
+development_status:
+  # Epic 1: 基礎架構與全站導航
+  epic-1: in-progress
+  1-1-sidebar-collapse: ready-for-dev
+  1-2-theme-toggle: ready-for-dev
+  1-3-react-router: ready-for-dev
+  1-4-app-layout: ready-for-dev
+  1-5-command-palette: ready-for-dev
+  epic-1-retrospective: optional
+
+  # Epic 2: 儀表板與收件匣
+  epic-2: backlog
+  2-1-dashboard-stats: ready-for-dev
+  2-2-habit-heatmap: ready-for-dev
+  2-3-metric-charts: ready-for-dev
+  2-4-inbox-list: ready-for-dev
+  2-5-quick-capture: ready-for-dev
+  epic-2-retrospective: optional
+
+  # Epic 3: 專案管理
+  epic-3: backlog
+  3-1-project-list: ready-for-dev
+  3-2-project-cards: ready-for-dev
+  3-3-project-detail: ready-for-dev
+  3-4-task-management: ready-for-dev
+  3-5-task-dnd: ready-for-dev
+  epic-3-retrospective: optional
+
+  # Epic 4: 領域、習慣與資源庫
+  epic-4: backlog
+  4-1-area-list: ready-for-dev
+  4-2-area-detail: ready-for-dev
+  4-3-habit-manager: ready-for-dev
+  4-4-resource-library: ready-for-dev
+  4-5-resource-editor: ready-for-dev
+  4-6-resource-dispatch: ready-for-dev
+  epic-4-retrospective: optional
+
+  # Epic 5: 日記與指標追蹤
+  epic-5: backlog
+  5-1-journal-layout: ready-for-dev
+  5-2-habit-tracker: ready-for-dev
+  5-3-metric-input: ready-for-dev
+  5-4-daily-note: ready-for-dev
+  5-5-resource-footprints: ready-for-dev
+  5-6-metrics-list: ready-for-dev
+  5-7-sleep-tracking: ready-for-dev
+  5-8-settings: ready-for-dev
+  epic-5-retrospective: optional
+
+  # Epic 6: 資料庫整合
+  epic-6: backlog
+  6-1-rxdb-init: ready-for-dev
+  6-2-service-layer: ready-for-dev
+  6-3-data-encryption: ready-for-dev
+  epic-6-retrospective: optional
+
+  # Epic 7: 身分驗證與同步
+  epic-7: backlog
+  7-1-oauth-integration: ready-for-dev
+  7-2-couchdb-sync: ready-for-dev
+  7-3-url-parser: ready-for-dev
+  epic-7-retrospective: optional
+
+  # Epic 8: 測試與安全性強化
+  epic-8: backlog
+  8-1-unit-tests: ready-for-dev
+  8-2-e2e-tests: ready-for-dev
+  8-3-security-audit: ready-for-dev
+  epic-8-retrospective: optional

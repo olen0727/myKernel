@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ["step-01-validate-prerequisites", "step-02-design-epics"]
+stepsCompleted: ["step-01-validate-prerequisites", "step-02-design-epics", "step-03-breakdown-epics"]
 inputDocuments:
   - ".bmad/prd.md"
   - ".bmad/architecture.md"
@@ -1339,3 +1339,192 @@ So that **我可以自定義應用程式體驗**.
 - 方案狀態 Badge (Free / Pro)
 - Upgrade 按鈕 (Mock)
 - 付款資訊區 (Mock 卡片資訊)
+
+---
+
+## Epic 6: 資料庫整合
+
+**目標**: 使用者的資料可以持久化儲存，重新整理頁面後資料不會消失。
+
+### Story 6.1: RxDB 初始化與 Schema 定義
+
+As a **開發者**,
+I want **初始化 RxDB 並定義所有資料模型的 JSON Schema**,
+So that **應用程式可以正確地儲存、驗證與檢索資料**.
+
+**Acceptance Criteria:**
+
+**Given** 應用程式啟動時
+**When** `db.ts` 初始化
+**Then** 應建立名為 `kernel_db` 的 RxDatabase
+**And** 應載入所有 Schema (Resource, Project, Area, Task, Habit, Metric, Log)
+**And** 應啟用 IndexedDB 作為儲存適配器
+
+**Given** 定義 Schema 時
+**When** 設定欄位屬性
+**Then** 必須包含 `id` (primary), `createdAt`, `updatedAt`
+**And** 敏感欄位應設定加密 (encrypted: true)
+**And** 應定義適當的索引 (Indexes) 以優化查詢
+
+---
+
+### Story 6.2: Service Layer 實作
+
+As a **開發者**,
+I want **封裝所有資料庫操作於 Service Layer (如 ResourceService)**,
+So that **UI 組件不直接依賴 RxDB，保持架構解耦與測試性**.
+
+**Acceptance Criteria:**
+
+**Given** 需要存取資料的 UI 組件
+**When** 呼叫 Service (e.g., `resourceService.getPending()`)
+**Then** 應回傳 Observable 或 Promise 格式的資料
+**And** 錯誤處理應在 Service 層統一封裝
+
+**Given** 實作各個 Service
+**When** 完成 ResourceService, ProjectService, AreaService, TaskService, MetricService
+**Then** 應覆蓋所有 CRUD 操作
+**And** 應包含必要的業務邏輯 (e.g., 完成任務時更新專案進度)
+
+---
+
+### Story 6.3: 資料加密與安全性
+
+As a **使用者**,
+I want **我的私人筆記與數據在本地儲存時經過加密**,
+So that **即使裝置遺失，資料也不會輕易被讀取**.
+
+**Acceptance Criteria:**
+
+**Given** 資料寫入 IndexedDB 前
+**When** RxDB 處理資料
+**Then** 所有標記為 `encrypted` 的欄位 (如 content, title) 應使用 AES-256 加密
+**And** 密鑰應由使用者登入後動態生成或解鎖
+
+**Given** 未授權的存取嘗試
+**When** 直接讀取 IndexedDB Blob
+**Then** 只能看到亂碼內容
+
+---
+
+## Epic 7: 身分驗證與同步
+
+**目標**: 使用者可以透過 Google/GitHub 登入，資料自動在多裝置間同步。
+
+### Story 7.1: OAuth 登入整合
+
+As a **使用者**,
+I want **使用 Google 或 GitHub 帳號登入系統**,
+So that **我不需要記憶新的帳號密碼，並能確保身分安全**.
+
+**Acceptance Criteria:**
+
+**Given** 訪問 Login 頁面
+**When** 點擊 Google 或 GitHub 登入按鈕
+**Then** 應重導向至 OAuth 提供者驗證頁面
+**And** 驗證成功後返回應用程式
+**And** 應取得 JWT Token 用於後續 API 請求
+
+**Given** 登入成功
+**When** 取得使用者資訊
+**Then** 應建立或更新本地使用者 Profile (Name, Avatar)
+**And** 應初始化遠端資料庫連線
+
+---
+
+### Story 7.2: CouchDB 後端設置與同步
+
+As a **使用者**,
+I want **我的資料在多個裝置間自動同步**,
+So that **我可以在手機與電腦間無縫切換工作**.
+
+**Acceptance Criteria:**
+
+**Given** 使用者已登入且網路連線正常
+**When** 背景同步機制啟動
+**Then** 本地 RxDB 應與遠端 CouchDB 建立 Replication
+**And** 資料變更應在 < 5秒內同步至其他裝置
+
+**Given** 網路中斷時 (離線模式)
+**When** 使用者進行操作
+**Then** 系統應正常運作 (Local-First)
+**And** 不顯示干擾的錯誤訊息
+
+**Given** 網路恢復時
+**When** 重新連線
+**Then** 應自動嘗試同步並解決衝突 (預設 Last-Write-Wins)
+
+---
+
+### Story 7.3: 內容解析 API
+
+As a **使用者**,
+I want **輸入網址時自動抓取標題與摘要**,
+So that **我可以省去手動複製貼上的時間**.
+
+**Acceptance Criteria:**
+
+**Given** 使用者輸入 URL
+**When** 觸發解析請求
+**Then** 後端 API (`/parse-url`) 應抓取該頁面的 Meta Tags
+**And** 回傳 Title, Description, OgImage, Content (Markdown conversion)
+**And** 若解析失敗，應回傳原始 URL 作為標題
+
+---
+
+## Epic 8: 測試與安全性強化
+
+**目標**: 系統經過完整測試，資料安全有保障。
+
+### Story 8.1: 單元與整合測試
+
+As a **開發者**,
+I want **擁有完整的自動化測試套件**,
+So that **重構或新增功能時不會破壞既有邏輯**.
+
+**Acceptance Criteria:**
+
+**Given** CI/CD 流程或本地開發
+**When** 執行 `npm run test`
+**Then** 所有 Vitest 測試案例應通過
+**And** Service Layer 測試覆蓋率應達 70% 以上
+
+**Given** 關鍵業務邏輯 (如習慣頻率計算、專案進度計算)
+**When** 撰寫測試
+**Then** 應包含邊界案例 (Boundary Cases) 測試
+
+---
+
+### Story 8.2: E2E 測試流程
+
+As a **開發者**,
+I want **模擬真實使用者操作的 E2E 測試**,
+So that **確保關鍵路徑 (Critical Paths) 功能正常**.
+
+**Acceptance Criteria:**
+
+**Given** Playwright 測試環境
+**When** 執行 E2E 測試
+**Then** 應自動驗證以下流程：
+1. 訪客登入
+2. 建立新專案
+3. 新增資源並分流
+4. 填寫日記
+5. 搜尋功能
+
+---
+
+### Story 8.3: 安全性稽核
+
+As a **資安人員**,
+I want **確保系統符合 OWASP 安全標準**,
+So that **使用者資料不會外洩或遭惡意利用**.
+
+**Acceptance Criteria:**
+
+**Given** 系統部署前
+**When** 執行安全性掃描
+**Then** 不應存在 OWASP Top 10 高風險漏洞
+**And** 資料傳輸應強制使用 HTTPS/TLS 1.3
+**And** CouchDB 應設定正確的 Security Object，禁止未授權訪問
+
