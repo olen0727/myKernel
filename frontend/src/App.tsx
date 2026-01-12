@@ -1,15 +1,34 @@
-
+import React, { useState } from 'react'
+import { Sidebar } from '@/components/layout/Sidebar'
+import { TopBar } from '@/components/layout/TopBar'
 
 function App() {
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+
     return (
-        <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center gap-4 transition-colors duration-500">
-            <h1 className="text-6xl font-serif font-medium tracking-tight">Kernel</h1>
-            <p className="text-muted-foreground font-sans tracking-wide uppercase text-sm">Reflective Dawn</p>
-            <div className="mt-8 p-6 border border-border rounded-2xl bg-card shadow-sm max-w-md text-center">
-                <p className="text-sm leading-relaxed">
-                    設計系統已就緒。Newsreader 與 Inter 字型已正確載入。
-                </p>
-            </div>
+        <div className="flex min-h-screen bg-background text-foreground font-sans">
+            <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
+
+            <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out overflow-hidden">
+                <TopBar />
+
+                {/* Scrollable Content Area */}
+                <div className="flex-1 overflow-auto p-8 flex flex-col items-center justify-start gap-6">
+                    <h1 className="text-4xl font-serif font-medium tracking-tight mt-10">Welcome to Kernel</h1>
+                    <p className="text-muted-foreground">Select an item from the sidebar to get started.</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mt-8">
+                        <div className="p-6 rounded-xl border bg-card hover:shadow-md transition-shadow">
+                            <h3 className="font-serif font-medium text-lg mb-2">Projects</h3>
+                            <p className="text-sm text-muted-foreground">Manage your active projects and tasks.</p>
+                        </div>
+                        <div className="p-6 rounded-xl border bg-card hover:shadow-md transition-shadow">
+                            <h3 className="font-serif font-medium text-lg mb-2">Inbox</h3>
+                            <p className="text-sm text-muted-foreground">Capture thoughts and process incoming tasks.</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     )
 }
