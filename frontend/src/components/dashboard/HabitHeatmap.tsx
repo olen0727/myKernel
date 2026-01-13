@@ -54,7 +54,7 @@ export const HabitHeatmap: React.FC = () => {
     const weekLabels = habitData[0]?.weeks.map(w => `w${w.weekNum}`) || []
 
     return (
-        <Card data-testid="habit-heatmap" className="overflow-hidden border-none shadow-md bg-card/50 backdrop-blur-sm">
+        <Card data-testid="habit-heatmap" className="border-none shadow-md bg-card/50 backdrop-blur-sm">
             <CardHeader className="pb-4">
                 <CardTitle className="text-lg font-bold flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -108,6 +108,9 @@ export const HabitHeatmap: React.FC = () => {
                                             </TooltipTrigger>
                                             <TooltipContent
                                                 side="top"
+                                                align={wIdx === 0 ? "start" : wIdx === 6 ? "end" : "center"}
+                                                avoidCollisions={true}
+                                                collisionPadding={10}
                                                 className="p-0 overflow-hidden rounded-xl border-none shadow-2xl bg-popover/95 backdrop-blur-md min-w-[180px]"
                                                 sideOffset={10}
                                             >
