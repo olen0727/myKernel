@@ -2,26 +2,31 @@ import React from 'react'
 import { Plus } from 'lucide-react'
 import { AreaCard } from '@/components/areas/AreaCard'
 import { CreateAreaModal } from '@/components/areas/CreateAreaModal'
-import { Area, INITIAL_AREAS } from '@/services/mock-data-service'
+import { Area, dataStore } from '@/services/mock-data-service'
 import { Card } from '@/components/ui/card'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 const AreaListPage: React.FC = () => {
-    const [areas, setAreas] = React.useState<Area[]>(INITIAL_AREAS)
+    const [areas, setAreas] = React.useState<Area[]>([])
     const [isModalOpen, setIsModalOpen] = React.useState(false)
     const navigate = useNavigate()
 
+    React.useEffect(() => {
+        setAreas([...dataStore.getAreas()])
+    }, [])
+
     const handleCreateArea = (name: string, coverImage: string) => {
         const newArea: Area = {
-            id: Math.random().toString(36).substr(2, 9),
+            id: crypto.randomUUID(),
             name,
             status: 'active',
             projectCount: 0,
             habitCount: 0,
             coverImage
         }
-        setAreas([...areas, newArea])
+        dataStore.addArea(newArea)
+        setAreas([...dataStore.getAreas()])
         toast.success(`領域 "${name}" 已建立`)
     }
 
@@ -47,8 +52,17 @@ const AreaListPage: React.FC = () => {
 
                 {/* New Area Entry */}
                 <Card
-                    className="border-dashed border-2 flex flex-col items-center justify-center p-6 cursor-pointer hover:border-primary/50 hover:bg-accent/50 transition-all min-h-[250px]"
+                    role="button"
+                    tabIndex={0}
+                    aria-label="新增新領域"
+                    className="border-dashed border-2 flex flex-col items-center justify-center p-6 cursor-pointer hover:border-primary/50 hover:bg-accent/50 transition-all min-h-[250px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     onClick={() => setIsModalOpen(true)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            setIsModalOpen(true)
+                        }
+                    }}
                 >
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                         <Plus className="w-6 h-6 text-primary" />

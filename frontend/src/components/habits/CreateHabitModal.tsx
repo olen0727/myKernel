@@ -18,6 +18,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'sonner'
 
 interface CreateHabitModalProps {
     isOpen: boolean
@@ -60,6 +61,10 @@ export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         if (name.trim()) {
+            if (frequency === 'weekly' && selectedDays.length === 0) {
+                toast.error('每週習慣請至少選擇一天')
+                return
+            }
             onSubmit({
                 name,
                 frequency,
@@ -138,7 +143,7 @@ export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>取消</Button>
-                        <Button type="submit">建立習慣</Button>
+                        <Button type="submit">{initialData ? '更新習慣' : '建立習慣'}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

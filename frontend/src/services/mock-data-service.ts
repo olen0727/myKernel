@@ -219,3 +219,39 @@ export const INITIAL_AREAS: Area[] = [
         description: "資產配置、開支追蹤與長期財務目標的達成。"
     }
 ]
+
+// --- Persistent store simulation ---
+class DataStore {
+    private areas: Area[] = [...INITIAL_AREAS]
+    private habits: Habit[] = [...HABITS]
+    private taskLists: TaskListGroup[] = [...INITIAL_TASK_LISTS]
+
+    // Areas
+    getAreas() { return this.areas }
+    getAreaById(id: string) { return this.areas.find(a => a.id === id) }
+    addArea(area: Area) { this.areas.push(area) }
+    updateArea(id: string, updates: Partial<Area>) {
+        this.areas = this.areas.map(a => a.id === id ? { ...a, ...updates } : a)
+    }
+    deleteArea(id: string) {
+        this.areas = this.areas.filter(a => a.id !== id)
+    }
+
+    // Habits
+    getHabitsByArea(areaId: string) { return this.habits.filter(h => h.areaId === areaId) }
+    addHabit(habit: Habit) { this.habits.push(habit) }
+    updateHabit(id: string, updates: Partial<Habit>) {
+        this.habits = this.habits.map(h => h.id === id ? { ...h, ...updates } : h)
+    }
+    deleteHabit(id: string) {
+        this.habits = this.habits.filter(h => h.id !== id)
+    }
+
+    // Projects
+    getProjectsByArea(areaName: string) {
+        // Mock project filtering by area name for now
+        return [INITIAL_PROJECT].filter(p => p.area === areaName)
+    }
+}
+
+export const dataStore = new DataStore()

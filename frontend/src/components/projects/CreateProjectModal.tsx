@@ -36,7 +36,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { INITIAL_AREAS } from "@/services/mock-data-service"
+import { dataStore } from "@/services/mock-data-service"
 
 const formSchema = z.object({
     name: z.string().min(2, {
@@ -87,6 +87,8 @@ export function CreateProjectModal({
         onOpenChange(false)
     }
 
+    const areas = dataStore.getAreas()
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
@@ -124,7 +126,7 @@ export function CreateProjectModal({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {INITIAL_AREAS.map(area => (
+                                            {areas.map(area => (
                                                 <SelectItem key={area.id} value={area.name}>
                                                     {area.name}
                                                 </SelectItem>

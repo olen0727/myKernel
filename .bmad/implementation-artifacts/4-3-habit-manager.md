@@ -1,6 +1,6 @@
 # Story 4.3: Habit Manager 習慣管理器
 
-Status: review
+Status: ready-for-dev
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -31,6 +31,11 @@ So that **我可以定義需要長期維持的行為承諾**.
 - [x] 實作 CreateHabitModal
     - [x] 建立 `src/components/habits/CreateHabitModal.tsx`。
     - [x] 頻率選擇邏輯 (Select + Checkbox group for days)。
+
+### Review Follow-ups (AI)
+- [x] [AI-Review][High] 整合 `mock-data-service` 以實現習慣數據持久化 `[src/components/habits/HabitManager.tsx]`
+- [x] [AI-Review][Medium] 實作表單驗證，確保「每週」頻率下必須勾選至少一天 `[src/components/habits/CreateHabitModal.tsx]`
+- [x] [AI-Review][Low] 重構 `HabitManager` 減少 `CreateHabitModal` 的重復實例代碼 `[src/components/habits/HabitManager.tsx]`
 
 ## Dev Agent Record (AI)
 

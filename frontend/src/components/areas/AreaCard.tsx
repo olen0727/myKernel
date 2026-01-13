@@ -11,17 +11,34 @@ interface AreaCardProps {
 }
 
 export const AreaCard: React.FC<AreaCardProps> = ({ area, onClick }) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onClick?.()
+        }
+    }
+
+    const fallbackImage = "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800&auto=format&fit=crop"
+
     return (
         <Card
-            className="overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300"
+            role="button"
+            tabIndex={0}
+            className="overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             onClick={onClick}
+            onKeyDown={handleKeyDown}
+            aria-label={`查看領域：${area.name}`}
         >
             <div className="relative">
-                <AspectRatio ratio={16 / 9}>
+                <AspectRatio ratio={16 / 9} className="bg-muted">
                     <img
                         src={area.coverImage}
                         alt={area.name}
                         className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.src = fallbackImage
+                        }}
                     />
                 </AspectRatio>
                 <div className="absolute top-2 right-2">

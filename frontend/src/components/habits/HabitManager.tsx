@@ -1,5 +1,5 @@
 import React from 'react'
-import { Habit, HABITS } from '@/services/mock-data-service'
+import { Habit, dataStore } from '@/services/mock-data-service'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
@@ -18,43 +18,48 @@ interface HabitManagerProps {
 }
 
 export const HabitManager: React.FC<HabitManagerProps> = ({ areaId }) => {
-    const [habits, setHabits] = React.useState<Habit[]>(
-        HABITS.filter(h => h.areaId === areaId)
-    )
+    const [habits, setHabits] = React.useState<Habit[]>([])
     const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
     const [editingHabit, setEditingHabit] = React.useState<Habit | null>(null)
 
+    React.useEffect(() => {
+        setHabits([...dataStore.getHabitsByArea(areaId)])
+    }, [areaId])
+
     const handleToggleStatus = (habitId: string) => {
-        setHabits(prev => prev.map(h =>
-            h.id === habitId ? { ...h, status: h.status === 'active' ? 'paused' : 'active' } : h
-        ))
+        const habit = habits.find(h => h.id === habitId)
+        if (!habit) return
+        const newStatus = habit.status === 'active' ? 'paused' : 'active'
+        dataStore.updateHabit(habitId, { status: newStatus })
+        setHabits([...dataStore.getHabitsByArea(areaId)])
     }
 
-    const handleCreateHabit = (data: { name: string; frequency: 'daily' | 'weekly'; days?: number[] }) => {
-        const newHabit: Habit = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: data.name,
-            currentStreak: 0,
-            maxStreak: 0,
-            status: 'active',
-            frequency: data.frequency,
-            days: data.days,
-            areaId
+    const handleHabitSubmit = (data: { name: string; frequency: 'daily' | 'weekly'; days?: number[] }) => {
+        if (editingHabit) {
+            dataStore.updateHabit(editingHabit.id, data)
+            toast.success(`習慣「${data.name}」已更新`)
+            setEditingHabit(null)
+        } else {
+            const newHabit: Habit = {
+                id: crypto.randomUUID(),
+                name: data.name,
+                currentStreak: 0,
+                maxStreak: 0,
+                status: 'active',
+                frequency: data.frequency,
+                days: data.days,
+                areaId
+            }
+            dataStore.addHabit(newHabit)
+            toast.success(`習慣「${data.name}」已建立`)
+            setIsCreateModalOpen(false)
         }
-        setHabits([...habits, newHabit])
-        toast.success(`習慣「${data.name}」已建立`)
-    }
-
-    const handleEditHabit = (data: { name: string; frequency: 'daily' | 'weekly'; days?: number[] }) => {
-        if (!editingHabit) return
-        setHabits(prev => prev.map(h =>
-            h.id === editingHabit.id ? { ...h, ...data } : h
-        ))
-        toast.success(`習慣「${data.name}」已更新`)
+        setHabits([...dataStore.getHabitsByArea(areaId)])
     }
 
     const handleDeleteHabit = (habitId: string) => {
-        setHabits(prev => prev.filter(h => h.id !== habitId))
+        dataStore.deleteHabit(habitId)
+        setHabits([...dataStore.getHabitsByArea(areaId)])
         toast.info('習慣已移除')
     }
 
@@ -141,14 +146,14 @@ export const HabitManager: React.FC<HabitManagerProps> = ({ areaId }) => {
             <CreateHabitModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={handleCreateHabit}
+                onSubmit={handleHabitSubmit}
                 title="建立新習慣"
             />
 
             <CreateHabitModal
                 isOpen={!!editingHabit}
                 onClose={() => setEditingHabit(null)}
-                onSubmit={handleEditHabit}
+                onSubmit={handleHabitSubmit}
                 initialData={editingHabit || undefined}
                 title="編輯習慣"
             />

@@ -3,7 +3,6 @@ import { Area } from '@/services/mock-data-service'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Camera, Target, Activity } from 'lucide-react'
-import { AspectRatio } from '@/components/ui/aspect-ratio'
 
 interface AreaHeaderProps {
     area: Area
@@ -25,6 +24,9 @@ export const AreaHeader: React.FC<AreaHeaderProps> = ({ area, onTitleChange, onI
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             handleBlur()
+        } else if (e.key === 'Escape') {
+            setIsEditing(false)
+            setTitle(area.name)
         }
     }
 

@@ -1,8 +1,9 @@
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { INITIAL_AREAS, Area, INITIAL_PROJECT } from '@/services/mock-data-service'
+import { dataStore, Area } from '@/services/mock-data-service'
 import { AreaHeader } from '@/components/areas/AreaHeader'
 import { AreaSidebar } from '@/components/areas/AreaSidebar'
+import { CreateAreaModal } from '@/components/areas/CreateAreaModal'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent } from '@/components/ui/card'
 import { HabitManager } from '@/components/habits/HabitManager'
@@ -15,9 +16,15 @@ const AreaDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const [area, setArea] = React.useState<Area | undefined>(
-        INITIAL_AREAS.find(a => a.id === id)
+        id ? dataStore.getAreaById(id) : undefined
     )
     const [isCreateProjectOpen, setIsCreateProjectOpen] = React.useState(false)
+    const [isCoverModalOpen, setIsCoverModalOpen] = React.useState(false)
+
+    // Derived data - in real app would be filtered in dataStore
+    const relatedProjects = React.useMemo(() => {
+        return area ? dataStore.getProjectsByArea(area.name) : []
+    }, [area])
 
     if (!area) {
         return (
@@ -29,18 +36,21 @@ const AreaDetailPage: React.FC = () => {
     }
 
     const handleUpdateArea = (updates: Partial<Area>) => {
-        setArea(prev => prev ? { ...prev, ...updates } : prev)
+        if (!id) return
+        dataStore.updateArea(id, updates)
+        setArea({ ...area, ...updates })
         toast.success('領域資訊已更新')
     }
 
     const handleDeleteArea = () => {
-        toast.error('領域已刪除 (模擬)')
+        if (!id) return
+        dataStore.deleteArea(id)
+        toast.error('領域已刪除')
         navigate('/areas')
     }
 
     const handleCreateProject = (values: any) => {
         toast.success(`專案「${values.name}」已建立於 ${values.area}`)
-        // In a real app, we would refresh data here
     }
 
     return (
@@ -48,7 +58,7 @@ const AreaDetailPage: React.FC = () => {
             <AreaHeader
                 area={area}
                 onTitleChange={(name) => handleUpdateArea({ name })}
-                onImageClick={() => toast.info('更換封面功能開發中')}
+                onImageClick={() => setIsCoverModalOpen(true)}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -75,19 +85,30 @@ const AreaDetailPage: React.FC = () => {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* 模擬顯示的一個專案卡片 */}
-                                <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate('/projects/1')}>
-                                    <CardContent className="p-4 space-y-2">
-                                        <h4 className="font-bold">{INITIAL_PROJECT.name}</h4>
-                                        <p className="text-sm text-muted-foreground line-clamp-2">
-                                            {INITIAL_PROJECT.description}
-                                        </p>
-                                        <div className="pt-2 flex justify-between items-center text-xs">
-                                            <span className="px-2 py-0.5 bg-accent rounded-full">Active</span>
-                                            <span className="text-muted-foreground">Due: 2026/06/30</span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                {relatedProjects.length > 0 ? (
+                                    relatedProjects.map(project => (
+                                        <Card
+                                            key={project.id}
+                                            className="hover:border-primary/50 transition-colors cursor-pointer"
+                                            onClick={() => navigate(`/projects/${project.id}`)}
+                                        >
+                                            <CardContent className="p-4 space-y-2">
+                                                <h4 className="font-bold">{project.name}</h4>
+                                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                                    {project.description}
+                                                </p>
+                                                <div className="pt-2 flex justify-between items-center text-xs">
+                                                    <span className="px-2 py-0.5 bg-accent rounded-full capitalize">{project.status}</span>
+                                                    <span className="text-muted-foreground">Due: {project.dueDate.toLocaleDateString()}</span>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full py-12 text-center border-dashed border-2 rounded-xl text-muted-foreground">
+                                        此領域尚無關聯專案
+                                    </div>
+                                )}
                             </div>
                         </TabsContent>
 
@@ -113,6 +134,12 @@ const AreaDetailPage: React.FC = () => {
                 defaultValues={{
                     area: area.name
                 }}
+            />
+
+            <CreateAreaModal
+                isOpen={isCoverModalOpen}
+                onClose={() => setIsCoverModalOpen(false)}
+                onCreate={(_, cover) => handleUpdateArea({ coverImage: cover })}
             />
         </div>
     )

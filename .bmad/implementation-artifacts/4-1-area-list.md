@@ -1,6 +1,6 @@
 # Story 4.1: Area List & Grid 領域列表與網格
 
-Status: review
+Status: ready-for-dev
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -35,6 +35,12 @@ So that **我可以看到人生版圖的全貌，並快速進入感興趣的領�
     - [x] 上半部使用 `img` tag (object-cover)，下半部顯示 info。
 - [x] 實作 CreateAreaModal
     - [x] 建立 `src/components/areas/CreateAreaModal.tsx`。
+
+### Review Follow-ups (AI)
+- [x] [AI-Review][Medium] 增進 Card 無障礙性 (Accessibility)，支援鍵盤導覽與正確角色標籤 `[src/components/areas/AreaCard.tsx]`
+- [x] [AI-Review][Medium] 實作圖片加載失敗的 Fallback UI 或預設占位圖 `[src/components/areas/AreaCard.tsx]`
+- [x] [AI-Review][High] 整合 `mock-data-service` 以實現數據持久化，避免頁面重整後新增數據消失 `[src/pages/AreaListPage.tsx]`
+- [x] [AI-Review][Low] 統一 ID 生成策略，改用 `crypto.randomUUID()` `[src/pages/AreaListPage.tsx]`
 
 ## Dev Agent Record (AI)
 

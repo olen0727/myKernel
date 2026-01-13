@@ -1,6 +1,6 @@
 # Story 4.2: Area Detail Layout 領域詳情頁
 
-Status: review
+Status: ready-for-dev
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -36,6 +36,11 @@ So that **我可以全面維護這個人生責任範圍**.
 - [x] 實作 AreaSidebar Component
     - [x] 建立 `src/components/areas/AreaSidebar.tsx`。
     - [x] 實作屬性編輯與刪除邏輯。
+
+### Review Follow-ups (AI)
+- [x] [AI-Review][High] 實作更換封面圖的 Mock UI，而非僅顯示 Toast `[src/components/areas/AreaHeader.tsx]`
+- [x] [AI-Review][Medium] 移除相關專案的硬編碼，根據 `areaId` 過濾真實數據 `[src/pages/AreaDetailPage.tsx]`
+- [x] [AI-Review][Low] 行內編輯支援 `Esc` 鍵取消修改 `[src/components/areas/AreaHeader.tsx]`
 
 ## Dev Agent Record (AI)
 
