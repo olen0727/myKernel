@@ -175,19 +175,27 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
 
                     {/* Recent Items */}
                     {!isCollapsed && (
-                        <Collapsible defaultOpen className="mt-8 px-3">
-                            <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Recent</h4>
-                                <CollapsibleTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-4 w-4">
-                                        <ChevronDown className="h-3 w-3" />
-                                    </Button>
-                                </CollapsibleTrigger>
-                            </div>
-                            <CollapsibleContent className="space-y-1">
+                        <Collapsible defaultOpen className="mt-8">
+                            <CollapsibleTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="w-full flex items-center justify-between px-3 py-2 h-auto hover:bg-transparent group"
+                                >
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider group-hover:text-foreground transition-colors">
+                                        Recent
+                                    </h4>
+                                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                                </Button>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="space-y-1 px-2">
                                 {recentItems.map((item, i) => (
-                                    <Button key={i} variant="ghost" size="sm" className="w-full justify-start gap-2 px-2 h-8 text-muted-foreground hover:text-foreground font-normal overflow-hidden">
-                                        <item.icon className="h-4 w-4 shrink-0" />
+                                    <Button
+                                        key={i}
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start gap-3 px-3 h-9 text-muted-foreground hover:text-foreground font-normal overflow-hidden"
+                                    >
+                                        <item.icon className="h-5 w-5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
                                         <span className="truncate">{item.label}</span>
                                     </Button>
                                 ))}
