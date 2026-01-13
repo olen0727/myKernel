@@ -93,7 +93,7 @@ export function ProjectSidebar({
                             )}
                         >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {dueDate ? format(dueDate, "PPP") : <span>設定截止日期</span>}
+                            {dueDate ? format(dueDate, "yyyy/MM/dd") : <span>設定截止日期</span>}
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
