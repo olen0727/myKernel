@@ -1,51 +1,33 @@
 # Story 3.2: Project Cards & Filters 專案卡片與篩選
 
-Status: ready-for-dev
+### Implementation Plan
+- [x] 實作 ProjectCard 元件（含進度條與狀態指標）。
+- [x] 實作 CreateProjectModal 元件（含表單驗證）。
+- [x] 整合篩選功能至 ProjectListPage。
+- [x] 撰寫元件測試。
 
-<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+### Debug Log
+- 2026-01-13: 開始開發。
+- 2026-01-13: 使用 `shadcn` 安裝 `dialog`, `progress`, `form` 元件。
+- 2026-01-13: 安裝 `react-hook-form`, `zod` 依賴。
+- 2026-01-13: 實作完成，單元測試通過。
 
-## Story
+### Completion Notes
+- 建立了獨立的 `ProjectCard` 元件，優化了視覺顯示。
+- 實作了「新增專案」彈窗，支援完整表單驗證。
+- 增加了狀態篩選按鈕列 (All, Active, Paused, Completed)。
 
-As a **使用者**,
-I want **以卡片形式檢視所有專案，並可依狀態篩選**,
-So that **我可以快速掌握專案全貌並找到目標專案**.
+## File List
+- `src/components/projects/ProjectCard.tsx`
+- `src/components/projects/CreateProjectModal.tsx`
+- `src/pages/ProjectListPage.tsx`
+- `src/components/projects/__tests__/ProjectCard.test.tsx`
+- `src/components/ui/progress.tsx`
+- `src/components/ui/form.tsx`
+- `src/components/ui/dialog.tsx`
+- `src/components/ui/input.tsx`
 
-## Acceptance Criteria
+## Change Log
+- 2026-01-13: 初始化工作區並完成 Story 3.2。
 
-1. **專案卡片顯示 (Card Display)**
-   - **Given** 使用者在 Projects 頁面，**When** 列表渲染，**Then** 應以網格 (Grid) 顯示專案卡片。
-   - **Then** 每張卡片應顯示：狀態標籤 (Active/Completed)、專案名稱、進度條 (`x/y` 任務完成)。
-
-2. **篩選功能 (Filtering)**
-   - **Given** 頁面頂部，**When** 使用者點擊狀態篩選按鈕 (Active/Completed/Archived)，**Then** 列表應即時過濾。
-
-3. **新增專案 (Create Project)**
-   - **Given** 使用者點擊 `[+ New Project]` 按鈕，**Then** 應彈出 Modal。
-   - **When** 填寫專案名稱並提交，**Then** 應建立新專案 (Mock) 並導航至詳情頁。
-   - **Fields**: Project Name (必填), Area (選填), Due Date (選填)。
-
-## Tasks / Subtasks
-
-- [ ] 實作 ProjectCard Component
-    - [ ] 建立 `src/components/projects/ProjectCard.tsx`。
-    - [ ] 實作進度條 (`Progress` component)。
-- [ ] 實作 CreateProjectModal
-    - [ ] 建立 `src/components/projects/CreateProjectModal.tsx`。
-    - [ ] 使用 Form (react-hook-form + zod) 處理輸入。
-- [ ] 整合至 ProjectListPage
-    - [ ] 實作篩選狀態 (`filterStatus`)。
-    - [ ] 實作卡片網格渲染。
-
-## Dev Notes
-
-### Architecture & Tech Stack
-- **Form**: `react-hook-form` + `zod`。
-- **Component**: Shadcn/UI (Dialog, Form, Select, Badge, Progress)。
-
-### File Structure Requirements
-- `src/components/projects/ProjectCard.tsx`: 專案卡片。
-- `src/components/projects/CreateProjectModal.tsx`: 新增專案視窗。
-
-### References
-- [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
-- [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-3.2)
+Status: review

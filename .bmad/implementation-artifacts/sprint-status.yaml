@@ -59,9 +59,9 @@ development_status:
   epic-2-retrospective: optional
 
   # Epic 3: 專案管理
-  epic-3: backlog
-  3-1-project-list: ready-for-dev
-  3-2-project-cards: ready-for-dev
+  epic-3: in-progress
+  3-1-project-list: review
+  3-2-project-cards: review
   3-3-project-detail: ready-for-dev
   3-4-task-management: ready-for-dev
   3-5-task-dnd: ready-for-dev
