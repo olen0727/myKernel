@@ -3,35 +3,16 @@ import {
     LineChart, Line, AreaChart, Area, ScatterChart, Scatter,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis
 } from "recharts"
-import { format, subDays, startOfDay } from "date-fns"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // --- Types & Constants ---
 
+import { generateMockMetricData } from "@/services/mock-data-service"
+
+// --- Types & Constants ---
+
 type TimeRange = "7d" | "30d" | "90d" | "1y"
-
-interface MetricData {
-    date: Date
-    label: string
-    value: number
-}
-
-// --- Mock Data Generators ---
-
-const generateMockData = (days: number, min: number, max: number): MetricData[] => {
-    const data: MetricData[] = []
-    const now = startOfDay(new Date())
-    for (let i = days; i >= 0; i--) {
-        const date = subDays(now, i)
-        data.push({
-            date,
-            label: format(date, "MM/dd"),
-            value: Math.floor(Math.random() * (max - min + 1)) + min
-        })
-    }
-    return data
-}
 
 // --- Components ---
 
@@ -41,7 +22,7 @@ const CustomTooltip = ({ active, payload, label, unit }: any) => {
             <div className="bg-popover/95 backdrop-blur-sm border border-border p-3 rounded-xl shadow-xl">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
                 <p className="text-sm font-bold text-primary">
-                    {payload[0].value} <span className="text-[10px] opacity-70 uppercase">{unit}</span>
+                    {payload[0].value.toLocaleString()} <span className="text-[10px] opacity-70 uppercase">{unit}</span>
                 </p>
             </div>
         )
@@ -60,9 +41,9 @@ export const MetricCharts: React.FC = () => {
     }
 
     // Generate specific data for each chart type
-    const weightData = useMemo(() => generateMockData(daysMap[range], 65, 75), [range])
-    const focusData = useMemo(() => generateMockData(daysMap[range], 1, 10), [range])
-    const sleepData = useMemo(() => generateMockData(daysMap[range], 4, 9), [range])
+    const weightData = useMemo(() => generateMockMetricData(daysMap[range], 65, 75), [range])
+    const focusData = useMemo(() => generateMockMetricData(daysMap[range], 1, 10), [range])
+    const sleepData = useMemo(() => generateMockMetricData(daysMap[range], 4, 9), [range])
 
     return (
         <div className="space-y-6" data-testid="metric-charts">
@@ -131,8 +112,8 @@ export const MetricCharts: React.FC = () => {
                             <AreaChart data={focusData}>
                                 <defs>
                                     <linearGradient id="colorFocus" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
@@ -149,7 +130,7 @@ export const MetricCharts: React.FC = () => {
                                 <Area
                                     type="monotone"
                                     dataKey="value"
-                                    stroke="#f97316"
+                                    stroke="hsl(var(--primary))"
                                     fillOpacity={1}
                                     fill="url(#colorFocus)"
                                     strokeWidth={3}
@@ -186,7 +167,7 @@ export const MetricCharts: React.FC = () => {
                                 <Tooltip content={<CustomTooltip unit="hrs" />} />
                                 <Scatter
                                     data={sleepData}
-                                    fill="#6366f1"
+                                    fill="hsl(var(--primary))"
                                     animationDuration={1000}
                                 />
                             </ScatterChart>

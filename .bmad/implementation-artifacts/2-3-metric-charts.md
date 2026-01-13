@@ -1,6 +1,6 @@
 # Story 2.3: Metrics Trend Charts 指標趨勢圖表
 
-Status: ready-for-dev
+## Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -52,6 +52,7 @@ So that **我可以了解自己的狀態變化並發現模式**.
 - 完成指標趨勢圖表組件。
 - 通過單元測試 (並解決測試環境下的組件 Mock 問題)。
 - 已整合至 Dashboard 頁面。
+- 透過 Code Review 優化：重構 Mock Data Service、移除硬編碼色彩、數值支援千分位格式。
 
 ## File List
 - `frontend/src/components/dashboard/MetricCharts.tsx`

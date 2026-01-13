@@ -53,7 +53,8 @@ So that **我可以快速了解目前的待辦狀況與系統使用情形**.
 ### Completion Notes
 - 完成 Dashboard 統計卡片開發。
 - 使用 Shadcn/UI Card 組件確保視覺一致性。
-- 已預留 Props 介面供未來 RxDB 資料串接。
+- 已預留 Props 介面供未來 RxDB 資料串集。
+- 透過 Code Review 優化：數值顯示支援千分位格式化。
 
 ## File List
 - `frontend/src/pages/DashboardPage.tsx`

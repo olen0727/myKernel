@@ -1,6 +1,6 @@
 # Story 2.2: Habit Heatmap & Strength 連續達成天數
 
-Status: in-progress
+## Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

@@ -50,12 +50,12 @@ development_status:
   epic-1-retrospective: done
 
   # Epic 2: 儀表板與收件匣
-  epic-2: in-progress
-  2-1-dashboard-stats: review
-  2-2-habit-heatmap: review
-  2-3-metric-charts: review
-  2-4-inbox-list: review
-  2-5-quick-capture: review
+  epic-2: done
+  2-1-dashboard-stats: done
+  2-2-habit-heatmap: done
+  2-3-metric-charts: done
+  2-4-inbox-list: done
+  2-5-quick-capture: done
   epic-2-retrospective: optional
 
   # Epic 3: 專案管理

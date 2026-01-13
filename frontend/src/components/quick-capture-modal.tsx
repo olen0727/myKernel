@@ -13,21 +13,17 @@ import { toast } from "sonner"
 import { Sparkles, Command, CornerDownLeft, Loader2 } from "lucide-react"
 
 export const QuickCaptureModal: React.FC = () => {
-    const { isOpen, onClose } = useQuickCapture()
-    const [content, setContent] = useState("")
+    const { isOpen, onClose, content, setContent } = useQuickCapture()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
     // Auto-focus when modal opens
     useEffect(() => {
         if (isOpen) {
-            // Small delay to ensure the dialog is mounted
             const timer = setTimeout(() => {
                 textareaRef.current?.focus()
             }, 50)
             return () => clearTimeout(timer)
-        } else {
-            setContent("")
         }
     }, [isOpen])
 
@@ -46,6 +42,7 @@ export const QuickCaptureModal: React.FC = () => {
         })
 
         setIsSubmitting(false)
+        setContent("") // Clear after successful save
         onClose()
     }
 

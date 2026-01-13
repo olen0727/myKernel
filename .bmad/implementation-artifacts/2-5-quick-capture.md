@@ -1,6 +1,6 @@
 # Story 2.5: Quick Capture Modal 快速捕捉視窗
 
-Status: ready-for-dev
+## Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -53,6 +53,7 @@ So that **我可以不中斷當前工作流，快速保留靈感或資訊**.
 - 支援 `Ctrl+Enter` 快速提交。
 - 完成全域快捷鍵註冊。
 - 單元測試全面通過。
+- 透過 Code Review 優化：整合 Zustand Persist 中間件，確保輸入內容在頁面重新整理後不遺失。
 
 ## File List
 - `frontend/src/components/quick-capture-modal.tsx`
