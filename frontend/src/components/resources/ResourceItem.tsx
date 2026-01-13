@@ -19,6 +19,7 @@ import {
     ContextMenuSeparator,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu"
+import { DispatchDialog } from "./DispatchDialog"
 
 export type ResourceType = "note" | "link"
 
@@ -43,6 +44,13 @@ export const ResourceItem: React.FC<ResourceItemProps> = ({
     onDelete
 }) => {
     const navigate = useNavigate()
+    const [isDispatchOpen, setIsDispatchOpen] = React.useState(false)
+
+    const handleConfirmDispatch = (selectedIds: string[]) => {
+        console.log(`Dispatching resource ${resource.id} to:`, selectedIds)
+        // In real app, this would trigger an API call and status update to 'Processed'
+        onArchive(resource.id) // Mock process by removing from inbox
+    }
 
     const Icon = resource.type === "note" ? FileText : LinkIcon
 
@@ -94,10 +102,9 @@ export const ResourceItem: React.FC<ResourceItemProps> = ({
                             className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
                             onClick={(e) => {
                                 e.stopPropagation()
-                                // Logic for linking to project
-                                console.log("Link to project:", resource.id)
+                                setIsDispatchOpen(true)
                             }}
-                            title="連結至專案"
+                            title="連結至專案/領域 (分流)"
                         >
                             <FolderPlus className="w-4 h-4" />
                         </Button>
@@ -137,9 +144,9 @@ export const ResourceItem: React.FC<ResourceItemProps> = ({
                     <ExternalLink className="mr-2 h-4 w-4 opacity-60" />
                     <span>開啟編輯器</span>
                 </ContextMenuItem>
-                <ContextMenuItem onClick={() => console.log("Link to project")}>
+                <ContextMenuItem onClick={() => setIsDispatchOpen(true)}>
                     <FolderPlus className="mr-2 h-4 w-4 opacity-60" />
-                    <span>連結至專案 (P)</span>
+                    <span>連結至專案/領域 (P)</span>
                 </ContextMenuItem>
                 <ContextMenuSeparator />
                 <ContextMenuItem onClick={() => onArchive(resource.id)}>
@@ -154,6 +161,11 @@ export const ResourceItem: React.FC<ResourceItemProps> = ({
                     <span>刪除 (Del)</span>
                 </ContextMenuItem>
             </ContextMenuContent>
+            <DispatchDialog
+                isOpen={isDispatchOpen}
+                onOpenChange={setIsDispatchOpen}
+                onConfirm={handleConfirmDispatch}
+            />
         </ContextMenu>
     )
 }
