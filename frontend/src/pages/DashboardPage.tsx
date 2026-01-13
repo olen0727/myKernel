@@ -1,5 +1,6 @@
 import React from "react"
 import { StatCard } from "@/components/dashboard/StatCard"
+import { HabitHeatmap } from "@/components/dashboard/HabitHeatmap"
 import { Brain, Inbox, Folder, ListTodo } from "lucide-react"
 
 const DashboardPage: React.FC = () => {
@@ -31,6 +32,13 @@ const DashboardPage: React.FC = () => {
                     icon={ListTodo}
                     description="未完成任務總量"
                 />
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                    <HabitHeatmap />
+                </div>
+                {/* Future: Right column for recent activities or charts */}
             </div>
         </div>
     )

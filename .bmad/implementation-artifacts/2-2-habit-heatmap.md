@@ -1,6 +1,6 @@
 # Story 2.2: Habit Heatmap & Strength 連續達成天數
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -29,27 +29,44 @@ So that **我可以追蹤自己的行為模式並保持動力**.
 
 ## Tasks / Subtasks
 
-- [ ] 安裝 Recharts
-    - [ ] 確認 `recharts` 已安裝 (若未安裝需執行 `npm install recharts`)。
-- [ ] 實作 Heatmap Component
-    - [ ] 建立 `src/components/dashboard/HabitHeatmap.tsx`。
-    - [ ] 準備 Mock Data (包含 dates, habits, status)。
-    - [ ] 使用 Recharts `ScatterChart` 或自定義 SVG/Grid 實作熱力圖效果 (因標準 Recharts 無直接 Heatmap，可能需用 `Scatter` 模擬或改用 `GitHub-style` grid 實作)。
-    - [ ] *替代方案*：若 Recharts 實作困難，可使用 CSS Grid 渲染簡單的方格矩陣。
-- [ ] 整合 Streak 顯示
-    - [ ] 在圖表旁或上方顯示習慣名稱與 Streak 數值。
-- [ ] 整合至 Dashboard
-    - [ ] 將 Heatmap 區塊加入 Dashboard 頁面。
+- [x] 安裝 Recharts
+    - [x] 確認 `recharts` 已安裝 (若未安裝需執行 `npm install recharts`)。
+- [x] 實作 Heatmap Component
+    - [x] 建立 `src/components/dashboard/HabitHeatmap.tsx`。
+    - [x] 準備 Mock Data (包含 dates, habits, status)。
+    - [x] 使用 CSS Grid 實作熱力圖效果。
+- [x] 整合 Streak 顯示
+    - [x] 在圖表旁或上方顯示習慣名稱與 Streak 數值。
+- [x] 整合至 Dashboard
+    - [x] 將 Heatmap 區塊加入 Dashboard 頁面。
 
-## Dev Notes
+## Dev Agent Record
 
-### Architecture & Tech Stack
-- **Data Visualization**: Recharts (優先嘗試) 或純 CSS Grid (備案)。
-- **Lib**: `date-fns` 處理日期計算。
+### Implementation Plan
+- 建立 `HabitHeatmap` 組件，使用 CSS Grid 渲染最近 30 天的達成狀況。
+- 整合 Streak (連續達成天數) 顯示。
+- 為組件編寫單元測試。
+- 整合至 `DashboardPage`。
 
-### File Structure Requirements
-- `src/components/dashboard/HabitHeatmap.tsx`:熱力圖元件。
+### Debug Log
+- 遇到 `node_modules` 與 `react` 版本不一致導致的測試失敗 (Invalid hook call)，已透過重新整理 `package-lock.json` 與 `npm install` 解決。
+- 移除 `Radix UI Tooltip` 以簡化除錯過程，改用 HTML `title` 屬性提供基礎悬停資訊。
 
-### References
+### Completion Notes
+- 完成習慣熱力圖組件。
+- 支援響應式顯示。
+- 已通過單元測試。
+
+## File List
+- `frontend/src/components/dashboard/HabitHeatmap.tsx`
+- `frontend/src/components/dashboard/__tests__/HabitHeatmap.test.tsx`
+- `frontend/src/pages/DashboardPage.tsx` (Modified)
+
+## Change Log
+- 2026-01-13: 初始實作習慣熱力圖與連續天數統計 (Story 2.2)
+
+## Status: review
+
+## References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-2.2)
