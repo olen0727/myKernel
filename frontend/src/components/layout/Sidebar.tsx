@@ -138,12 +138,14 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
                                     <NavLink to={item.href}>
                                         {({ isActive }) => (
                                             <Button
-                                                variant={isActive ? "secondary" : "ghost"}
+                                                variant="ghost"
                                                 size={isCollapsed ? "icon" : "default"}
                                                 className={cn(
-                                                    "w-full transition-all",
+                                                    "w-full transition-all group",
                                                     isCollapsed ? "justify-center" : "justify-start gap-3 px-3",
-                                                    isActive && "bg-accent text-accent-foreground"
+                                                    isActive
+                                                        ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary font-semibold"
+                                                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
                                                 )}
                                             >
                                                 <item.icon className="h-5 w-5" />
@@ -151,7 +153,12 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
                                                     <div className="flex flex-1 items-center justify-between">
                                                         <span>{item.label}</span>
                                                         {item.count && (
-                                                            <span className="text-xs font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-md">
+                                                            <span className={cn(
+                                                                "text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-all",
+                                                                isActive
+                                                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                                                    : "bg-primary/10 text-primary"
+                                                            )}>
                                                                 {item.count}
                                                             </span>
                                                         )}
