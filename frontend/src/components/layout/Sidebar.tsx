@@ -27,7 +27,7 @@ import {
 } from "lucide-react"
 
 export function Sidebar() {
-    const { isCollapsed, toggleSidebar } = useSidebarStore()
+    const { isCollapsed } = useSidebarStore()
 
     return (
         <aside
