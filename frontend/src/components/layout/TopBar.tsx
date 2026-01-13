@@ -1,5 +1,6 @@
 import { Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ModeToggle } from "@/components/mode-toggle"
 
 export function TopBar() {
     return (
@@ -25,9 +26,9 @@ export function TopBar() {
                 </Button>
             </div>
 
-            {/* Right: Actions (Placeholder for contextual actions) */}
+            {/* Right: Actions */}
             <div className="flex items-center gap-2 ml-4 w-[100px] justify-end">
-                {/* Future: Notifications or Contextual Menu */}
+                <ModeToggle />
             </div>
         </header>
     )

@@ -7,10 +7,13 @@ import '@fontsource/inter/400.css'
 import '@fontsource/inter/500.css'
 import '@fontsource/inter/600.css'
 import App from './App'
+import { ThemeProvider } from '@/components/theme-provider'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <App />
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+            <App />
+        </ThemeProvider>
     </React.StrictMode>,
 )

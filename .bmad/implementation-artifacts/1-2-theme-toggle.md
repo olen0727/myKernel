@@ -1,6 +1,6 @@
 # Story 1.2: TopBar Theme Toggle 主題切換
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -26,30 +26,59 @@ So that **我可以根據環境光線或個人偏好選擇舒適的介面主題*
 
 ## Tasks / Subtasks
 
-- [ ] 實作 Theme Provider (Context)
-    - [ ] 建立 `ThemeProvider` 與 `useTheme` hook。
-    - [ ] 實作讀取/寫入 `localStorage` (key: `vite-ui-theme`) 的邏輯。
-    - [ ] 實作系統偏好偵測 (`window.matchMedia('(prefers-color-scheme: dark)')`)。
-    - [ ] 實作 DOM class 切換 (在 `html` 或 `body` tag 加上 `dark` class)。
-- [ ] 實作 Theme Toggle Component
-    - [ ] 使用 Shadcn/UI `DropdownMenu` 或簡單 `Button` 實作切換器。
-    - [ ] 加入太陽與月亮圖示 (Lucide React)。
-    - [ ] 實作點擊切換邏輯。
-- [ ] 整合至 TopBar
-    - [ ] 將 Theme Toggle 元件放置於 `TopBar` 右側區域。
+- [x] 實作 Theme Provider (Context)
+    - [x] 建立 `ThemeProvider` 與 `useTheme` hook。
+    - [x] 實作讀取/寫入 `localStorage` (key: `vite-ui-theme`) 的邏輯。
+    - [x] 實作系統偏好偵測 (`window.matchMedia('(prefers-color-scheme: dark)')`)。
+    - [x] 實作 DOM class 切換 (在 `html` 或 `body` tag 加上 `dark` class)。
+- [x] 實作 Theme Toggle Component
+    - [x] 使用 Shadcn/UI `DropdownMenu` 或簡單 `Button` 實作切換器。
+    - [x] 加入太陽與月亮圖示 (Lucide React)。
+    - [x] 實作點擊切換邏輯。
+- [x] 整合至 TopBar
+    - [x] 將 Theme Toggle 元件放置於 `TopBar` 右側區域。
 
 ## Dev Notes
 
 ### Architecture & Tech Stack
 - **Styling**: Tailwind CSS Dark Mode (`class` strategy)。
 - **State**: `localStorage`。
-- **Component**: Shadcn/UI (Button, DropdownMenu - 若需要選單式切換)。
+- **Component**: Shadcn/UI (Button, DropdownMenu)。
 
 ### File Structure Requirements
 - `src/components/theme-provider.tsx`: Context Provider。
 - `src/components/mode-toggle.tsx`: 切換按鈕元件。
 - `src/components/layout/TopBar.tsx`: 整合位置。
 
+### Implementation Plan
+1. 實作並測試 `theme-provider.tsx`。
+2. 安裝必要的 Shadcn/UI 組件 (`dropdown-menu`)。
+3. 建立 `mode-toggle.tsx` 組件。
+4. 在 `main.tsx` 中包裹 `ThemeProvider`。
+5. 在 `TopBar.tsx` 中加入 `ModeToggle`。
+
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-1.2)
+
+## Dev Agent Record
+
+### Agent Model Used
+Gemini 2.0 Flash
+
+### Debug Log References
+- 確保 `ThemeProvider` 正確處理 "system" 主題與系統事件監聽（雖然目前僅為靜態偵測，但 API 已預留）。
+- 導入 `dropdown-menu` 與處理 Lucide 圖示的動畫過渡邏輯。
+
+### Completion Notes List
+- [x] Code implemented
+- [x] Tests verified (2/2 passing for ThemeProvider)
+- [x] UI integrated in TopBar
+
+### File List
+- `src/components/theme-provider.tsx`
+- `src/components/__tests__/theme-provider.test.tsx`
+- `src/components/mode-toggle.tsx`
+- `src/components/layout/TopBar.tsx`
+- `src/main.tsx`
+- `src/components/ui/dropdown-menu.tsx`
