@@ -5,10 +5,11 @@ import { AreaHeader } from '@/components/areas/AreaHeader'
 import { AreaSidebar } from '@/components/areas/AreaSidebar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent } from '@/components/ui/card'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Plus, LayoutGrid, CalendarCheck } from 'lucide-react'
+import { HabitManager } from '@/components/habits/HabitManager'
+import { LayoutGrid, CalendarCheck, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 
 const AreaDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>()
@@ -16,6 +17,7 @@ const AreaDetailPage: React.FC = () => {
     const [area, setArea] = React.useState<Area | undefined>(
         INITIAL_AREAS.find(a => a.id === id)
     )
+    const [isCreateProjectOpen, setIsCreateProjectOpen] = React.useState(false)
 
     if (!area) {
         return (
@@ -34,6 +36,11 @@ const AreaDetailPage: React.FC = () => {
     const handleDeleteArea = () => {
         toast.error('領域已刪除 (模擬)')
         navigate('/areas')
+    }
+
+    const handleCreateProject = (values: any) => {
+        toast.success(`專案「${values.name}」已建立於 ${values.area}`)
+        // In a real app, we would refresh data here
     }
 
     return (
@@ -61,7 +68,7 @@ const AreaDetailPage: React.FC = () => {
                         <TabsContent value="projects" className="pt-6 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-xl font-semibold">相關專案</h3>
-                                <Button size="sm" className="gap-2">
+                                <Button size="sm" className="gap-2" onClick={() => setIsCreateProjectOpen(true)}>
                                     <Plus className="w-4 h-4" />
                                     新增專案
                                 </Button>
@@ -85,12 +92,7 @@ const AreaDetailPage: React.FC = () => {
                         </TabsContent>
 
                         <TabsContent value="habits" className="pt-6">
-                            <EmptyState
-                                icon={CalendarCheck}
-                                title="尚未建立核心習慣"
-                                description="將你的日常行為轉化為可追蹤的習慣，以達成此領域的長期目標。"
-                                action={<Button className="mt-4">建立第一個習慣</Button>}
-                            />
+                            <HabitManager areaId={area.id} />
                         </TabsContent>
                     </Tabs>
                 </div>
@@ -103,6 +105,15 @@ const AreaDetailPage: React.FC = () => {
                     />
                 </div>
             </div>
+
+            <CreateProjectModal
+                open={isCreateProjectOpen}
+                onOpenChange={setIsCreateProjectOpen}
+                onSubmit={handleCreateProject}
+                defaultValues={{
+                    area: area.name
+                }}
+            />
         </div>
     )
 }

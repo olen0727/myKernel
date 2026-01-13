@@ -152,11 +152,22 @@ export const DASHBOARD_STATS = [
 ]
 
 // --- Habits Mock Data ---
-export const HABITS = [
-    { id: "1", name: "寫日記", currentStreak: 42, maxStreak: 60 },
-    { id: "2", name: "閱讀 30 分鐘", currentStreak: 5, maxStreak: 15 },
-    { id: "3", name: "冥想", currentStreak: 12, maxStreak: 12 },
-    { id: "4", name: "運動", currentStreak: 3, maxStreak: 10 },
+export interface Habit {
+    id: string
+    name: string
+    currentStreak: number
+    maxStreak: number
+    status: "active" | "paused"
+    frequency: "daily" | "weekly"
+    days?: number[] // 0-6 for Sun-Sat
+    areaId: string
+}
+
+export const HABITS: Habit[] = [
+    { id: "1", name: "寫日記", currentStreak: 42, maxStreak: 60, status: "active", frequency: "daily", areaId: "1" },
+    { id: "2", name: "閱讀 30 分鐘", currentStreak: 5, maxStreak: 15, status: "active", frequency: "daily", areaId: "2" },
+    { id: "3", name: "冥想", currentStreak: 12, maxStreak: 12, status: "active", frequency: "daily", areaId: "2" },
+    { id: "4", name: "運動", currentStreak: 3, maxStreak: 10, status: "active", frequency: "weekly", days: [1, 3, 5], areaId: "3" },
 ]
 
 // --- Area Mock Data ---

@@ -1,6 +1,6 @@
 # Story 4.3: Habit Manager 習慣管理器
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -25,12 +25,36 @@ So that **我可以定義需要長期維持的行為承諾**.
 
 ## Tasks / Subtasks
 
-- [ ] 實作 HabitManager Component
-    - [ ] 建立 `src/components/habits/HabitManager.tsx`。
-    - [ ] 實作列表渲染。
-- [ ] 實作 CreateHabitModal
-    - [ ] 建立 `src/components/habits/CreateHabitModal.tsx`。
-    - [ ] 頻率選擇邏輯 (Select + Checkbox group for days)。
+- [x] 實作 HabitManager Component
+    - [x] 建立 `src/components/habits/HabitManager.tsx`。
+    - [x] 實作列表渲染。
+- [x] 實作 CreateHabitModal
+    - [x] 建立 `src/components/habits/CreateHabitModal.tsx`。
+    - [x] 頻率選擇邏輯 (Select + Checkbox group for days)。
+
+## Dev Agent Record (AI)
+
+### Implementation Plan
+1.  **Mock Data**: 更新 `mock-data-service.ts` 擴充 `Habit` 介面，增加 `frequency`、`days`、`areaId` 與 `status` 欄位。
+2.  **Components**: 建立 `HabitManager` 與 `CreateHabitModal` 組件。
+3.  **Integration**: 在 `AreaDetailPage` 的「習慣管理」分頁中整合 `HabitManager`。
+4.  **Tests**: 撰寫單元測試驗證習慣新增與狀態切換。
+
+### Completion Notes
+- ✅ 實作 `CreateHabitModal` 組件，支援每天 (Daily) 與每週 (Weekly) 頻率選擇，並可為每週頻率勾選特定日期。
+- ✅ 實作 `HabitManager` 組件，提供習慣清單、啟用/暫停狀態切換 (`Switch`) 以及單項習慣刪除與編輯入口。
+- ✅ 將 `HabitManager` 整合至 `AreaDetailPage` 的「習慣管理」標籤頁中，實現基於領域 ID 的習慣過濾與管理。
+- ✅ 通過 `HabitManager.test.tsx` 整合測試，驗證列表渲染、狀態切換與模態視窗開啟。
+
+## File List
+- `src/services/mock-data-service.ts` (Modified)
+- `src/pages/AreaDetailPage.tsx` (Modified)
+- `src/components/habits/HabitManager.tsx` (New)
+- `src/components/habits/CreateHabitModal.tsx` (New)
+- `src/components/habits/__tests__/HabitManager.test.tsx` (New)
+
+## Change Log
+- 2026-01-14: 開始實作 Habit Manager。
 
 ## Dev Notes
 
@@ -42,5 +66,5 @@ So that **我可以定義需要長期維持的行為承諾**.
 - `src/components/habits/HabitManager.tsx`: 主元件。
 
 ### References
-- [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
-- [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-4.3)
+- [Architecture](../architecture.md)
+- [Epics](../planning-artifacts/epics.md#Story-4.3)

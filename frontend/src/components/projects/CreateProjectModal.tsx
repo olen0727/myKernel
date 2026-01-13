@@ -33,12 +33,14 @@ interface CreateProjectModalProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     onSubmit: (values: z.infer<typeof formSchema>) => void
+    defaultValues?: Partial<z.infer<typeof formSchema>>
 }
 
 export function CreateProjectModal({
     open,
     onOpenChange,
     onSubmit,
+    defaultValues,
 }: CreateProjectModalProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -46,8 +48,21 @@ export function CreateProjectModal({
             name: "",
             area: "",
             dueDate: "",
+            ...defaultValues,
         },
     })
+
+    // Reset form when modal opens with new defaultValues
+    React.useEffect(() => {
+        if (open) {
+            form.reset({
+                name: "",
+                area: "",
+                dueDate: "",
+                ...defaultValues,
+            })
+        }
+    }, [open, defaultValues, form])
 
     function handleInternalSubmit(values: z.infer<typeof formSchema>) {
         onSubmit(values)
