@@ -1,6 +1,6 @@
 # Story 4.2: Area Detail Layout 領域詳情頁
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,12 +28,38 @@ So that **我可以全面維護這個人生責任範圍**.
 
 ## Tasks / Subtasks
 
-- [ ] 實作 AreaDetailPage
-    - [ ] 建立 `src/pages/AreaDetailPage.tsx`。
-- [ ] 實作 AreaHeader Component
-    - [ ] 支援背景圖顯示與標題編輯。
-- [ ] 實作 AreaSidebar Component
-    - [ ] 實作屬性編輯與刪除邏輯。
+- [x] 實作 AreaDetailPage
+    - [x] 建立 `src/pages/AreaDetailPage.tsx`。
+- [x] 實作 AreaHeader Component
+    - [x] 建立 `src/components/areas/AreaHeader.tsx`。
+    - [x] 支援背景圖顯示與標題編輯。
+- [x] 實作 AreaSidebar Component
+    - [x] 建立 `src/components/areas/AreaSidebar.tsx`。
+    - [x] 實作屬性編輯與刪除邏輯。
+
+## Dev Agent Record (AI)
+
+### Implementation Plan
+1.  **Mock Data**: 更新 `mock-data-service.ts` 擴充 `Area` 介面，增加 `description` 與 `coverImage` 欄位。
+2.  **Components**: 建立 `AreaHeader` 與 `AreaSidebar` 組件。
+3.  **Page**: 實作 `AreaDetailPage` 整合左右佈局。
+4.  **Tests**: 撰寫單元測試驗證詳情頁渲染與基本互動。
+
+### Completion Notes
+- ✅ 實作 `AreaHeader` 組件，支援封面圖背景、標題點擊編輯 (Inline Edit) 與狀態標籤。
+- ✅ 實作 `AreaSidebar` 組件，包含描述編輯區 (`Textarea`)、隱藏開關 (`Switch`) 與刪除二次確認 (`AlertDialog`)。
+- ✅ 實作 `AreaDetailPage` 頁面，採用 Left (Content) + Right (Sidebar) 結構，並加入 Tabs 分隔專案與習慣區。
+- ✅ 通過 `AreaDetailPage.test.tsx` 整合測試，驗證頁面結構與數據渲染。
+
+## File List
+- `src/services/mock-data-service.ts` (Modified)
+- `src/pages/AreaDetailPage.tsx` (Modified)
+- `src/components/areas/AreaHeader.tsx` (New)
+- `src/components/areas/AreaSidebar.tsx` (New)
+- `src/pages/__tests__/AreaDetailPage.test.tsx` (New)
+
+## Change Log
+- 2026-01-14: 開始實作 Area Detail Layout。
 
 ## Dev Notes
 
@@ -45,5 +71,5 @@ So that **我可以全面維護這個人生責任範圍**.
 - `src/components/areas/AreaHeader.tsx`: 頁頭。
 
 ### References
-- [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
-- [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-4.2)
+- [Architecture](../architecture.md)
+- [Epics](../planning-artifacts/epics.md#Story-4.2)

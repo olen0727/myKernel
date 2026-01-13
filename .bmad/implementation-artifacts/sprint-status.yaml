@@ -68,9 +68,9 @@ development_status:
   epic-3-retrospective: optional
 
   # Epic 4: 領域、習慣與資源庫
-  epic-4: backlog
-  4-1-area-list: ready-for-dev
-  4-2-area-detail: ready-for-dev
+  epic-4: in-progress
+  4-1-area-list: review
+  4-2-area-detail: review
   4-3-habit-manager: ready-for-dev
   4-4-resource-library: ready-for-dev
   4-5-resource-editor: ready-for-dev

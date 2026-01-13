@@ -158,3 +158,53 @@ export const HABITS = [
     { id: "3", name: "冥想", currentStreak: 12, maxStreak: 12 },
     { id: "4", name: "運動", currentStreak: 3, maxStreak: 10 },
 ]
+
+// --- Area Mock Data ---
+export interface Area {
+    id: string
+    name: string
+    status: "active" | "hidden"
+    projectCount: number
+    habitCount: number
+    coverImage: string
+    description?: string
+}
+
+export const INITIAL_AREAS: Area[] = [
+    {
+        id: "1",
+        name: "Work 職涯與專業",
+        status: "active",
+        projectCount: 3,
+        habitCount: 2,
+        coverImage: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=800&auto=format&fit=crop",
+        description: "專注於職業技能發展、專案管理與專業網絡建立。"
+    },
+    {
+        id: "2",
+        name: "Self-Growth 自我成長",
+        status: "active",
+        projectCount: 5,
+        habitCount: 4,
+        coverImage: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=800&auto=format&fit=crop",
+        description: "涵蓋內在修養、知識學習與心理素質的提升。"
+    },
+    {
+        id: "3",
+        name: "Health & Fitness 健康",
+        status: "active",
+        projectCount: 1,
+        habitCount: 3,
+        coverImage: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800&auto=format&fit=crop",
+        description: "維持身體健康、規律運動與營養均衡的飲食習慣。"
+    },
+    {
+        id: "4",
+        name: "Finance 財務管理",
+        status: "active",
+        projectCount: 2,
+        habitCount: 1,
+        coverImage: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=800&auto=format&fit=crop",
+        description: "資產配置、開支追蹤與長期財務目標的達成。"
+    }
+]

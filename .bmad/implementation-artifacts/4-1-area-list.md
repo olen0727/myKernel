@@ -1,6 +1,6 @@
 # Story 4.1: Area List & Grid 領域列表與網格
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,13 +28,38 @@ So that **我可以看到人生版圖的全貌，並快速進入感興趣的領�
 
 ## Tasks / Subtasks
 
-- [ ] 實作 AreaListPage
-    - [ ] 建立 `src/pages/AreaListPage.tsx`。
-- [ ] 實作 AreaCard Component
-    - [ ] 建立 `src/components/areas/AreaCard.tsx`。
-    - [ ] 上半部使用 `img` tag (object-cover)，下半部顯示 info。
-- [ ] 實作 CreateAreaModal
-    - [ ] 建立 `src/components/areas/CreateAreaModal.tsx`。
+- [x] 實作 AreaListPage
+    - [x] 建立 `src/pages/AreaListPage.tsx`。
+- [x] 實作 AreaCard Component
+    - [x] 建立 `src/components/areas/AreaCard.tsx`。
+    - [x] 上半部使用 `img` tag (object-cover)，下半部顯示 info。
+- [x] 實作 CreateAreaModal
+    - [x] 建立 `src/components/areas/CreateAreaModal.tsx`。
+
+## Dev Agent Record (AI)
+
+### Implementation Plan
+1.  **Mock Data**: 更新 `mock-data-service.ts` 以包含領域資料。
+2.  **Components**: 建立 `AreaCard` 與 `CreateAreaModal` 組件。
+3.  **Page**: 實作 `AreaListPage` 並整合上述組件。
+4.  **Tests**: 撰寫單元測試以驗證列表顯示與模態行為。
+
+### Completion Notes
+- ✅ 實作 `AreaCard` 組件，支援封面圖、狀態燈號與統計數字。
+- ✅ 實作 `CreateAreaModal` 組件，支援名稱輸入與封面預覽選擇。
+- ✅ 實作 `AreaListPage` 頁面，採用響應式網格佈局，整合完整增刪改查模擬邏輯。
+- ✅ 通過 `AreaCard.test.tsx` 與 `AreaListPage.test.tsx` 單元測試。
+
+## File List
+- `src/services/mock-data-service.ts` (Modified)
+- `src/pages/AreaListPage.tsx` (Modified)
+- `src/components/areas/AreaCard.tsx` (New)
+- `src/components/areas/CreateAreaModal.tsx` (New)
+- `src/components/areas/__tests__/AreaCard.test.tsx` (New)
+- `src/pages/__tests__/AreaListPage.test.tsx` (New)
+
+## Change Log
+- 2026-01-14: 開始實作 Area List & Grid。
 
 ## Dev Notes
 
@@ -46,5 +71,5 @@ So that **我可以看到人生版圖的全貌，並快速進入感興趣的領�
 - `src/components/areas/AreaCard.tsx`: 領域卡片。
 
 ### References
-- [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
-- [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-4.1)
+- [Architecture](../architecture.md)
+- [Epics](../planning-artifacts/epics.md#Story-4.1)
