@@ -38,15 +38,7 @@ export function Sidebar() {
         >
             <SidebarContent />
 
-            {/* Collapse Toggle - Desktop Only */}
-            <Button
-                variant="ghost"
-                size="icon"
-                className="absolute -right-3 top-6 z-10 h-6 w-6 rounded-full border bg-background shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={toggleSidebar}
-            >
-                <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
-            </Button>
+            <SidebarContent />
         </aside>
     )
 }
@@ -56,7 +48,7 @@ interface SidebarContentProps {
 }
 
 export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
-    const { isCollapsed: storeCollapsed } = useSidebarStore()
+    const { isCollapsed: storeCollapsed, toggleSidebar } = useSidebarStore()
     const isCollapsed = forceExpanded ? false : storeCollapsed
 
     const navItems = [
@@ -77,14 +69,37 @@ export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
     return (
         <TooltipProvider delayDuration={0}>
             <div className="flex flex-col w-full h-full items-center">
-                {/* Logo Area */}
-                <NavLink to="/inbox" className={cn("flex items-center justify-center w-full mb-6 h-10 transition-all", isCollapsed ? "px-2" : "px-6")}>
-                    {isCollapsed ? (
-                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold font-serif cursor-pointer">K</div>
-                    ) : (
-                        <span className="text-xl font-bold font-serif tracking-tight cursor-pointer text-foreground">Kernel</span>
-                    )}
-                </NavLink>
+                {/* Logo & Toggle Area (Integrated) */}
+                <div className={cn("w-full mb-6 px-2")}>
+                    <Button
+                        variant="ghost"
+                        onClick={toggleSidebar}
+                        className={cn(
+                            "w-full h-10 flex items-center transition-all duration-200 overflow-hidden px-2",
+                            isCollapsed ? "justify-center" : "justify-between gap-2"
+                        )}
+                    >
+                        {/* PC Logic */}
+                        <div className="hidden md:flex items-center gap-2">
+                            {isCollapsed ? (
+                                <div className="group relative h-8 w-8 flex items-center justify-center">
+                                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold font-serif group-hover:hidden transition-all">K</div>
+                                    <ChevronLeft className="h-5 w-5 transition-transform rotate-180 hidden group-hover:block text-muted-foreground" />
+                                </div>
+                            ) : (
+                                <>
+                                    <span className="text-xl font-bold font-serif tracking-tight text-foreground">Kernel</span>
+                                    <ChevronLeft className="h-4 w-4 text-muted-foreground/50" />
+                                </>
+                            )}
+                        </div>
+
+                        {/* Mobile/Pad Logic (No Hover, simple icon) */}
+                        <div className="md:hidden flex items-center justify-center">
+                            <ChevronLeft className={cn("h-5 w-5 transition-transform", isCollapsed ? "rotate-180" : "rotate-0")} />
+                        </div>
+                    </Button>
+                </div>
 
                 {/* Quick Capture */}
                 <div className="mb-4 w-full px-2 flex justify-center">
