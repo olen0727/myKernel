@@ -30,6 +30,6 @@ describe('useSidebarStore', () => {
         // 模擬重新加載頁面，狀態應從 localStorage 恢復
         // 注意: Zustand persist 是異步的，或者在 jsdom 中需要特殊處理
         // 這裡我們先驗證邏輯
-        expect(localStorage.getItem('sidebar-storage')).toContain('"isCollapsed":true');
+        expect(localStorage.getItem('kernel-sidebar-storage')).toContain('"isCollapsed":true');
     });
 });

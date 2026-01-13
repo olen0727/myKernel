@@ -99,7 +99,7 @@ export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
                                 {!isCollapsed && <span>New Resource</span>}
                             </Button>
                         </TooltipTrigger>
-                        {isCollapsed && <TooltipContent side="right">Quick Capture (Cmd+Q)</TooltipContent>}
+                        {isCollapsed && <TooltipContent side="right">Quick Capture</TooltipContent>}
                     </Tooltip>
                 </div>
 
@@ -169,45 +169,41 @@ export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
 
                     <div className={cn("flex items-center gap-2", isCollapsed ? "flex-col" : "flex-row")}>
                         {/* User Profile Trigger */}
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="ghost" className={cn("h-12", isCollapsed ? "w-10 px-0" : "w-full justify-start gap-3 px-2")}>
-                                        <Avatar className="h-8 w-8">
-                                            <AvatarImage src="https://github.com/shadcn.png" />
-                                            <AvatarFallback>OL</AvatarFallback>
-                                        </Avatar>
-                                        {!isCollapsed && (
-                                            <div className="flex flex-col items-start text-left">
-                                                <span className="text-sm font-medium">Olen</span>
-                                                <span className="text-xs text-muted-foreground">Pro Plan</span>
-                                            </div>
-                                        )}
-                                    </Button>
-                                </TooltipTrigger>
-                                {isCollapsed && <TooltipContent side="right">Profile</TooltipContent>}
-                            </Tooltip>
-                        </TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" className={cn("h-12", isCollapsed ? "w-10 px-0" : "w-full justify-start gap-3 px-2")}>
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src="https://github.com/shadcn.png" />
+                                        <AvatarFallback>OL</AvatarFallback>
+                                    </Avatar>
+                                    {!isCollapsed && (
+                                        <div className="flex flex-col items-start text-left">
+                                            <span className="text-sm font-medium">Olen</span>
+                                            <span className="text-xs text-muted-foreground">Pro Plan</span>
+                                        </div>
+                                    )}
+                                </Button>
+                            </TooltipTrigger>
+                            {isCollapsed && <TooltipContent side="right">Profile</TooltipContent>}
+                        </Tooltip>
 
                         {/* Settings Trigger */}
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <NavLink to="/settings">
-                                        {({ isActive }) => (
-                                            <Button
-                                                variant={isActive ? "secondary" : "ghost"}
-                                                size="icon"
-                                                className={cn("text-muted-foreground hover:text-foreground", isCollapsed ? "h-10 w-10" : "h-8 w-8", isActive && "bg-accent text-accent-foreground")}
-                                            >
-                                                <Settings className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </NavLink>
-                                </TooltipTrigger>
-                                {isCollapsed && <TooltipContent side="right">Settings</TooltipContent>}
-                            </Tooltip>
-                        </TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <NavLink to="/settings">
+                                    {({ isActive }) => (
+                                        <Button
+                                            variant={isActive ? "secondary" : "ghost"}
+                                            size="icon"
+                                            className={cn("text-muted-foreground hover:text-foreground", isCollapsed ? "h-10 w-10" : "h-8 w-8", isActive && "bg-accent text-accent-foreground")}
+                                        >
+                                            <Settings className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </NavLink>
+                            </TooltipTrigger>
+                            {isCollapsed && <TooltipContent side="right">Settings</TooltipContent>}
+                        </Tooltip>
                     </div>
                 </div>
             </div>

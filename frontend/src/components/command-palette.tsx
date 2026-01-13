@@ -66,12 +66,14 @@ export function CommandPalette() {
                 </CommandGroup>
                 <CommandSeparator />
                 <CommandGroup heading="Recent Projects">
+                    {/* TODO: Epic 6 - Replace with dynamic results from RxDB Search Service */}
                     <CommandItem onSelect={() => runCommand(() => navigate("/projects/kernel"))}>
                         <Folder className="mr-2 h-4 w-4" />
                         <span>Kernel Development</span>
                     </CommandItem>
                 </CommandGroup>
                 <CommandGroup heading="Recent Resources">
+                    {/* TODO: Epic 6 - Replace with dynamic results from RxDB Search Service */}
                     <CommandItem onSelect={() => runCommand(() => navigate("/resources/ux-notes"))}>
                         <FileText className="mr-2 h-4 w-4" />
                         <span>UX Research Notes</span>

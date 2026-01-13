@@ -15,7 +15,7 @@ export const useSidebarStore = create<SidebarState>()(
             setCollapsed: (collapsed: boolean) => set({ isCollapsed: collapsed }),
         }),
         {
-            name: 'sidebar-storage',
+            name: 'kernel-sidebar-storage',
         }
     )
 );
