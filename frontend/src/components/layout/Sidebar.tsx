@@ -1,10 +1,16 @@
-import { useState } from "react"
+import { useSidebarStore } from "@/stores/sidebar-store"
 import { cn } from "@/lib/utils"
+
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
     Inbox,
     Layout,
@@ -16,15 +22,45 @@ import {
     PlusCircle,
     Activity,
     FileText,
-    Folder
+    Folder,
+    ChevronDown
 } from "lucide-react"
 
-interface SidebarProps {
-    isCollapsed: boolean
-    setIsCollapsed: (value: boolean) => void
+
+
+export function Sidebar() {
+    const { isCollapsed, toggleSidebar } = useSidebarStore()
+
+    return (
+        <aside
+            className={cn(
+                "group relative hidden md:flex flex-col items-center border-r bg-background transition-[width] duration-300 ease-in-out h-screen py-4",
+                isCollapsed ? "w-16" : "w-64"
+            )}
+        >
+            <SidebarContent />
+
+            {/* Collapse Toggle - Desktop Only */}
+            <Button
+                variant="ghost"
+                size="icon"
+                className="absolute -right-3 top-6 z-10 h-6 w-6 rounded-full border bg-background shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={toggleSidebar}
+            >
+                <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
+            </Button>
+        </aside>
+    )
 }
 
-export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
+interface SidebarContentProps {
+    forceExpanded?: boolean
+}
+
+export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
+    const { isCollapsed: storeCollapsed } = useSidebarStore()
+    const isCollapsed = forceExpanded ? false : storeCollapsed
+
     const navItems = [
         { icon: Inbox, label: "Inbox", href: "/inbox", count: 3 },
         { icon: Layout, label: "Projects", href: "/projects" },
@@ -42,22 +78,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
     return (
         <TooltipProvider delayDuration={0}>
-            <aside
-                className={cn(
-                    "group relative flex flex-col items-center border-r bg-background transition-[width] duration-300 ease-in-out h-screen py-4",
-                    isCollapsed ? "w-16" : "w-64"
-                )}
-            >
-                {/* Collapse Toggle */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute -right-3 top-6 z-10 h-6 w-6 rounded-full border bg-background shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                >
-                    <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
-                </Button>
-
+            <div className="flex flex-col w-full h-full items-center">
                 {/* Logo Area */}
                 <div className={cn("flex items-center justify-center w-full mb-6 h-10 transition-all", isCollapsed ? "px-2" : "px-6")}>
                     {isCollapsed ? (
@@ -120,20 +141,26 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
                     {/* Recent Items (Desktop Only when expanded) */}
                     {!isCollapsed && (
-                        <div className="mt-8 px-3">
+                        <Collapsible defaultOpen className="mt-8 px-3">
                             <div className="flex items-center justify-between mb-2">
                                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Recent</h4>
+                                <CollapsibleTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-4 w-4">
+                                        <ChevronDown className="h-3 w-3" />
+                                    </Button>
+                                </CollapsibleTrigger>
                             </div>
-                            <div className="space-y-1">
+                            <CollapsibleContent className="space-y-1">
                                 {recentItems.map((item, i) => (
                                     <Button key={i} variant="ghost" size="sm" className="w-full justify-start gap-2 px-2 h-8 text-muted-foreground hover:text-foreground font-normal overflow-hidden">
                                         <item.icon className="h-4 w-4 shrink-0" />
                                         <span className="truncate">{item.label}</span>
                                     </Button>
                                 ))}
-                            </div>
-                        </div>
+                            </CollapsibleContent>
+                        </Collapsible>
                     )}
+
                 </ScrollArea>
 
                 {/* Footer: User Profile & Settings */}
@@ -160,13 +187,13 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                             {isCollapsed && <TooltipContent side="right">Profile</TooltipContent>}
                         </Tooltip>
 
-                        {/* Settings Trigger (Bottom Right in expanded) */}
+                        {/* Settings Trigger */}
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className={cn("text-muted-foreground hover:text-foreground", isCollapsed ? "h-10 w-10" : "h-8 w-8 absolute bottom-4 right-2")}
+                                    className={cn("text-muted-foreground hover:text-foreground", isCollapsed ? "h-10 w-10" : "h-8 w-8")}
                                 >
                                     <Settings className="h-4 w-4" />
                                 </Button>
@@ -175,7 +202,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
                         </Tooltip>
                     </div>
                 </div>
-            </aside>
+            </div>
         </TooltipProvider>
     )
 }

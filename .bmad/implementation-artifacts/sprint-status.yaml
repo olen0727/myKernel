@@ -42,7 +42,7 @@ story_location: .bmad/implementation-artifacts
 development_status:
   # Epic 1: 基礎架構與全站導航
   epic-1: in-progress
-  1-1-sidebar-collapse: ready-for-dev
+  1-1-sidebar-collapse: review
   1-2-theme-toggle: ready-for-dev
   1-3-react-router: ready-for-dev
   1-4-app-layout: ready-for-dev

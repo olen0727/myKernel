@@ -1,6 +1,6 @@
 # Story 1.1: 側邊欄收折與響應式行為
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,19 +28,19 @@ So that **我可以根據需求調整工作區域大小，在小螢幕上也能�
 
 ## Tasks / Subtasks
 
-- [ ] 實作 Sidebar 狀態管理 (Zustand/Context)
-    - [ ] 建立/更新 `useSidebarStore` 或本地 State，包含 `isCollapsed`, `toggleSidebar`。
-    - [ ] 將狀態持久化至 `localStorage`。
-- [ ] 重構/建立 `Sidebar.tsx` 元件
-    - [ ] 實作桌面版寬度過渡動畫 (256px <-> 64px, 300ms)。
-    - [ ] 實作 Logo 切換邏輯。
-    - [ ] 實作導航項目渲染 (Icon vs Icon+Text)。
-    - [ ] 整合 Shadcn/UI `Tooltip` 於收折狀態使用。
-- [ ] 實作行動版觸發器 (Mobile Trigger)
-    - [ ] 建立漢堡選單按鈕 (僅在行動裝置顯示)。
-    - [ ] 確保正確的響應式 Class (例如 `hidden md:flex`)。
-- [ ] 實作 "Recent" 區塊切換
-    - [ ] 為 "Recent" 增加 Collapsible 區塊功能。
+- [x] 實作 Sidebar 狀態管理 (Zustand/Context)
+    - [x] 建立/更新 `useSidebarStore` 或本地 State，包含 `isCollapsed`, `toggleSidebar`。
+    - [x] 將狀態持久化至 `localStorage`。
+- [x] 重構/建立 `Sidebar.tsx` 元件
+    - [x] 實作桌面版寬度過渡動畫 (256px <-> 64px, 300ms)。
+    - [x] 實作 Logo 切換邏輯。
+    - [x] 實作導航項目渲染 (Icon vs Icon+Text)。
+    - [x] 整合 Shadcn/UI `Tooltip` 於收折狀態 use。
+- [x] 實作行動版觸發器 (Mobile Trigger)
+    - [x] 建立漢堡選單按鈕 (僅在行動裝置顯示)。
+    - [x] 確保正確的響應式 Class (例如 `hidden md:flex`)。
+- [x] 實作 "Recent" 區塊切換
+    - [x] 為 "Recent" 增加 Collapsible 區塊功能。
 
 ## Dev Notes
 
@@ -49,21 +49,21 @@ So that **我可以根據需求調整工作區域大小，在小螢幕上也能�
 - **Styling**: Tailwind CSS.
 - **UI Components**: Shadcn/UI (使用現有的 `Tooltip`, `Sheet`, `Button`, `Collapsible`)。
 - **Icons**: Lucide React.
-- **State**: 建議使用 `localStorage` 持久化使用者偏好。
+- **State**: 使用 `zustand` 配合 `persist` 中間件實現 `localStorage` 持久化。
 - **Animation**: CSS Transitions (Tailwind classes 如 `transition-all duration-300 ease-in-out`)。
 
 ### File Structure Requirements
-- `src/components/layout/Sidebar.tsx`: 主要元件。
-- `src/components/layout/SidebarItem.tsx`: 個別項目子元件。
-- `src/hooks/use-sidebar.tsx`: 邏輯 Hook (可選，但有助於分離關注點)。
+- `src/stores/sidebar-store.ts`: 狀態管理。
+- `src/components/layout/Sidebar.tsx`: 主要元件（拆分為 Sidebar 與 SidebarContent 以便行動版重用）。
+- `src/App.tsx`: 整合與行動版對齊。
 
 ### Implementation Plan
-1.  確認 Shadcn/UI 元件 (`tooltip`, `sheet`, `button`, `collapsible`) 已安裝。
-2.  建立 `Sidebar` 元件骨架。
-3.  加入狀態邏輯。
-4.  實作佈局與樣式。
-5.  加入子元件。
-6.  透過瀏覽器 DevTools 測試響應式行為。
+1.  安裝及配置 Vitest 測試環境。
+2.  建立 `sidebar-store.ts` 與其單元測試。
+3.  重構 `Sidebar.tsx` 以適配 Zustand 狀態並支援 `SidebarContent` 導出。
+4.  更新 `App.tsx` 移除局部 `useState` 並加入 `SidebarMobileTrigger`。
+5.  安裝 `sheet` 與 `collapsible` UI 元件。
+6.  整合 `Collapsible` 於 "Recent" 區塊。
 
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
@@ -75,12 +75,21 @@ So that **我可以根據需求調整工作區域大小，在小螢幕上也能�
 Gemini 2.0 Flash
 
 ### Debug Log References
-- N/A
+- 修正 `vite.config.ts` 中的 Vitest 類型錯誤（添加字串參考）。
+- 修正 `Sidebar.tsx` 導入衝突與未使用的變數。
 
 ### Completion Notes List
-- [ ] Code implemented
-- [ ] Tests verified
-- [ ] UI refined
+- [x] Code implemented
+- [x] Tests verified (3/3 passing)
+- [x] UI refined (動畫與響應式邏輯已確認)
 
 ### File List
+- `src/stores/sidebar-store.ts`
+- `src/stores/__tests__/sidebar-store.test.ts`
 - `src/components/layout/Sidebar.tsx`
+- `src/App.tsx`
+- `src/components/ui/sheet.tsx`
+- `src/components/ui/collapsible.tsx`
+- `vite.config.ts`
+- `package.json`
+- `src/test/setup.ts`

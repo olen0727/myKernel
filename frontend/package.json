@@ -7,14 +7,19 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "test:run": "vitest run"
     },
     "dependencies": {
-        "@tiptap/react": "^2.4.0",
-        "@tiptap/pm": "^2.4.0",
-        "@tiptap/starter-kit": "^2.4.0",
-        "@tiptap/extension-placeholder": "^2.4.0",
+        "@radix-ui/react-collapsible": "^1.1.12",
+        "@radix-ui/react-dialog": "^1.1.15",
         "@tiptap/extension-link": "^2.4.0",
+        "@tiptap/extension-placeholder": "^2.4.0",
+        "@tiptap/pm": "^2.4.0",
+        "@tiptap/react": "^2.4.0",
+        "@tiptap/starter-kit": "^2.4.0",
         "clsx": "^2.1.1",
         "date-fns": "^3.6.0",
         "dexie-encrypted": "^2.0.0",
@@ -32,18 +37,24 @@
         "zustand": "^4.5.7"
     },
     "devDependencies": {
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.1",
+        "@testing-library/user-event": "^14.6.1",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "@typescript-eslint/eslint-plugin": "^7.13.1",
         "@typescript-eslint/parser": "^7.13.1",
         "@vitejs/plugin-react": "^4.3.1",
+        "@vitest/ui": "^4.0.17",
         "autoprefixer": "^10.4.23",
         "eslint": "^8.57.0",
         "eslint-plugin-react-hooks": "^4.6.2",
         "eslint-plugin-react-refresh": "^0.4.7",
+        "jsdom": "^27.4.0",
         "postcss": "^8.5.6",
         "tailwindcss": "^3.4.19",
         "typescript": "^5.2.2",
-        "vite": "^5.3.1"
+        "vite": "^5.3.1",
+        "vitest": "^4.0.17"
     }
 }
