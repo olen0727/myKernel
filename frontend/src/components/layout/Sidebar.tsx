@@ -144,8 +144,8 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
                                                     "w-full transition-all group",
                                                     isCollapsed ? "justify-center" : "justify-start gap-3 px-3",
                                                     isActive
-                                                        ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary font-semibold"
-                                                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                                                        ? "bg-primary/10 text-primary font-semibold hover:bg-primary hover:text-primary-foreground"
+                                                        : "text-muted-foreground hover:bg-primary hover:text-primary-foreground"
                                                 )}
                                             >
                                                 <item.icon className="h-5 w-5" />
@@ -156,8 +156,8 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
                                                             <span className={cn(
                                                                 "text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-all",
                                                                 isActive
-                                                                    ? "bg-primary text-primary-foreground shadow-sm"
-                                                                    : "bg-primary/10 text-primary"
+                                                                    ? "bg-primary text-primary-foreground shadow-sm group-hover:bg-primary-foreground group-hover:text-primary"
+                                                                    : "bg-primary/10 text-primary group-hover:bg-primary-foreground group-hover:text-primary"
                                                             )}>
                                                                 {item.count}
                                                             </span>
@@ -193,7 +193,7 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
                                         key={i}
                                         variant="ghost"
                                         size="sm"
-                                        className="w-full justify-start gap-3 px-3 h-9 text-muted-foreground hover:text-foreground font-normal overflow-hidden"
+                                        className="w-full justify-start gap-3 px-3 h-9 text-muted-foreground hover:bg-primary hover:text-primary-foreground font-normal overflow-hidden"
                                     >
                                         <item.icon className="h-5 w-5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
                                         <span className="truncate">{item.label}</span>
