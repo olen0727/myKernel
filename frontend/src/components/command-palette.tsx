@@ -19,6 +19,7 @@ import {
     CommandSeparator,
     CommandShortcut,
 } from "@/components/ui/command"
+import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useCommandStore } from "@/stores/command-store"
 
 export function CommandPalette() {
@@ -47,7 +48,11 @@ export function CommandPalette() {
 
     return (
         <CommandDialog open={isOpen} onOpenChange={setOpen}>
-            <CommandInput placeholder="Type a command or search..." />
+            <DialogTitle className="sr-only">全域搜尋與操作指令</DialogTitle>
+            <DialogDescription className="sr-only">
+                快速尋找你的資源、專案、領域或執行相關系統操作命令。
+            </DialogDescription>
+            <CommandInput placeholder="搜尋資源、專案或執行指令..." />
             <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup heading="Suggestions">

@@ -9,7 +9,8 @@ import {
     CommandSeparator,
 } from "@/components/ui/command"
 import { Badge } from "@/components/ui/badge"
-import { Check, Folder, Layers, X } from "lucide-react"
+import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Check, Folder, Layers, X, MoveHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface DispatchDialogProps {
@@ -54,6 +55,17 @@ export function DispatchDialog({
 
     return (
         <CommandDialog open={isOpen} onOpenChange={onOpenChange}>
+            <div className="px-4 pt-4 pb-2 border-b bg-muted/5 flex items-center justify-between">
+                <div className="space-y-0.5">
+                    <DialogTitle className="text-sm font-black flex items-center gap-2 tracking-tight">
+                        <MoveHorizontal className="w-3.5 h-3.5 text-primary" />
+                        資源分流與關聯
+                    </DialogTitle>
+                    <DialogDescription className="text-[10px] text-muted-foreground font-medium">
+                        將此資源分類至 PARA 系統中的專案或領域
+                    </DialogDescription>
+                </div>
+            </div>
             <div className="flex flex-col h-full max-h-[85vh]">
                 <CommandInput placeholder="搜尋專案或領域..." />
 
@@ -109,11 +121,9 @@ export function DispatchDialog({
                                     <Layers className="w-4 h-4 text-blue-500/60" />
                                     <span className="font-medium text-sm">{area.name}</span>
                                 </div>
-                                {
-                                    selectedIds.includes(area.id) && (
-                                        <Check className="w-4 h-4 text-primary" />
-                                    )
-                                }
+                                {selectedIds.includes(area.id) && (
+                                    <Check className="w-4 h-4 text-primary" />
+                                )}
                             </CommandItem>
                         ))}
                     </CommandGroup>
@@ -131,7 +141,7 @@ export function DispatchDialog({
                         確認分流
                     </Button>
                 </div>
-            </div >
-        </CommandDialog >
+            </div>
+        </CommandDialog>
     )
 }
