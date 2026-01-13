@@ -1,6 +1,6 @@
 # Story 2.1: Dashboard 統計卡片與系統概覽
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -27,28 +27,47 @@ So that **我可以快速了解目前的待辦狀況與系統使用情形**.
 
 ## Tasks / Subtasks
 
-- [ ] 建立 Dashboard 頁面
-    - [ ] 建立 `src/pages/DashboardPage.tsx`。
-    - [ ] 實作基本 Grid 佈局。
-- [ ] 實作 StatCard Component
-    - [ ] 建立 `src/components/dashboard/StatCard.tsx`。
-    - [ ] 定義 Props: `title`, `value`, `icon`, `description` (optional)。
-    - [ ] 使用 Shadcn/UI `Card` 元件作為基底。
-- [ ] 整合至 Dashboard
-    - [ ] 在 Dashboard 頁面引用 4 個 StatCard。
-    - [ ] 帶入 Mock Data。
+- [x] 建立 Dashboard 頁面
+    - [x] 建立 `src/pages/DashboardPage.tsx`。
+    - [x] 實作基本 Grid 佈局。
+- [x] 實作 StatCard Component
+    - [x] 建立 `src/components/dashboard/StatCard.tsx`。
+    - [x] 定義 Props: `title`, `value`, `icon`, `description` (optional)。
+    - [x] 使用 Shadcn/UI `Card` 元件作為基底。
+- [x] 整合至 Dashboard
+    - [x] 在 Dashboard 頁面引用 4 個 StatCard。
+    - [x] 帶入 Mock Data。
 
-## Dev Notes
+## Dev Agent Record
 
-### Architecture & Tech Stack
-- **Component**: Shadcn/UI (Card)。
-- **Icons**: Lucide React。
-- **Layout**: CSS Grid (Responsive: 1 col mobile, 2 cols tablet, 4 cols desktop)。
+### Implementation Plan
+- 建立 `DashboardPage` 頁面與基礎佈局。
+- 建立可複用的 `StatCard` 組件。
+- 整合測試確保渲染正確。
+- 更新 Router 與 Sidebar 導航。
 
-### File Structure Requirements
-- `src/pages/DashboardPage.tsx`: 儀表板頁面。
-- `src/components/dashboard/StatCard.tsx`: 統計卡片元件。
+### Debug Log
+- 修正了測試檔案中的 import 路徑問題。
+- 調整了 Grid 佈局以符合響應式需求。
 
-### References
+### Completion Notes
+- 完成 Dashboard 統計卡片開發。
+- 使用 Shadcn/UI Card 組件確保視覺一致性。
+- 已預留 Props 介面供未來 RxDB 資料串接。
+
+## File List
+- `frontend/src/pages/DashboardPage.tsx`
+- `frontend/src/components/dashboard/StatCard.tsx`
+- `frontend/src/pages/__tests__/DashboardPage.test.tsx`
+- `frontend/src/components/dashboard/__tests__/StatCard.test.tsx`
+- `frontend/src/router.tsx` (Modified)
+- `frontend/src/components/layout/Sidebar.tsx` (Modified)
+
+## Change Log
+- 2026-01-13: 初始實作 Dashboard 統計卡片 (Story 2.1)
+
+## Status: review
+
+## References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-2.1)

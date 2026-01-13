@@ -59,6 +59,7 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
     }
 
     const navItems = [
+        { icon: Layout, label: "Dashboard", href: "/dashboard" },
         { icon: Inbox, label: "Inbox", href: "/inbox", count: 3 },
         { icon: Layout, label: "Projects", href: "/projects" },
         { icon: Layers, label: "Areas", href: "/areas" },
