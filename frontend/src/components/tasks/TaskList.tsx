@@ -1,6 +1,7 @@
 import * as React from "react"
 import { MoreVertical, Plus, Trash2, Edit2 } from "lucide-react"
-import { TaskItem, TaskItemProps } from "@/components/tasks/TaskItem"
+import { TaskItemProps } from "@/components/tasks/TaskItem"
+import { SortableTaskItem } from "@/components/tasks/SortableTaskItem"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -9,6 +10,11 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { useDroppable } from "@dnd-kit/core"
 import { cn } from "@/lib/utils"
 
 export interface TaskListProps {
@@ -37,6 +43,10 @@ export function TaskList({
     const [isAddingTask, setIsAddingTask] = React.useState(false)
     const [newTaskTitle, setNewTaskTitle] = React.useState("")
 
+    const { setNodeRef, isOver } = useDroppable({
+        id: id,
+    })
+
     const handleTitleBlur = () => {
         setIsEditingTitle(false)
         if (localTitle !== title) {
@@ -56,7 +66,7 @@ export function TaskList({
     const handleAddTaskKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
             handleAddTask()
-            setIsAddingTask(true) // 繼續保持新增狀態
+            setIsAddingTask(true)
         } else if (e.key === "Escape") {
             setIsAddingTask(false)
             setNewTaskTitle("")
@@ -64,7 +74,13 @@ export function TaskList({
     }
 
     return (
-        <div className="space-y-4">
+        <div
+            ref={setNodeRef}
+            className={cn(
+                "space-y-4 p-4 rounded-xl transition-colors",
+                isOver && "bg-accent/20"
+            )}
+        >
             <div className="flex items-center justify-between group/list">
                 {isEditingTitle ? (
                     <Input
@@ -104,19 +120,23 @@ export function TaskList({
             </div>
 
             <div className="space-y-1">
-                {items.map((task) => (
-                    <TaskItem
-                        key={task.id}
-                        {...task}
-                        showProject={false}
-                        onToggle={(taskId) => onTaskToggle(id, taskId)}
-                        onTitleChange={(taskId, newTitle) => onTaskTitleChange(id, taskId, newTitle)}
-                    />
-                ))}
+                <SortableContext
+                    items={items.map(i => i.id)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    {items.map((task) => (
+                        <SortableTaskItem
+                            key={task.id}
+                            {...task}
+                            showProject={false}
+                            onToggle={(taskId) => onTaskToggle(id, taskId)}
+                            onTitleChange={(taskId, newTitle) => onTaskTitleChange(id, taskId, newTitle)}
+                        />
+                    ))}
+                </SortableContext>
 
                 {isAddingTask ? (
-                    <div className="flex items-center gap-3 p-2">
-                        <div className="w-4 h-4 rounded border border-muted" />
+                    <div className="flex items-center gap-3 p-2 pl-10">
                         <Input
                             className="flex-1 h-7 text-sm py-1 px-2"
                             placeholder="任務名稱..."
@@ -131,7 +151,7 @@ export function TaskList({
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full justify-start text-muted-foreground hover:text-primary gap-2 h-9 px-2"
+                        className="w-full justify-start text-muted-foreground hover:text-primary gap-2 h-9 px-2 pl-10"
                         onClick={() => setIsAddingTask(true)}
                     >
                         <Plus className="h-4 w-4" />
