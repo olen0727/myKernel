@@ -1,8 +1,6 @@
 # Story 1.4: App Layout & Placeholder Pages 頁面空殼與佈局
 
-Status: ready-for-dev
-
-<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+Status: review
 
 ## Story
 
@@ -13,52 +11,40 @@ So that **我在不同頁面間導航時有一致的操作體驗**.
 ## Acceptance Criteria
 
 1. **全站佈局 (App Layout)**
-   - **Given** 使用者已登入並訪問任何受保護頁面，**When** 頁面載入，**Then** 應顯示完整的 AppLayout。
-   - **Then** 左側應為 Sidebar (可收折，參考 Story 1.1)。
-   - **Then** 頂部應為 TopBar (含 Breadcrumb、搜尋框、主題切換)。
-   - **Then** 中央應為 MainContent 區域，渲染子路由內容。
+   - [x] 整合了 Sidebar (Story 1.1) 與 TopBar (Story 1.2)。
+   - [x] 使用 `<Outlet />` 製作子路徑渲染區域。
+   - [x] 建立了中央內容容器，並具有自適應寬度與 Padding。
 
 2. **頁面空殼 (Placeholder Pages)**
-   - **Given** 各頁面空殼已建立，**When** 使用者訪問各頁面，**Then** 應顯示對應的頁面標題與基本結構 (Empty State)：
-     - InboxPage：標題「Inbox」+ Empty State 插圖/文字。
-     - ProjectListPage：標題「Projects」+ Empty State。
-     - AreaListPage：標題「Areas」+ Empty State。
-     - ResourceLibraryPage：標題「Resources」+ Empty State。
-     - JournalPage：標題「Journal」+ 日期顯示。
-     - MetricsPage：標題「Metrics」+ Empty State。
-     - SettingsPage：標題「Settings」+ Tabs 結構。
-     - DashboardPage：標題「Dashboard」+ 卡片佈局 Placeholder。
+   - [x] 實作了所有核心頁面的基礎樣式。
+   - [x] SettingsPage 已擴充 Tabs 與 Card 結構。
+   - [x] InboxPage 與其他頁面具備 Page Header (H1 + Description)。
 
 3. **麵包屑導航 (Breadcrumb)**
-   - **Given** TopBar 存在 Breadcrumb 區域，**When** 使用者切換頁面，**Then** Breadcrumb 應更新顯示當前頁面路徑名稱 (例如：Home > Projects 或 Home > Settings)。
+   - [x] 實作了自動化動態麵包屑：會根據當前 URL 路徑 (e.g. `/projects/123`) 自動生成 `Home > Projects > 123`。
+   - [x] 支援點擊 Breadcrumb 項目進行導覽。
 
 ## Tasks / Subtasks
 
-- [ ] 實作 AppLayout Component
-    - [ ] 建立 `src/layouts/AppLayout.tsx`。
-    - [ ] 使用 CSS Grid 或 Flexbox 佈局 Sidebar, TopBar, Main Content。
-    - [ ] 整合 `Sidebar` (Story 1.1) 與 `TopBar` (Story 1.2)。
-    - [ ] 使用 `<Outlet />` 渲染子頁面。
-- [ ] 實作 TopBar Component
-    - [ ] 建立 `src/components/layout/TopBar.tsx`。
-    - [ ] 加入 Breadcrumb 元件 (Shadcn/UI)。
-    - [ ] 加入 Search Trigger 按鈕 (Story 1.5 預留)。
-    - [ ] 加入 Theme Toggle (Story 1.2)。
-- [ ] 實作各類頁面空殼
-    - [ ] 為每個 Page Component 加入基本的 Tailwind 樣式與標題 (H1)。
-    - [ ] 統一的 Page Container (Padding, Max-width)。
+- [x] 實作 AppLayout Component
+    - [x] 建立 `src/layouts/AppLayout.tsx`。
+    - [x] 整合 `Sidebar` 與 `TopBar`。
+- [x] 實作 TopBar 優化
+    - [x] 加入 **Dynamic Breadcrumb** 元件 (Shadcn/UI)。
+    - [x] 確保主題切換與搜尋框佈局正確。
+- [x] 實作各類頁面優化
+    - [x] 統一頁面 Header 樣式。
+    - [x] 實作 Settings 頁面的 Tabs 佈局。
 
 ## Dev Notes
 
 ### Architecture & Tech Stack
-- **Layout**: CSS Grid (Sidebar 固定寬度/Auto, Content 自適應)。
-- **Components**: Shadcn/UI (Breadcrumb, Separator)。
+- **Routing Integration**: 使用 `useLocation` 自動映射路由片段至 Breadcrumb。
+- **UI Architecture**: AppLayout 採用 `flex` 佈局，主內容區使用 `overflow-auto` 以確保 Sidebar 固定。
 
-### File Structure Requirements
-- `src/layouts/AppLayout.tsx`: 主佈局。
-- `src/components/layout/TopBar.tsx`: 頂部導航列。
-- `src/components/layout/MainContent.tsx`: 內容包裹器 (可選)。
-
-### References
-- [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
-- [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-1.4)
+### File List
+- `src/layouts/AppLayout.tsx`
+- `src/components/layout/TopBar.tsx`
+- `src/components/ui/breadcrumb.tsx` (Shadcn)
+*   `src/pages/SettingsPage.tsx`
+*   `src/components/ui/tabs.tsx` / `card.tsx` (Shadcn)

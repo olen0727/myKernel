@@ -1,14 +1,56 @@
-import { Search } from "lucide-react"
+import { Search, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
+import { useLocation, Link } from "react-router-dom"
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export function TopBar() {
+    const location = useLocation()
+    const pathnames = location.pathname.split("/").filter((x) => x)
+
     return (
         <header className="sticky top-0 z-10 flex h-16 w-full items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
-
-            {/* Left: Breadcrumbs (Placeholder for now) */}
+            {/* Left: Dynamic Breadcrumbs */}
             <div className="flex items-center gap-2 mr-4">
-                <span className="text-sm font-medium text-muted-foreground">Inbox</span>
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <BreadcrumbLink asChild>
+                                <Link to="/inbox" className="flex items-center gap-1">
+                                    <Home className="h-3.5 w-3.5" />
+                                </Link>
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        {pathnames.length > 0 && <BreadcrumbSeparator />}
+                        {pathnames.map((value, index) => {
+                            const last = index === pathnames.length - 1
+                            const to = `/${pathnames.slice(0, index + 1).join("/")}`
+                            const label = value.charAt(0).toUpperCase() + value.slice(1)
+
+                            return (
+                                <div key={to} className="flex items-center">
+                                    <BreadcrumbItem>
+                                        {last ? (
+                                            <BreadcrumbPage>{label}</BreadcrumbPage>
+                                        ) : (
+                                            <BreadcrumbLink asChild>
+                                                <Link to={to}>{label}</Link>
+                                            </BreadcrumbLink>
+                                        )}
+                                    </BreadcrumbItem>
+                                    {!last && <BreadcrumbSeparator />}
+                                </div>
+                            )
+                        })}
+                    </BreadcrumbList>
+                </Breadcrumb>
             </div>
 
             {/* Center: Global Search (Command Palette Trigger) */}
