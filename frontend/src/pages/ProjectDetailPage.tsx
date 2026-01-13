@@ -1,6 +1,8 @@
 import * as React from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, ListTodo, Library, Plus, GripVertical } from "lucide-react"
+import { ArrowLeft, ListTodo, Library, Plus, GripVertical, FileText, Link as LinkIcon } from "lucide-react"
+import { format } from "date-fns"
+import { zhTW } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProjectHeader } from "@/components/projects/ProjectHeader"
@@ -68,6 +70,39 @@ const INITIAL_PROJECT = {
     status: "active" as "active" | "paused" | "completed" | "archived",
     dueDate: new Date(2026, 5, 30),
 }
+
+// Mock linked resources for this project
+interface ProjectResource {
+    id: string
+    type: "note" | "link"
+    title: string
+    content: string
+    createdAt: Date
+}
+
+const INITIAL_RESOURCES: ProjectResource[] = [
+    {
+        id: "res-1",
+        type: "note",
+        title: "專案架構設計筆記",
+        content: "本專案採用 React + Vite 作為前端框架，使用 RxDB 作為本地資料庫實現離線優先架構。UI 元件庫選用 Shadcn/UI，搭配 Tailwind CSS 進行樣式管理...",
+        createdAt: new Date(2026, 0, 10),
+    },
+    {
+        id: "res-2",
+        type: "link",
+        title: "Shadcn/UI 官方文件",
+        content: "Beautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.",
+        createdAt: new Date(2026, 0, 8),
+    },
+    {
+        id: "res-3",
+        type: "note",
+        title: "用戶訪談紀錄 - 第一輪",
+        content: "訪談對象：5 位目標用戶。主要發現：用戶普遍對現有任務管理工具感到不滿，主要痛點包括：1) 跨裝置同步困難 2) 介面過於複雜 3) 缺乏彈性的組織方式...",
+        createdAt: new Date(2026, 0, 5),
+    },
+]
 
 export default function ProjectDetailPage() {
     const { id } = useParams<{ id: string }>()
@@ -330,9 +365,43 @@ export default function ProjectDetailPage() {
                                 </TabsContent>
 
                                 <TabsContent value="resources" className="min-h-[400px]">
-                                    <div className="bg-muted/10 border border-dashed rounded-xl flex items-center justify-center p-12">
-                                        <p className="text-muted-foreground">尚未關聯任何資源至此專案。</p>
-                                    </div>
+                                    {INITIAL_RESOURCES.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {INITIAL_RESOURCES.map((resource) => (
+                                                <div
+                                                    key={resource.id}
+                                                    className="group flex items-start gap-4 p-4 rounded-xl border border-border/50 hover:border-border hover:bg-muted/30 transition-all cursor-pointer"
+                                                >
+                                                    <div className={`mt-0.5 p-2.5 rounded-lg flex items-center justify-center ${
+                                                        resource.type === "note"
+                                                            ? "bg-primary/10 text-primary"
+                                                            : "bg-blue-500/10 text-blue-600"
+                                                    }`}>
+                                                        {resource.type === "note" ? (
+                                                            <FileText className="w-5 h-5" />
+                                                        ) : (
+                                                            <LinkIcon className="w-5 h-5" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="font-semibold text-base truncate group-hover:text-primary transition-colors">
+                                                            {resource.title}
+                                                        </h4>
+                                                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                                                            {resource.content}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground/60 mt-2">
+                                                            建立於 {format(resource.createdAt, "yyyy/MM/dd", { locale: zhTW })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-muted/10 border border-dashed rounded-xl flex items-center justify-center p-12">
+                                            <p className="text-muted-foreground">尚未關聯任何資源至此專案。</p>
+                                        </div>
+                                    )}
                                 </TabsContent>
                             </Tabs>
                         </div>

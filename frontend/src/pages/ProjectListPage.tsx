@@ -15,7 +15,7 @@ const INITIAL_PROJECTS: ProjectCardProps[] = [
     { id: "5", name: "Vacation Planning", area: "Personal", status: "completed", doneTasks: 10, totalTasks: 10 },
 ]
 
-type FilterStatus = "all" | "active" | "completed" | "paused"
+type FilterStatus = "all" | "active" | "paused" | "completed" | "archived"
 
 import {
     ResizableHandle,
@@ -26,7 +26,7 @@ import {
 export default function ProjectListPage() {
     const navigate = useNavigate()
     const [projects, setProjects] = useState<ProjectCardProps[]>(INITIAL_PROJECTS)
-    const [filterStatus, setFilterStatus] = useState<FilterStatus>("all")
+    const [filterStatus, setFilterStatus] = useState<FilterStatus>("active")
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     const filteredProjects = projects.filter(project => {
@@ -66,7 +66,7 @@ export default function ProjectListPage() {
                             <div className="flex flex-col gap-1">
                                 <h1 className="text-2xl font-bold tracking-tight">Projects 專案清單</h1>
                                 <div className="flex items-center gap-2 mt-2">
-                                    {(["all", "active", "paused", "completed"] as FilterStatus[]).map((status) => (
+                                    {(["active", "paused", "completed", "archived", "all"] as FilterStatus[]).map((status) => (
                                         <Button
                                             key={status}
                                             variant={filterStatus === status ? "secondary" : "ghost"}
