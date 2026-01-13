@@ -1,6 +1,5 @@
-import * as React from "react"
 import { format } from "date-fns"
-import { Calendar as CalendarIcon, Trash2, Archive, ChevronDown } from "lucide-react"
+import { Calendar as CalendarIcon, Trash2, Archive } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -26,10 +25,10 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 interface ProjectSidebarProps {
+    projectName: string
     status: "active" | "paused" | "completed" | "archived"
     area: string
     dueDate?: Date
@@ -41,6 +40,7 @@ interface ProjectSidebarProps {
 }
 
 export function ProjectSidebar({
+    projectName,
     status,
     area,
     dueDate,
@@ -143,7 +143,7 @@ export function ProjectSidebar({
                         <AlertDialogHeader>
                             <AlertDialogTitle>確定要刪除此專案嗎？</AlertDialogTitle>
                             <AlertDialogDescription>
-                                此操作無法復原。這將永久刪除專案「{area} / ...」及其所有相關任務。
+                                此操作無法復原。這將永久刪除專案「{projectName}」及其所有相關任務。
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

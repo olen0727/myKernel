@@ -70,7 +70,7 @@ const INITIAL_PROJECT = {
 }
 
 export default function ProjectDetailPage() {
-    const { id } = useParams()
+    useParams()
     const navigate = useNavigate()
 
     const [project, setProject] = React.useState(INITIAL_PROJECT)
@@ -141,11 +141,11 @@ export default function ProjectDetailPage() {
             let newIndex
             if (prev.some(l => l.id === overId)) {
                 // 拖曳到空的容器上
-                newIndex = overItems.length + 1
+                newIndex = overItems.length
             } else {
                 const isBelowLastItem = over && overIndex === overItems.length - 1
                 const modifier = isBelowLastItem ? 1 : 0
-                newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length + 1
+                newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length
             }
 
             const movedItem = activeItems[activeIndex]
@@ -345,12 +345,13 @@ export default function ProjectDetailPage() {
 
                     <div className="w-[350px] overflow-y-auto py-8 pr-8">
                         <ProjectSidebar
+                            projectName={project.name}
                             status={project.status}
                             area={project.area}
                             dueDate={project.dueDate}
-                            onStatusChange={(status) => handleUpdateProject({ status })}
-                            onAreaChange={(area) => handleUpdateProject({ area })}
-                            onDueDateChange={(dueDate) => handleUpdateProject({ dueDate })}
+                            onStatusChange={(status: any) => handleUpdateProject({ status })}
+                            onAreaChange={(area: string) => handleUpdateProject({ area })}
+                            onDueDateChange={(dueDate: Date | undefined) => handleUpdateProject({ dueDate })}
                             onArchive={() => handleUpdateProject({ status: "archived" })}
                             onDelete={() => navigate("/projects")}
                         />

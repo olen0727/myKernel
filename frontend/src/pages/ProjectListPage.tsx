@@ -2,12 +2,10 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Workbench } from "@/components/projects/Workbench"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProjectCard, ProjectCardProps } from "@/components/projects/ProjectCard"
 import { CreateProjectModal } from "@/components/projects/CreateProjectModal"
-import { cn } from "@/lib/utils"
 
 const INITIAL_PROJECTS: ProjectCardProps[] = [
     { id: "1", name: "Kernel Project", area: "Work", status: "active", doneTasks: 8, totalTasks: 12 },
@@ -18,6 +16,12 @@ const INITIAL_PROJECTS: ProjectCardProps[] = [
 ]
 
 type FilterStatus = "all" | "active" | "completed" | "paused"
+
+import {
+    ResizableHandle,
+    ResizablePanel,
+    ResizablePanelGroup,
+} from "@/components/ui/resizable"
 
 export default function ProjectListPage() {
     const navigate = useNavigate()
@@ -40,56 +44,61 @@ export default function ProjectListPage() {
             totalTasks: 0,
         }
         setProjects([newProject, ...projects])
-        // 模擬導航至詳情頁
         navigate(`/projects/${newProject.id}`)
     }
 
     return (
-        <div className="flex flex-col h-full overflow-hidden bg-background">
-            <div className="flex flex-col h-full">
+        <div className="h-full w-full bg-background flex flex-col">
+            <ResizablePanelGroup direction="vertical" className="min-h-full">
                 {/* Top: Workbench */}
-                <div className="h-[40%] min-h-[300px] border-b">
-                    <Workbench />
-                </div>
+                <ResizablePanel defaultSize={40} minSize={30}>
+                    <div className="h-full border-b overflow-hidden">
+                        <Workbench />
+                    </div>
+                </ResizablePanel>
+
+                <ResizableHandle withHandle />
 
                 {/* Bottom: Project List */}
-                <div className="flex-1 overflow-hidden bg-muted/5 flex flex-col">
-                    <div className="flex items-center justify-between px-6 py-6">
-                        <div className="flex flex-col gap-1">
-                            <h1 className="text-2xl font-bold tracking-tight">Projects 專案清單</h1>
-                            <div className="flex items-center gap-2 mt-2">
-                                {(["all", "active", "paused", "completed"] as FilterStatus[]).map((status) => (
-                                    <Button
-                                        key={status}
-                                        variant={filterStatus === status ? "secondary" : "ghost"}
-                                        size="sm"
-                                        onClick={() => setFilterStatus(status)}
-                                        className="h-7 px-3 text-xs capitalize"
-                                    >
-                                        {status}
-                                    </Button>
+                <ResizablePanel defaultSize={60}>
+                    <div className="h-full flex flex-col bg-muted/5">
+                        <div className="flex items-center justify-between px-6 py-6 scroll-m-20">
+                            <div className="flex flex-col gap-1">
+                                <h1 className="text-2xl font-bold tracking-tight">Projects 專案清單</h1>
+                                <div className="flex items-center gap-2 mt-2">
+                                    {(["all", "active", "paused", "completed"] as FilterStatus[]).map((status) => (
+                                        <Button
+                                            key={status}
+                                            variant={filterStatus === status ? "secondary" : "ghost"}
+                                            size="sm"
+                                            onClick={() => setFilterStatus(status)}
+                                            className="h-7 px-3 text-xs capitalize"
+                                        >
+                                            {status}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                            <Button size="sm" className="gap-2" onClick={() => setIsModalOpen(true)}>
+                                <Plus className="h-4 w-4" />
+                                New Project
+                            </Button>
+                        </div>
+
+                        <ScrollArea className="flex-1 px-6 pb-6 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {filteredProjects.map((project) => (
+                                    <ProjectCard
+                                        key={project.id}
+                                        {...project}
+                                        onClick={() => navigate(`/projects/${project.id}`)}
+                                    />
                                 ))}
                             </div>
-                        </div>
-                        <Button size="sm" className="gap-2" onClick={() => setIsModalOpen(true)}>
-                            <Plus className="h-4 w-4" />
-                            New Project
-                        </Button>
+                        </ScrollArea>
                     </div>
-
-                    <ScrollArea className="flex-1 px-6 pb-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {filteredProjects.map((project) => (
-                                <ProjectCard
-                                    key={project.id}
-                                    {...project}
-                                    onClick={() => navigate(`/projects/${project.id}`)}
-                                />
-                            ))}
-                        </div>
-                    </ScrollArea>
-                </div>
-            </div>
+                </ResizablePanel>
+            </ResizablePanelGroup>
 
             <CreateProjectModal
                 open={isModalOpen}

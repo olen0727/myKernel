@@ -100,18 +100,30 @@ export function Workbench() {
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event
         if (over && active.id !== over.id) {
-            const activeContainer = findContainer(active.id as string)
-            const overContainer = findContainer(over.id as string) || over.id
+            const activeId = active.id as string
+            const overId = over.id as string
+            const activeContainer = findContainer(activeId)
+            const overContainer = findContainer(overId) || overId
 
             if (activeContainer === overContainer) {
                 if (activeContainer === "doing") {
-                    setDoingTasks(items => arrayMove(items, items.findIndex(i => i.id === active.id), items.findIndex(i => i.id === over.id)))
+                    setDoingTasks(items => arrayMove(items, items.findIndex(i => i.id === activeId), items.findIndex(i => i.id === overId)))
                 } else {
-                    setTodoTasks(items => arrayMove(items, items.findIndex(i => i.id === active.id), items.findIndex(i => i.id === over.id)))
+                    setTodoTasks(items => arrayMove(items, items.findIndex(i => i.id === activeId), items.findIndex(i => i.id === overId)))
                 }
             }
         }
         setActiveId(null)
+    }
+
+    const handleToggleTask = (id: string) => {
+        setDoingTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
+        setTodoTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
+    }
+
+    const handleTitleChange = (id: string, newTitle: string) => {
+        setDoingTasks(prev => prev.map(t => t.id === id ? { ...t, title: newTitle } : t))
+        setTodoTasks(prev => prev.map(t => t.id === id ? { ...t, title: newTitle } : t))
     }
 
     const findContainer = (id: string) => {
@@ -134,8 +146,21 @@ export function Workbench() {
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
-                    <DroppableColumn id="doing" title="Do Today 焦點" tasks={doingTasks} />
-                    <DroppableColumn id="todo" title="Todo 待辦" tasks={todoTasks} isLast />
+                    <DroppableColumn
+                        id="doing"
+                        title="Do Today 焦點"
+                        tasks={doingTasks}
+                        onToggle={handleToggleTask}
+                        onTitleChange={handleTitleChange}
+                    />
+                    <DroppableColumn
+                        id="todo"
+                        title="Todo 待辦"
+                        tasks={todoTasks}
+                        isLast
+                        onToggle={handleToggleTask}
+                        onTitleChange={handleTitleChange}
+                    />
                 </div>
             </div>
 
@@ -151,7 +176,21 @@ export function Workbench() {
     )
 }
 
-function DroppableColumn({ id, title, tasks, isLast = false }: { id: string, title: string, tasks: any[], isLast?: boolean }) {
+function DroppableColumn({
+    id,
+    title,
+    tasks,
+    isLast = false,
+    onToggle,
+    onTitleChange
+}: {
+    id: string,
+    title: string,
+    tasks: any[],
+    isLast?: boolean,
+    onToggle: (id: string) => void,
+    onTitleChange: (id: string, title: string) => void
+}) {
     const { setNodeRef, isOver } = useDroppable({ id })
 
     return (
@@ -170,7 +209,12 @@ function DroppableColumn({ id, title, tasks, isLast = false }: { id: string, tit
                 <div className="space-y-1">
                     <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
                         {tasks.map(task => (
-                            <SortableTaskItem key={task.id} {...task} />
+                            <SortableTaskItem
+                                key={task.id}
+                                {...task}
+                                onToggle={onToggle}
+                                onTitleChange={onTitleChange}
+                            />
                         ))}
                     </SortableContext>
                 </div>
