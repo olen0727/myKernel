@@ -139,7 +139,11 @@ const AreaDetailPage: React.FC = () => {
             <CreateAreaModal
                 isOpen={isCoverModalOpen}
                 onClose={() => setIsCoverModalOpen(false)}
-                onCreate={(_, cover) => handleUpdateArea({ coverImage: cover })}
+                initialData={{
+                    name: area.name,
+                    coverImage: area.coverImage
+                }}
+                onSubmit={(name, cover) => handleUpdateArea({ name, coverImage: cover })}
             />
         </div>
     )

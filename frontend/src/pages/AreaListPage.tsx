@@ -75,7 +75,7 @@ const AreaListPage: React.FC = () => {
             <CreateAreaModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onCreate={handleCreateArea}
+                onSubmit={handleCreateArea}
             />
         </div>
     )
