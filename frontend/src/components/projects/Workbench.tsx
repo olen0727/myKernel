@@ -15,6 +15,7 @@ import {
     DragStartEvent,
     DragOverEvent,
     useDroppable,
+    defaultDropAnimationSideEffects,
 } from "@dnd-kit/core"
 import {
     arrayMove,
@@ -164,9 +165,17 @@ export function Workbench() {
                 </div>
             </div>
 
-            <DragOverlay>
+            <DragOverlay dropAnimation={{
+                sideEffects: defaultDropAnimationSideEffects({
+                    styles: {
+                        active: {
+                            opacity: '0.4',
+                        },
+                    },
+                }),
+            }}>
                 {activeTask ? (
-                    <div className="w-[300px] bg-background border rounded-md shadow-xl p-2 flex items-center gap-3">
+                    <div className="w-[300px] bg-background/80 backdrop-blur-md border rounded-md shadow-2xl p-2 flex items-center gap-3 scale-95 origin-center rotate-1 transition-transform cursor-grabbing ring-2 ring-primary/20">
                         <GripVertical className="h-4 w-4 text-muted-foreground" />
                         <TaskItem {...activeTask} editable={false} />
                     </div>
