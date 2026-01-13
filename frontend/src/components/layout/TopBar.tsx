@@ -28,9 +28,9 @@ export function TopBar() {
     }, [location.pathname])
 
     return (
-        <header className="sticky top-0 z-50 flex h-16 w-full items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 gap-2 md:gap-4">
-            {/* Left: Mobile Menu Trigger (Mobile Only) */}
-            <div className="md:hidden">
+        <header className="sticky top-0 z-50 flex h-16 w-full items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-6 gap-2 lg:gap-4">
+            {/* Left: Mobile Menu Trigger (Mobile/Pad) */}
+            <div className="lg:hidden">
                 <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                     <SheetTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -38,13 +38,16 @@ export function TopBar() {
                         </Button>
                     </SheetTrigger>
                     <SheetContent side="left" className="p-0 w-72">
-                        <SidebarContent forceExpanded />
+                        <SidebarContent
+                            forceExpanded
+                            onToggle={() => setIsMobileMenuOpen(false)}
+                        />
                     </SheetContent>
                 </Sheet>
             </div>
 
             {/* Left: Dynamic Breadcrumbs (Desktop Only) */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2">
                 <Breadcrumb>
                     <BreadcrumbList>
                         <BreadcrumbItem>
@@ -83,7 +86,7 @@ export function TopBar() {
             <div className="flex-1 flex justify-center">
                 <Button
                     variant="outline"
-                    className="relative h-9 w-full md:w-96 lg:w-[32rem] justify-start rounded-[0.5rem] text-sm text-muted-foreground shadow-sm bg-muted/20 hover:bg-muted/50 transition-colors px-3"
+                    className="relative h-9 w-full lg:w-96 xl:w-[32rem] justify-start rounded-[0.5rem] text-sm text-muted-foreground shadow-sm bg-muted/20 hover:bg-muted/50 transition-colors px-3"
                     onClick={() => setOpen(true)}
                 >
                     <Search className="mr-2 h-4 w-4 shrink-0" />

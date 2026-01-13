@@ -32,12 +32,10 @@ export function Sidebar() {
     return (
         <aside
             className={cn(
-                "group relative hidden md:flex flex-col items-center border-r bg-background transition-[width] duration-300 ease-in-out h-screen py-4",
+                "relative hidden lg:flex flex-col border-r bg-card transition-all duration-300 ease-in-out h-screen sticky top-0",
                 isCollapsed ? "w-16" : "w-64"
             )}
         >
-            <SidebarContent />
-
             <SidebarContent />
         </aside>
     )
@@ -45,11 +43,20 @@ export function Sidebar() {
 
 interface SidebarContentProps {
     forceExpanded?: boolean
+    onToggle?: () => void
 }
 
-export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
+export function SidebarContent({ forceExpanded = false, onToggle }: SidebarContentProps) {
     const { isCollapsed: storeCollapsed, toggleSidebar } = useSidebarStore()
     const isCollapsed = forceExpanded ? false : storeCollapsed
+
+    const handleToggle = () => {
+        if (onToggle) {
+            onToggle()
+        } else {
+            toggleSidebar()
+        }
+    }
 
     const navItems = [
         { icon: Inbox, label: "Inbox", href: "/inbox", count: 3 },
@@ -68,19 +75,18 @@ export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
 
     return (
         <TooltipProvider delayDuration={0}>
-            <div className="flex flex-col w-full h-full items-center">
-                {/* Logo & Toggle Area (Integrated) */}
+            <div className="flex flex-col w-full h-full items-center py-4">
                 <div className={cn("w-full mb-6 px-2")}>
                     <Button
                         variant="ghost"
-                        onClick={toggleSidebar}
+                        onClick={handleToggle}
                         className={cn(
                             "w-full h-10 flex items-center transition-all duration-200 overflow-hidden px-2",
                             isCollapsed ? "justify-center" : "justify-between gap-2"
                         )}
                     >
                         {/* PC Logic */}
-                        <div className="hidden md:flex items-center gap-2">
+                        <div className="hidden lg:flex items-center gap-2">
                             {isCollapsed ? (
                                 <div className="group relative h-8 w-8 flex items-center justify-center">
                                     <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold font-serif group-hover:hidden transition-all">K</div>
@@ -94,9 +100,10 @@ export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
                             )}
                         </div>
 
-                        {/* Mobile/Pad Logic (No Hover, simple icon) */}
-                        <div className="md:hidden flex items-center justify-center">
-                            <ChevronLeft className={cn("h-5 w-5 transition-transform", isCollapsed ? "rotate-180" : "rotate-0")} />
+                        {/* Mobile/Pad Logic - Same as PC expanded style for sheet */}
+                        <div className="lg:hidden flex items-center justify-between w-full">
+                            <span className="text-xl font-bold font-serif tracking-tight text-foreground">Kernel</span>
+                            <ChevronLeft className={cn("h-4 w-4 text-muted-foreground/50 transition-transform", isCollapsed ? "rotate-180" : "rotate-0")} />
                         </div>
                     </Button>
                 </div>
