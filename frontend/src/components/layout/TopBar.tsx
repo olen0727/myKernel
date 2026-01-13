@@ -2,6 +2,8 @@ import { Search, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useLocation, Link } from "react-router-dom"
+import { useCommandStore } from "@/stores/command-store"
+
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -14,6 +16,8 @@ import {
 export function TopBar() {
     const location = useLocation()
     const pathnames = location.pathname.split("/").filter((x) => x)
+    const setOpen = useCommandStore((state) => state.setOpen)
+
 
     return (
         <header className="sticky top-0 z-10 flex h-16 w-full items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
@@ -58,7 +62,8 @@ export function TopBar() {
                 <Button
                     variant="outline"
                     className="relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-96 lg:w-[32rem] shadow-sm bg-muted/20 hover:bg-muted/50 transition-colors"
-                    onClick={() => console.log("Open command palette")}
+                    onClick={() => setOpen(true)}
+
                 >
                     <Search className="mr-2 h-4 w-4" />
                     <span>Search or ask...</span>

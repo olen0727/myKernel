@@ -4,11 +4,16 @@ import { TopBar } from "@/components/layout/TopBar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
+import { CommandPalette } from "@/components/command-palette"
 
 export default function AppLayout() {
     return (
         <div className="flex min-h-screen bg-background text-foreground font-sans">
+            {/* Command Palette */}
+            <CommandPalette />
+
             {/* Desktop Sidebar */}
+
             <Sidebar />
 
             <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out overflow-hidden">
