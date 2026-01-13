@@ -1,43 +1,134 @@
 import * as React from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, ListTodo, FileText, Settings } from "lucide-react"
+import { ArrowLeft, ListTodo, FileText, Settings, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProjectHeader } from "@/components/projects/ProjectHeader"
 import { ProjectSidebar } from "@/components/projects/ProjectSidebar"
+import { TaskList } from "@/components/tasks/TaskList"
 import { toast } from "sonner"
 
-// --- Mock Data ---
-const MOCK_PROJECT = {
+// --- Initial Mock Data ---
+interface Task {
+    id: string
+    title: string
+    completed: boolean
+}
+
+interface TaskListGroup {
+    id: string
+    title: string
+    items: Task[]
+}
+
+const INITIAL_TASK_LISTS: TaskListGroup[] = [
+    {
+        id: "list-1",
+        title: "第一階段：開發環境準備",
+        items: [
+            { id: "task-1", title: "初始化 React + Vite 專案", completed: true },
+            { id: "task-2", title: "配置 Tailwind CSS", completed: true },
+            { id: "task-3", title: "設定 Shadcn UI 組件庫", completed: false },
+        ]
+    },
+    {
+        id: "list-2",
+        title: "第二階段：核心 UI 實作",
+        items: [
+            { id: "task-4", title: "實作專案列表頁面", completed: false },
+            { id: "task-5", title: "開發專案詳情頁", completed: false },
+        ]
+    }
+]
+
+const INITIAL_PROJECT = {
     id: "1",
     name: "Kernel Project",
     description: "這是一個關於個人生產力系統的核心開發專案。目標是建立一個能夠完美整合筆記、任務與目標的腦同步系統。",
     area: "Work",
     status: "active" as "active" | "paused" | "completed" | "archived",
     dueDate: new Date(2026, 5, 30),
-    doneTasks: 8,
-    totalTasks: 12,
 }
 
 export default function ProjectDetailPage() {
     const { id } = useParams()
     const navigate = useNavigate()
-    const [project, setProject] = React.useState(MOCK_PROJECT)
 
-    const handleUpdate = (updates: Partial<typeof MOCK_PROJECT>) => {
+    const [project, setProject] = React.useState(INITIAL_PROJECT)
+    const [taskLists, setTaskLists] = React.useState<TaskListGroup[]>(INITIAL_TASK_LISTS)
+
+    // --- 進度計算 ---
+    const taskStats = React.useMemo(() => {
+        let total = 0
+        let done = 0
+        taskLists.forEach(list => {
+            total += list.items.length
+            list.items.forEach(item => {
+                if (item.completed) done++
+            })
+        })
+        return { done, total }
+    }, [taskLists])
+
+    // --- Handlers ---
+    const handleUpdateProject = (updates: Partial<typeof INITIAL_PROJECT>) => {
         setProject(prev => ({ ...prev, ...updates }))
         toast.success("專案已更新")
     }
 
-    const handleDelete = () => {
-        console.log("Deleting project:", id)
-        toast.error("專案已刪除")
-        navigate("/projects")
+    const handleTaskToggle = (listId: string, taskId: string) => {
+        setTaskLists(prev => prev.map(list => {
+            if (list.id !== listId) return list
+            return {
+                ...list,
+                items: list.items.map(task =>
+                    task.id === taskId ? { ...task, completed: !task.completed } : task
+                )
+            }
+        }))
     }
 
-    const handleArchive = () => {
-        handleUpdate({ status: "archived" })
-        toast.info("專案已封存")
+    const handleTaskTitleChange = (listId: string, taskId: string, newTitle: string) => {
+        setTaskLists(prev => prev.map(list => {
+            if (list.id !== listId) return list
+            return {
+                ...list,
+                items: list.items.map(task =>
+                    task.id === taskId ? { ...task, title: newTitle } : task
+                )
+            }
+        }))
+    }
+
+    const handleAddTask = (listId: string, title: string) => {
+        const newTask = {
+            id: `task-${Math.random().toString(36).substr(2, 9)}`,
+            title,
+            completed: false
+        }
+        setTaskLists(prev => prev.map(list =>
+            list.id === listId ? { ...list, items: [...list.items, newTask] } : list
+        ))
+    }
+
+    const handleAddList = () => {
+        const newList = {
+            id: `list-${Math.random().toString(36).substr(2, 9)}`,
+            title: "新的任務清單",
+            items: []
+        }
+        setTaskLists([...taskLists, newList])
+    }
+
+    const handleRenameList = (listId: string, newTitle: string) => {
+        setTaskLists(prev => prev.map(list =>
+            list.id === listId ? { ...list, title: newTitle } : list
+        ))
+    }
+
+    const handleDeleteList = (listId: string) => {
+        setTaskLists(prev => prev.filter(list => list.id !== listId))
+        toast.error("清單已刪除")
     }
 
     return (
@@ -54,7 +145,6 @@ export default function ProjectDetailPage() {
                 </div>
             </div>
 
-            {/* Main Content Area */}
             <div className="flex-1 overflow-hidden flex h-full">
                 {/* Left Column: Content */}
                 <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
@@ -62,10 +152,10 @@ export default function ProjectDetailPage() {
                         <ProjectHeader
                             title={project.name}
                             description={project.description}
-                            doneTasks={project.doneTasks}
-                            totalTasks={project.totalTasks}
-                            onTitleChange={(name) => handleUpdate({ name })}
-                            onDescriptionChange={(description) => handleUpdate({ description })}
+                            doneTasks={taskStats.done}
+                            totalTasks={taskStats.total}
+                            onTitleChange={(name) => handleUpdateProject({ name })}
+                            onDescriptionChange={(description) => handleUpdateProject({ description })}
                         />
 
                         <Tabs defaultValue="tasks" className="w-full">
@@ -84,12 +174,28 @@ export default function ProjectDetailPage() {
                                 </TabsTrigger>
                             </TabsList>
 
-                            <TabsContent value="tasks" className="min-h-[400px]">
-                                <div className="bg-muted/10 border border-dashed rounded-xl flex items-center justify-center p-12">
-                                    <div className="text-center space-y-2">
-                                        <p className="text-muted-foreground">任務管理模組開發中...</p>
-                                        <p className="text-xs text-muted-foreground/60">(預計在 Story 3.4 實作)</p>
-                                    </div>
+                            <TabsContent value="tasks" className="space-y-8 min-h-[400px]">
+                                <div className="space-y-12">
+                                    {taskLists.map(list => (
+                                        <TaskList
+                                            key={list.id}
+                                            {...list}
+                                            onTaskToggle={handleTaskToggle}
+                                            onTaskTitleChange={handleTaskTitleChange}
+                                            onAddTask={handleAddTask}
+                                            onRenameList={handleRenameList}
+                                            onDeleteList={handleDeleteList}
+                                        />
+                                    ))}
+
+                                    <Button
+                                        variant="outline"
+                                        className="w-full border-dashed py-8 h-auto gap-2 text-muted-foreground hover:text-primary transition-all"
+                                        onClick={handleAddList}
+                                    >
+                                        <Plus className="h-5 w-5" />
+                                        新增任務群組 (Task Group)
+                                    </Button>
                                 </div>
                             </TabsContent>
 
@@ -114,11 +220,11 @@ export default function ProjectDetailPage() {
                         status={project.status}
                         area={project.area}
                         dueDate={project.dueDate}
-                        onStatusChange={(status) => handleUpdate({ status })}
-                        onAreaChange={(area) => handleUpdate({ area })}
-                        onDueDateChange={(dueDate) => handleUpdate({ dueDate })}
-                        onArchive={handleArchive}
-                        onDelete={handleDelete}
+                        onStatusChange={(status) => handleUpdateProject({ status })}
+                        onAreaChange={(area) => handleUpdateProject({ area })}
+                        onDueDateChange={(dueDate) => handleUpdateProject({ dueDate })}
+                        onArchive={() => handleUpdateProject({ status: "archived" })}
+                        onDelete={() => navigate("/projects")}
                     />
                 </div>
             </div>
