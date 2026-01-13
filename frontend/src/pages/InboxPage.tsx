@@ -5,6 +5,8 @@ import { ResourceItem, Resource } from "@/components/resources/ResourceItem"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { toast } from "sonner"
+import { Archive, Trash2 } from "lucide-react"
 
 // --- Mock Data ---
 
@@ -45,13 +47,23 @@ export const InboxPage: React.FC = () => {
     const [resources, setResources] = useState<Resource[]>(INITIAL_MOCK_RESOURCES)
 
     const handleArchive = (id: string) => {
+        const resource = resources.find(r => r.id === id)
         console.log("Archive resource:", id)
         setResources(prev => prev.filter(r => r.id !== id))
+        toast.success("資源已歸檔", {
+            description: `「${resource?.title}」已移至封存庫。`,
+            icon: <Archive className="w-4 h-4 text-primary" />
+        })
     }
 
     const handleDelete = (id: string) => {
+        const resource = resources.find(r => r.id === id)
         console.log("Delete resource:", id)
         setResources(prev => prev.filter(r => r.id !== id))
+        toast.error("資源已刪除", {
+            description: `「${resource?.title}」已從系統中移除。`,
+            icon: <Trash2 className="w-4 h-4 text-destructive" />
+        })
     }
 
     return (

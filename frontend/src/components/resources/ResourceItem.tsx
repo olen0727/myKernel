@@ -1,6 +1,7 @@
 import React from "react"
 import { formatDistanceToNow } from "date-fns"
 import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 import {
     FileText,
     Link as LinkIcon,
@@ -8,7 +9,8 @@ import {
     Trash2,
     ExternalLink,
     ChevronRight,
-    FolderPlus
+    FolderPlus,
+    CheckCircle2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -48,7 +50,10 @@ export const ResourceItem: React.FC<ResourceItemProps> = ({
 
     const handleConfirmDispatch = (selectedIds: string[]) => {
         console.log(`Dispatching resource ${resource.id} to:`, selectedIds)
-        // In real app, this would trigger an API call and status update to 'Processed'
+        toast.success("資源分流成功", {
+            description: `已將「${resource.title}」標記為已處理並關聯至 ${selectedIds.length} 個目標。`,
+            icon: <CheckCircle2 className="w-4 h-4 text-primary" />
+        })
         onArchive(resource.id) // Mock process by removing from inbox
     }
 
