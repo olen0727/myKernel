@@ -81,7 +81,10 @@ export function TaskItem({
             )}
 
             {showProject && projectName && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal bg-accent/20 text-accent-foreground border-accent/20">
+                <Badge
+                    variant="outline"
+                    className="text-[10px] px-1.5 py-0 h-4 font-medium bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors"
+                >
                     {projectName}
                 </Badge>
             )}
