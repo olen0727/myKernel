@@ -102,14 +102,50 @@ export const INITIAL_TASK_LISTS: TaskListGroup[] = [
     }
 ]
 
-export const INITIAL_PROJECT = {
-    id: "1",
-    name: "Kernel Project",
-    description: "這是一個關於個人生產力系統的核心開發專案。目標是建立一個能夠完美整合筆記、任務與目標的腦同步系統。",
-    area: "Work",
-    status: "active" as "active" | "paused" | "completed" | "archived",
-    dueDate: new Date(2026, 5, 30),
-}
+export const INITIAL_PROJECTS = [
+    {
+        id: "1",
+        name: "Kernel Core 開發",
+        description: "本專案旨在建立個人生產力系統的核心架構，包含收件匣、領域管理與專案追蹤。",
+        area: "Work 職涯與專業",
+        status: "active" as const,
+        dueDate: new Date(2026, 5, 30),
+    },
+    {
+        id: "2",
+        name: "閱讀清單：數位大腦",
+        description: "整理與閱讀關於第二大腦、知識管理的相關書籍與文章。",
+        area: "Self-Growth 自我成長",
+        status: "active" as const,
+        dueDate: new Date(2026, 2, 15),
+    },
+    {
+        id: "3",
+        name: "馬拉松訓練計畫",
+        description: "為 2026 年底的台北馬拉松做準備，包含每週的跑量安排與耐力訓練。",
+        area: "Health & Fitness 健康",
+        status: "active" as const,
+        dueDate: new Date(2026, 11, 20),
+    },
+    {
+        id: "4",
+        name: "資產配置優化",
+        description: "檢視目前的投資組合，並根據 2026 年的市場環境進行再平衡。",
+        area: "Finance 財務管理",
+        status: "active" as const,
+        dueDate: new Date(2026, 1, 1),
+    },
+    {
+        id: "5",
+        name: "系統架構重構 (Phase 2)",
+        description: "針對現有的 UI 組件進行效能優化與無障礙功能增強。",
+        area: "Work 職涯與專業",
+        status: "active" as const,
+        dueDate: new Date(2026, 8, 15),
+    }
+]
+
+export const INITIAL_PROJECT = INITIAL_PROJECTS[0]
 
 export interface ProjectResource {
     id: string
@@ -249,8 +285,19 @@ class DataStore {
 
     // Projects
     getProjectsByArea(areaName: string) {
-        // Mock project filtering by area name for now
-        return [INITIAL_PROJECT].filter(p => p.area === areaName)
+        // Mock project filtering by area name or substring
+        return INITIAL_PROJECTS.filter(p =>
+            p.area === areaName ||
+            areaName.includes(p.area) ||
+            p.area.includes(areaName.split(' ')[0])
+        )
+    }
+
+    // Resources
+    getResourcesByArea(areaId: string) {
+        // Mock filtering some resources for the area
+        // In a real app, this would be based on a link table
+        return INITIAL_INBOX_RESOURCES.filter((_, idx) => (idx + parseInt(areaId)) % 2 === 0)
     }
 }
 
