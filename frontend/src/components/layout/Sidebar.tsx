@@ -1,4 +1,5 @@
 import { useSidebarStore } from "@/stores/sidebar-store"
+import { useQuickCapture } from "@/stores/quick-capture-store"
 import { cn } from "@/lib/utils"
 import { NavLink } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -48,6 +49,7 @@ interface SidebarContentProps {
 
 export function SidebarContent({ forceExpanded = false, onToggle }: SidebarContentProps) {
     const { isCollapsed: storeCollapsed, toggleSidebar } = useSidebarStore()
+    const { onOpen } = useQuickCapture()
     const isCollapsed = forceExpanded ? false : storeCollapsed
 
     const handleToggle = () => {
@@ -116,6 +118,7 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
                             <Button
                                 variant={isCollapsed ? "ghost" : "default"}
                                 size={isCollapsed ? "icon" : "default"}
+                                onClick={onOpen}
                                 className={cn("transition-all", !isCollapsed && "w-full justify-start gap-2 shadow-sm font-medium")}
                             >
                                 <PlusCircle className="h-5 w-5" />
