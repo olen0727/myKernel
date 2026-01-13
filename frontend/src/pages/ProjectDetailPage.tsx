@@ -369,8 +369,8 @@ export default function ProjectDetailPage() {
                 }),
             }}>
                 {activeTask ? (
-                    <div className="w-full max-w-[500px] bg-background/80 backdrop-blur-md border rounded-md shadow-2xl p-2 flex items-center gap-3 scale-[0.98] rotate-1 cursor-grabbing ring-2 ring-primary/20">
-                        <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    <div className="w-full max-w-[500px] bg-background/70 backdrop-blur-sm border-2 border-primary/30 rounded-md shadow-2xl p-2 flex items-center gap-3 scale-[0.98] rotate-1 cursor-grabbing opacity-70">
+                        <GripVertical className="h-4 w-4 text-primary" />
                         <TaskItem {...activeTask} editable={false} showProject={false} />
                     </div>
                 ) : null}

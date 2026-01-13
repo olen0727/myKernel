@@ -175,8 +175,8 @@ export function Workbench() {
                 }),
             }}>
                 {activeTask ? (
-                    <div className="w-[300px] bg-background/80 backdrop-blur-md border rounded-md shadow-2xl p-2 flex items-center gap-3 scale-95 origin-center rotate-1 transition-transform cursor-grabbing ring-2 ring-primary/20">
-                        <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    <div className="w-[300px] bg-background/70 backdrop-blur-sm border-2 border-primary/30 rounded-md shadow-2xl p-2 flex items-center gap-3 scale-95 origin-center rotate-1 transition-transform cursor-grabbing opacity-70">
+                        <GripVertical className="h-4 w-4 text-primary" />
                         <TaskItem {...activeTask} editable={false} />
                     </div>
                 ) : null}
