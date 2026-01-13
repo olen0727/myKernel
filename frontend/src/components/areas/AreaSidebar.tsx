@@ -5,8 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Trash2, Link as LinkIcon, Info } from 'lucide-react'
+import { Trash2, Info } from 'lucide-react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -61,17 +60,6 @@ export const AreaSidebar: React.FC<AreaSidebarProps> = ({ area, onUpdate, onDele
                         />
                     </div>
 
-                    <Separator />
-
-                    <div className="space-y-3">
-                        <Label className="flex items-center gap-2">
-                            <LinkIcon className="w-4 h-4" />
-                            關聯資源
-                        </Label>
-                        <div className="text-sm text-center py-4 bg-accent/30 rounded-lg border border-dashed text-muted-foreground">
-                            目前暫無關聯資源
-                        </div>
-                    </div>
                 </CardContent>
             </Card>
 
