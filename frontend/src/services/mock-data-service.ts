@@ -1,4 +1,4 @@
-import { startOfDay, subDays, format } from "date-fns"
+import { startOfDay, subDays, subHours, format } from "date-fns"
 
 export interface MetricData {
     date: Date
@@ -25,3 +25,136 @@ export const generateMockMetricData = (days: number, min: number, max: number): 
     }
     return data
 }
+
+// --- Inbox Mock Data ---
+export interface Resource {
+    id: string
+    type: "note" | "link"
+    title: string
+    summary: string
+    timestamp: Date
+    url?: string
+}
+
+export const INITIAL_INBOX_RESOURCES: Resource[] = [
+    {
+        id: "1",
+        type: "note",
+        title: "Kernel 產品核心理念筆記",
+        summary: "這是一份關於 Kernel 的設計哲學筆記，涵蓋了『腦同步』與『收件匣』的核心概念...",
+        timestamp: subHours(new Date(), 2),
+    },
+    {
+        id: "2",
+        type: "link",
+        title: "Building a Second Brain - Tiago Forte",
+        summary: "深入探討 CODE 框架：Capture, Organize, Distill, Express，如何建立數位大腦...",
+        timestamp: subHours(new Date(), 5),
+        url: "https://fortelabs.com/blog/basb/"
+    },
+    {
+        id: "3",
+        type: "note",
+        title: "2026 年個人發展目標思考",
+        summary: "從健康、事業、財務、人際關係四個維度設定 OKRs，並將其拆解為可執行的習慣...",
+        timestamp: subDays(new Date(), 1),
+    },
+    {
+        id: "4",
+        type: "link",
+        title: "React 19 Server Components 深度解析",
+        summary: "這篇技術文章詳細說明了 React 19 對於伺服器元件的優化以及更簡單的資料獲取模式...",
+        timestamp: subDays(new Date(), 1),
+        url: "https://react.dev/blog/react-19"
+    }
+]
+
+// --- Project Mock Data ---
+export interface Task {
+    id: string
+    title: string
+    completed: boolean
+}
+
+export interface TaskListGroup {
+    id: string
+    title: string
+    items: Task[]
+}
+
+export const INITIAL_TASK_LISTS: TaskListGroup[] = [
+    {
+        id: "list-1",
+        title: "第一階段：開發環境準備",
+        items: [
+            { id: "task-1", title: "初始化 React + Vite 專案", completed: true },
+            { id: "task-2", title: "配置 Tailwind CSS", completed: true },
+            { id: "task-3", title: "設定 Shadcn UI 組件庫", completed: false },
+        ]
+    },
+    {
+        id: "list-2",
+        title: "第二階段：核心 UI 實作",
+        items: [
+            { id: "task-4", title: "實作專案列表頁面", completed: false },
+            { id: "task-5", title: "開發專案詳情頁", completed: false },
+        ]
+    }
+]
+
+export const INITIAL_PROJECT = {
+    id: "1",
+    name: "Kernel Project",
+    description: "這是一個關於個人生產力系統的核心開發專案。目標是建立一個能夠完美整合筆記、任務與目標的腦同步系統。",
+    area: "Work",
+    status: "active" as "active" | "paused" | "completed" | "archived",
+    dueDate: new Date(2026, 5, 30),
+}
+
+export interface ProjectResource {
+    id: string
+    type: "note" | "link"
+    title: string
+    content: string
+    createdAt: Date
+}
+
+export const INITIAL_PROJECT_RESOURCES: ProjectResource[] = [
+    {
+        id: "res-1",
+        type: "note",
+        title: "專案架構設計筆記",
+        content: "本專案採用 React + Vite 作為前端框架，使用 RxDB 作為本地資料庫實現離線優先架構。UI 元件庫選用 Shadcn/UI，搭配 Tailwind CSS 進行樣式管理...",
+        createdAt: new Date(2026, 0, 10),
+    },
+    {
+        id: "res-2",
+        type: "link",
+        title: "Shadcn/UI 官方文件",
+        content: "Beautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.",
+        createdAt: new Date(2026, 0, 8),
+    },
+    {
+        id: "res-3",
+        type: "note",
+        title: "用戶訪談紀錄 - 第一輪",
+        content: "訪談對象：5 位目標用戶。主要發現：用戶普遍對現有任務管理工具感到不滿，主要痛點包括：1) 跨裝置同步困難 2) 介面過於複雜 3) 缺乏彈性的組織方式...",
+        createdAt: new Date(2026, 0, 5),
+    },
+]
+
+// --- Dashboard Mock Data ---
+export const DASHBOARD_STATS = [
+    { title: "腦同步天數 (Brain-Sync Days)", value: 42, description: "寫過日記的總天數" },
+    { title: "Inbox 未處理數", value: 5, description: "待處理資源數量" },
+    { title: "進行中專案 (Active Projects)", value: 3, description: "Active 狀態專案" },
+    { title: "待辦任務 (Total Tasks)", value: 12, description: "未完成任務總量" },
+]
+
+// --- Habits Mock Data ---
+export const HABITS = [
+    { id: "1", name: "寫日記", currentStreak: 42, maxStreak: 60 },
+    { id: "2", name: "閱讀 30 分鐘", currentStreak: 5, maxStreak: 15 },
+    { id: "3", name: "冥想", currentStreak: 12, maxStreak: 12 },
+    { id: "4", name: "運動", currentStreak: 3, maxStreak: 10 },
+]

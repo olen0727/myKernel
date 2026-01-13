@@ -1,50 +1,17 @@
 import React, { useState } from "react"
-import { subHours, subDays } from "date-fns"
 import { Sparkles, Plus } from "lucide-react"
-import { ResourceItem, Resource } from "@/components/resources/ResourceItem"
+import { ResourceItem } from "@/components/resources/ResourceItem"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { toast } from "sonner"
 import { Archive, Trash2 } from "lucide-react"
-
-// --- Mock Data ---
-
-const INITIAL_MOCK_RESOURCES: Resource[] = [
-    {
-        id: "1",
-        type: "note",
-        title: "Kernel 產品核心理念筆記",
-        summary: "這是一份關於 Kernel 的設計哲學筆記，涵蓋了『腦同步』與『收件匣』的核心概念...",
-        timestamp: subHours(new Date(), 2),
-    },
-    {
-        id: "2",
-        type: "link",
-        title: "Building a Second Brain - Tiago Forte",
-        summary: "深入探討 CODE 框架：Capture, Organize, Distill, Express，如何建立數位大腦...",
-        timestamp: subHours(new Date(), 5),
-        url: "https://fortelabs.com/blog/basb/"
-    },
-    {
-        id: "3",
-        type: "note",
-        title: "2026 年個人發展目標思考",
-        summary: "從健康、事業、財務、人際關係四個維度設定 OKRs，並將其拆解為可執行的習慣...",
-        timestamp: subDays(new Date(), 1),
-    },
-    {
-        id: "4",
-        type: "link",
-        title: "React 19 Server Components 深度解析",
-        summary: "這篇技術文章詳細說明了 React 19 對於伺服器元件的優化以及更簡單的資料獲取模式...",
-        timestamp: subDays(new Date(), 1),
-        url: "https://react.dev/blog/react-19"
-    }
-]
+import { INITIAL_INBOX_RESOURCES, Resource } from "@/services/mock-data-service"
+import { useQuickCapture } from "@/stores/quick-capture-store"
 
 export const InboxPage: React.FC = () => {
-    const [resources, setResources] = useState<Resource[]>(INITIAL_MOCK_RESOURCES)
+    const [resources, setResources] = useState<Resource[]>(INITIAL_INBOX_RESOURCES)
+    const { onOpen } = useQuickCapture()
 
     const handleArchive = (id: string) => {
         const resource = resources.find(r => r.id === id)
@@ -79,7 +46,10 @@ export const InboxPage: React.FC = () => {
                         你有 <span className="text-primary font-bold">{resources.length}</span> 個待處理項目
                     </p>
                 </div>
-                <Button className="rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all gap-2 px-6">
+                <Button
+                    onClick={onOpen}
+                    className="rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all gap-2 px-6"
+                >
                     <Plus className="w-4 h-4" />
                     快速擷取
                 </Button>

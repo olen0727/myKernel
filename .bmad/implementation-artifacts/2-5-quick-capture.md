@@ -38,6 +38,9 @@ So that **我可以不中斷當前工作流，快速保留靈感或資訊**.
 - [x] 整合 "New Resource" 按鈕
     - [x] Sidebar 中的按鈕正確觸發 Modal 開啟。
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][High] 將 Mock Data 移至獨立 Service 以利後續 RxDB 整合 [InboxPage.tsx:13]
+
 ## Dev Agent Record
 
 ### Implementation Plan

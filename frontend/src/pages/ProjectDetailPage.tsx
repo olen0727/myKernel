@@ -9,6 +9,12 @@ import { ProjectHeader } from "@/components/projects/ProjectHeader"
 import { ProjectSidebar } from "@/components/projects/ProjectSidebar"
 import { TaskList } from "@/components/tasks/TaskList"
 import { toast } from "sonner"
+import {
+    INITIAL_PROJECT,
+    INITIAL_TASK_LISTS,
+    INITIAL_PROJECT_RESOURCES,
+    TaskListGroup,
+} from "@/services/mock-data-service"
 
 import {
     DndContext,
@@ -29,88 +35,11 @@ import {
 } from "@dnd-kit/sortable"
 import { TaskItem } from "@/components/tasks/TaskItem"
 
-// --- Types ---
-interface Task {
-    id: string
-    title: string
-    completed: boolean
-}
-
-interface TaskListGroup {
-    id: string
-    title: string
-    items: Task[]
-}
-
-const INITIAL_TASK_LISTS: TaskListGroup[] = [
-    {
-        id: "list-1",
-        title: "第一階段：開發環境準備",
-        items: [
-            { id: "task-1", title: "初始化 React + Vite 專案", completed: true },
-            { id: "task-2", title: "配置 Tailwind CSS", completed: true },
-            { id: "task-3", title: "設定 Shadcn UI 組件庫", completed: false },
-        ]
-    },
-    {
-        id: "list-2",
-        title: "第二階段：核心 UI 實作",
-        items: [
-            { id: "task-4", title: "實作專案列表頁面", completed: false },
-            { id: "task-5", title: "開發專案詳情頁", completed: false },
-        ]
-    }
-]
-
-const INITIAL_PROJECT = {
-    id: "1",
-    name: "Kernel Project",
-    description: "這是一個關於個人生產力系統的核心開發專案。目標是建立一個能夠完美整合筆記、任務與目標的腦同步系統。",
-    area: "Work",
-    status: "active" as "active" | "paused" | "completed" | "archived",
-    dueDate: new Date(2026, 5, 30),
-}
-
-// Mock linked resources for this project
-interface ProjectResource {
-    id: string
-    type: "note" | "link"
-    title: string
-    content: string
-    createdAt: Date
-}
-
-const INITIAL_RESOURCES: ProjectResource[] = [
-    {
-        id: "res-1",
-        type: "note",
-        title: "專案架構設計筆記",
-        content: "本專案採用 React + Vite 作為前端框架，使用 RxDB 作為本地資料庫實現離線優先架構。UI 元件庫選用 Shadcn/UI，搭配 Tailwind CSS 進行樣式管理...",
-        createdAt: new Date(2026, 0, 10),
-    },
-    {
-        id: "res-2",
-        type: "link",
-        title: "Shadcn/UI 官方文件",
-        content: "Beautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.",
-        createdAt: new Date(2026, 0, 8),
-    },
-    {
-        id: "res-3",
-        type: "note",
-        title: "用戶訪談紀錄 - 第一輪",
-        content: "訪談對象：5 位目標用戶。主要發現：用戶普遍對現有任務管理工具感到不滿，主要痛點包括：1) 跨裝置同步困難 2) 介面過於複雜 3) 缺乏彈性的組織方式...",
-        createdAt: new Date(2026, 0, 5),
-    },
-]
+// Mock linked resources moved to service
 
 export default function ProjectDetailPage() {
-    const { id } = useParams<{ id: string }>()
+    const { id: _id } = useParams<{ id: string }>() // Use for metadata/fetch
     const navigate = useNavigate()
-
-    // TODO: Epic 6 - Use id to fetch project from RxDB
-    // Currently using mock data, id will be used when service layer is implemented
-    const _projectId = id
 
     const [project, setProject] = React.useState(INITIAL_PROJECT)
     const [taskLists, setTaskLists] = React.useState<TaskListGroup[]>(INITIAL_TASK_LISTS)
@@ -230,7 +159,8 @@ export default function ProjectDetailPage() {
 
     const findContainer = (id: string) => {
         if (taskLists.some(l => l.id === id)) return id
-        return taskLists.find(l => l.items.some(i => i.id === id))?.id
+        const container = taskLists.find(l => l.items.some(i => i.id === id))
+        return container?.id
     }
 
     // --- Handlers ---
@@ -365,18 +295,17 @@ export default function ProjectDetailPage() {
                                 </TabsContent>
 
                                 <TabsContent value="resources" className="min-h-[400px]">
-                                    {INITIAL_RESOURCES.length > 0 ? (
+                                    {INITIAL_PROJECT_RESOURCES.length > 0 ? (
                                         <div className="space-y-3">
-                                            {INITIAL_RESOURCES.map((resource) => (
+                                            {INITIAL_PROJECT_RESOURCES.map((resource) => (
                                                 <div
                                                     key={resource.id}
                                                     className="group flex items-start gap-4 p-4 rounded-xl border border-border/50 hover:border-border hover:bg-muted/30 transition-all cursor-pointer"
                                                 >
-                                                    <div className={`mt-0.5 p-2.5 rounded-lg flex items-center justify-center ${
-                                                        resource.type === "note"
-                                                            ? "bg-primary/10 text-primary"
-                                                            : "bg-blue-500/10 text-blue-600"
-                                                    }`}>
+                                                    <div className={`mt-0.5 p-2.5 rounded-lg flex items-center justify-center ${resource.type === "note"
+                                                        ? "bg-primary/10 text-primary"
+                                                        : "bg-blue-500/10 text-blue-600"
+                                                        }`}>
                                                         {resource.type === "note" ? (
                                                             <FileText className="w-5 h-5" />
                                                         ) : (

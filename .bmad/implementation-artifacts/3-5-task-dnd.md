@@ -33,6 +33,9 @@ So that **我可以靈活地安排工作優先級與焦點任務**.
 - [x] 整合 dnd-kit 至 TaskList
     - [x] 實作單一列表內的排序邏輯。
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][High] 優化空容器的拖拽放置邏輯 (findContainer 邊際案例) [ProjectDetailPage.tsx:166]
+
 ## Dev Agent Record
 
 ### Implementation Plan

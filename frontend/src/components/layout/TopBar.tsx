@@ -46,8 +46,8 @@ export function TopBar() {
                 </Sheet>
             </div>
 
-            {/* Left: Dynamic Breadcrumbs (Desktop Only) */}
-            <div className="hidden lg:flex items-center gap-2">
+            {/* Left: Dynamic Breadcrumbs (Tablet & Desktop) */}
+            <div className="hidden md:flex items-center gap-2">
                 <Breadcrumb>
                     <BreadcrumbList>
                         <BreadcrumbItem>

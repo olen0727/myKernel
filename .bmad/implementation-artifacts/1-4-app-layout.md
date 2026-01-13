@@ -32,9 +32,10 @@ So that **我在不同頁面間導航時有一致的操作體驗**.
 - [x] 實作 TopBar 優化
     - [x] 加入 **Dynamic Breadcrumb** 元件 (Shadcn/UI)。
     - [x] 確保主題切換與搜尋框佈局正確。
-- [x] 實作各類頁面優化
-    - [x] 統一頁面 Header 樣式。
-    - [x] 實作 Settings 頁面的 Tabs 佈局。
+- [x] 實作 Settings 頁面的 Tabs 佈局。
+
+### Review Follow-ups (AI)
+- [x] [AI-Review][Medium] 解決 768px - 1024px 之間的導航真空問題 (Breadcrumbs vs Sidebar visibility) [TopBar.tsx:50]
 
 ## Dev Notes
 

@@ -4,13 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-// Mock Data
-const HABITS = [
-    { id: "1", name: "寫日記", currentStreak: 42, maxStreak: 60 },
-    { id: "2", name: "閱讀 30 分鐘", currentStreak: 5, maxStreak: 15 },
-    { id: "3", name: "冥想", currentStreak: 12, maxStreak: 12 },
-    { id: "4", name: "運動", currentStreak: 3, maxStreak: 10 },
-]
+import { HABITS } from "@/services/mock-data-service"
 
 /**
  * 產生最近 7 週的數據，按週分組
