@@ -5,8 +5,8 @@ import { AreaHeader } from '@/components/areas/AreaHeader'
 import { AreaSidebar } from '@/components/areas/AreaSidebar'
 import { CreateAreaModal } from '@/components/areas/CreateAreaModal'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent } from '@/components/ui/card'
 import { HabitManager } from '@/components/habits/HabitManager'
+import { ProjectCard } from '@/components/projects/ProjectCard'
 import { LayoutGrid, CalendarCheck, Plus, Library, FileText, Link as LinkIcon, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -96,25 +96,16 @@ const AreaDetailPage: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {relatedProjects.length > 0 ? (
                                     relatedProjects.map(project => (
-                                        <Card
+                                        <ProjectCard
                                             key={project.id}
-                                            className="group hover:border-primary/50 transition-all cursor-pointer bg-card/50 hover:bg-card hover:shadow-md"
+                                            id={project.id}
+                                            name={project.name}
+                                            area={project.area}
+                                            status={project.status}
+                                            doneTasks={2} // Mocked for consistency
+                                            totalTasks={5} // Mocked for consistency
                                             onClick={() => navigate(`/projects/${project.id}`)}
-                                        >
-                                            <CardContent className="p-5 space-y-4">
-                                                <div className="flex justify-between items-start">
-                                                    <h4 className="font-bold text-lg group-hover:text-primary transition-colors">{project.name}</h4>
-                                                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary/50 transition-all group-hover:translate-x-1" />
-                                                </div>
-                                                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                                                    {project.description}
-                                                </p>
-                                                <div className="pt-2 flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">
-                                                    <span className="px-2 py-1 bg-accent/50 rounded-md border border-border/50">{project.status}</span>
-                                                    <span>Due: {format(project.dueDate, "yyyy/MM/dd")}</span>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
+                                        />
                                     ))
                                 ) : (
                                     <div className="col-span-full py-16 text-center border-dashed border-2 rounded-2xl bg-muted/5">
