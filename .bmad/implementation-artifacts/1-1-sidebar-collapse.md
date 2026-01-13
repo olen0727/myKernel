@@ -1,6 +1,6 @@
 # Story 1.1: 側邊欄收折與響應式行為
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

@@ -1,6 +1,6 @@
 # Story 1.4: App Layout & Placeholder Pages 頁面空殼與佈局
 
-Status: review
+Status: done
 
 ## Story
 

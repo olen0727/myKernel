@@ -1,6 +1,6 @@
 # Story 1.5: Command Palette 全域搜尋
 
-Status: review
+Status: done
 
 ## Story
 
