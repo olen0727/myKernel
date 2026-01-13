@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, ListTodo, FileText, Settings, Plus, GripVertical } from "lucide-react"
+import { ArrowLeft, ListTodo, Library, Plus, GripVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProjectHeader } from "@/components/projects/ProjectHeader"
@@ -70,8 +70,12 @@ const INITIAL_PROJECT = {
 }
 
 export default function ProjectDetailPage() {
-    useParams()
+    const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
+
+    // TODO: Epic 6 - Use id to fetch project from RxDB
+    // Currently using mock data, id will be used when service layer is implemented
+    const _projectId = id
 
     const [project, setProject] = React.useState(INITIAL_PROJECT)
     const [taskLists, setTaskLists] = React.useState<TaskListGroup[]>(INITIAL_TASK_LISTS)
@@ -276,7 +280,8 @@ export default function ProjectDetailPage() {
                 </div>
 
                 <div className="flex-1 overflow-hidden flex h-full">
-                    <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                    {/* Main Content: 70% */}
+                    <div className="w-[70%] overflow-y-auto p-8 custom-scrollbar">
                         <div className="max-w-4xl mx-auto space-y-10">
                             <ProjectHeader
                                 title={project.name}
@@ -293,13 +298,9 @@ export default function ProjectDetailPage() {
                                         <ListTodo className="h-4 w-4" />
                                         任務清單 (Tasks)
                                     </TabsTrigger>
-                                    <TabsTrigger value="docs" className="gap-2">
-                                        <FileText className="h-4 w-4" />
-                                        專案文件 (Docs)
-                                    </TabsTrigger>
-                                    <TabsTrigger value="settings" className="gap-2">
-                                        <Settings className="h-4 w-4" />
-                                        設定
+                                    <TabsTrigger value="resources" className="gap-2">
+                                        <Library className="h-4 w-4" />
+                                        專案資源 (Resources)
                                     </TabsTrigger>
                                 </TabsList>
 
@@ -328,28 +329,23 @@ export default function ProjectDetailPage() {
                                     </div>
                                 </TabsContent>
 
-                                <TabsContent value="docs" className="min-h-[400px]">
+                                <TabsContent value="resources" className="min-h-[400px]">
                                     <div className="bg-muted/10 border border-dashed rounded-xl flex items-center justify-center p-12">
-                                        <p className="text-muted-foreground">目前尚未建立相關文件。</p>
-                                    </div>
-                                </TabsContent>
-
-                                <TabsContent value="settings" className="min-h-[400px]">
-                                    <div className="bg-muted/10 border border-dashed rounded-xl flex items-center justify-center p-12">
-                                        <p className="text-muted-foreground">進階設定選項實作中。</p>
+                                        <p className="text-muted-foreground">尚未關聯任何資源至此專案。</p>
                                     </div>
                                 </TabsContent>
                             </Tabs>
                         </div>
                     </div>
 
-                    <div className="w-[350px] overflow-y-auto py-8 pr-8">
+                    {/* Sidebar: 30% */}
+                    <div className="w-[30%] min-w-[280px] max-w-[400px] overflow-y-auto py-8 pr-8">
                         <ProjectSidebar
                             projectName={project.name}
                             status={project.status}
                             area={project.area}
                             dueDate={project.dueDate}
-                            onStatusChange={(status: any) => handleUpdateProject({ status })}
+                            onStatusChange={(status) => handleUpdateProject({ status })}
                             onAreaChange={(area: string) => handleUpdateProject({ area })}
                             onDueDateChange={(dueDate: Date | undefined) => handleUpdateProject({ dueDate })}
                             onArchive={() => handleUpdateProject({ status: "archived" })}

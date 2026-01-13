@@ -36,7 +36,7 @@ export default function ProjectListPage() {
 
     const handleCreateProject = (values: any) => {
         const newProject: ProjectCardProps = {
-            id: Math.random().toString(36).substr(2, 9),
+            id: Math.random().toString(36).substring(2, 11),
             name: values.name,
             area: values.area || "General",
             status: "active",

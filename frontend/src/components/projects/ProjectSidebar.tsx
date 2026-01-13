@@ -27,12 +27,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 
+type ProjectStatus = "active" | "paused" | "completed" | "archived"
+
 interface ProjectSidebarProps {
     projectName: string
-    status: "active" | "paused" | "completed" | "archived"
+    status: ProjectStatus
     area: string
     dueDate?: Date
-    onStatusChange: (status: any) => void
+    onStatusChange: (status: ProjectStatus) => void
     onAreaChange: (area: string) => void
     onDueDateChange: (date?: Date) => void
     onArchive: () => void

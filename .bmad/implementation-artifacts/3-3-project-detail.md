@@ -1,6 +1,6 @@
 # Story 3.3: Project Detail Page 專案詳情頁
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -42,6 +42,13 @@ So that **我可以深入管理單一專案的執行狀況**.
 - [x] 實作 Inline Edit 功能。
 - [x] 撰寫測試。
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][HIGH] ProjectDetailPage 缺少測試檔案 ✅ Fixed: Added ProjectDetailPage.test.tsx
+- [x] [AI-Review][HIGH] AC 要求 70%/30% 佈局 ✅ Fixed: Changed to w-[70%] and w-[30%]
+- [x] [AI-Review][HIGH] File List 需更新 ✅ Fixed: Updated below
+- [x] [AI-Review][MEDIUM] useParams() 返回值被忽略 ✅ Fixed: Now captures id parameter
+- [x] [AI-Review][LOW] ProjectSidebar onStatusChange 型別 ✅ Fixed: Added ProjectStatus type
+
 ### Debug Log
 - 2026-01-13: 開始開發。
 - 2026-01-13: 完成元件實作與測試。成功整合 Shadcn Calendar 與 Popover。
@@ -53,14 +60,15 @@ So that **我可以深入管理單一專案的執行狀況**.
 - 使用 `Tabs` 佈局預留了 Story 3.4 任務管理的整合空間。
 
 ## File List
-- `src/pages/ProjectDetailPage.tsx`
-- `src/components/projects/ProjectHeader.tsx`
-- `src/components/projects/ProjectSidebar.tsx`
-- `src/components/projects/__tests__/ProjectHeader.test.tsx`
-- `src/components/ui/popover.tsx`
-- `src/components/ui/calendar.tsx`
-- `src/components/ui/select.tsx`
-- `src/components/ui/alert-dialog.tsx`
+- `src/pages/ProjectDetailPage.tsx` (新增)
+- `src/pages/__tests__/ProjectDetailPage.test.tsx` (新增)
+- `src/components/projects/ProjectHeader.tsx` (新增)
+- `src/components/projects/ProjectSidebar.tsx` (新增)
+- `src/components/projects/__tests__/ProjectHeader.test.tsx` (新增)
+- `src/components/ui/popover.tsx` (新增)
+- `src/components/ui/calendar.tsx` (新增)
+- `src/components/ui/select.tsx` (新增)
+- `src/components/ui/alert-dialog.tsx` (新增)
 
 ## Change Log
 - 2026-01-13: 初始化工作區並更新狀態。

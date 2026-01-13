@@ -1,6 +1,6 @@
 # Story 3.2: Project Cards & Filters 專案卡片與篩選
 
-Status: review
+Status: done
 
 ## Story
 
@@ -28,6 +28,13 @@ So that **我可以快速掌握所有專案的進度，並找到我感興趣的�
 - [x] 整合篩選功能至 ProjectListPage。
 - [x] 撰寫元件測試。
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][HIGH] 確認是否需要 "Archived" 篩選按鈕 → AC 明確列出 All/Active/Paused/Completed，實作正確
+- [x] [AI-Review][HIGH] CreateProjectModal 缺少測試檔案 ✅ Fixed: Added CreateProjectModal.test.tsx
+- [x] [AI-Review][MEDIUM] ProjectCard id prop → 用於 key，符合 React 最佳實踐
+- [x] [AI-Review][MEDIUM] substr 已棄用 ✅ Fixed: Changed to substring
+- [x] [AI-Review][LOW] "use client" 指令 ✅ Fixed: Removed
+
 ### Debug Log
 - 2026-01-13: 開始開發。
 - 2026-01-13: 使用 `shadcn` 安裝 `dialog`, `progress`, `form` 元件。
@@ -40,16 +47,17 @@ So that **我可以快速掌握所有專案的進度，並找到我感興趣的�
 - 增加了狀態篩選按鈕列 (All, Active, Paused, Completed)。
 
 ## File List
-- `src/components/projects/ProjectCard.tsx`
-- `src/components/projects/CreateProjectModal.tsx`
-- `src/pages/ProjectListPage.tsx`
-- `src/components/projects/__tests__/ProjectCard.test.tsx`
-- `src/components/ui/progress.tsx`
-- `src/components/ui/form.tsx`
-- `src/components/ui/dialog.tsx`
-- `src/components/ui/input.tsx`
+- `src/components/projects/ProjectCard.tsx` (新增)
+- `src/components/projects/CreateProjectModal.tsx` (新增)
+- `src/pages/ProjectListPage.tsx` (修改)
+- `src/components/projects/__tests__/ProjectCard.test.tsx` (新增)
+- `src/components/projects/__tests__/CreateProjectModal.test.tsx` (新增)
+- `src/components/ui/progress.tsx` (新增)
+- `src/components/ui/form.tsx` (新增)
+- `src/components/ui/dialog.tsx` (新增)
+- `src/components/ui/input.tsx` (新增)
 
 ## Change Log
 - 2026-01-13: 初始化工作區並完成 Story 3.2。
 
-Status: review
+Status: done

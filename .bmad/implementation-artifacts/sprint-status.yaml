@@ -59,12 +59,12 @@ development_status:
   epic-2-retrospective: optional
 
   # Epic 3: 專案管理
-  epic-3: in-progress
-  3-1-project-list: review
-  3-2-project-cards: review
-  3-3-project-detail: in-progress
-  3-4-task-management: review
-  3-5-task-dnd: in-progress
+  epic-3: done
+  3-1-project-list: done  # AI-Review: All issues fixed
+  3-2-project-cards: done  # AI-Review: All issues fixed
+  3-3-project-detail: done  # AI-Review: All issues fixed
+  3-4-task-management: done  # AI-Review: All issues fixed
+  3-5-task-dnd: done  # AI-Review: Passed
   epic-3-retrospective: optional
 
   # Epic 4: 領域、習慣與資源庫

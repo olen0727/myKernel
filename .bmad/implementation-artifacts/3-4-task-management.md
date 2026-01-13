@@ -1,6 +1,6 @@
 # Story 3.4: Task Lists & Progress Task Lists & Progress Calculation 任務清單與進度計算
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -43,6 +43,9 @@ So that **我可以有組織地拆解專案工作，並追蹤完成進度**.
 - [x] 建立 `TaskList` 作為任務群組，整合「新增任務」流。
 - [x] 在 `ProjectDetailPage` 實作跨列表的狀態提升與進度條同步。
 - [x] 撰寫元件測試。
+
+### Review Follow-ups (AI)
+- [x] [AI-Review][LOW] TaskItem Badge 使用 text-[10px] 魔術數字 ✅ Fixed: Changed to text-xs
 
 ### Debug Log
 - 2026-01-13: 開始開發 3.4。

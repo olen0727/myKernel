@@ -1,6 +1,6 @@
 # Story 3.1: Project List & Workbench 專案列表與工作台
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -36,6 +36,10 @@ So that **我可以專注於「今天該做什麼」，而不需要逐一檢視�
     - [x] 建立 `src/components/tasks/TaskItem.tsx`。
     - [x] 支援 Checkbox 勾選狀態。
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][HIGH] File List 包含非本 story 新增的檔案 (checkbox.tsx)，應移除或標註為「既有元件」 [3-1-project-list.md:File List] ✅ Fixed: Updated File List
+- [x] [AI-Review][MEDIUM] resizable.tsx 使用 `any` 型別，違反 Architecture 規範 [src/components/ui/resizable.tsx:12-19] ✅ Fixed: Refactored with proper types
+- [x] [AI-Review][MEDIUM] resizable.tsx 使用 console.error，建議改用統一 logger [src/components/ui/resizable.tsx:23] ✅ Fixed: Removed fallback logic
 
 ## Dev Notes
 
@@ -70,18 +74,18 @@ So that **我可以專注於「今天該做什麼」，而不需要逐一檢視�
 - 新增了相關的單元測試。
 
 ## File List
-- `src/pages/ProjectListPage.tsx`
-- `src/components/projects/Workbench.tsx`
-- `src/components/tasks/TaskItem.tsx`
-- `src/components/ui/checkbox.tsx`
-- `src/components/ui/resizable.tsx`
-- `src/pages/__tests__/ProjectListPage.test.tsx`
-- `src/components/projects/__tests__/Workbench.test.tsx`
-- `src/components/tasks/__tests__/TaskItem.test.tsx`
+- `src/pages/ProjectListPage.tsx` (新增)
+- `src/components/projects/Workbench.tsx` (新增)
+- `src/components/tasks/TaskItem.tsx` (新增)
+- `src/components/ui/resizable.tsx` (新增)
+- `src/pages/__tests__/ProjectListPage.test.tsx` (新增)
+- `src/components/projects/__tests__/Workbench.test.tsx` (新增)
+- `src/components/tasks/__tests__/TaskItem.test.tsx` (新增)
+- `src/components/ui/checkbox.tsx` (既有元件，本 story 使用)
 
 ## Change Log
 - 2026-01-13: 初始化工作區並更新狀態。
 - 2026-01-13: 完成 Story 3.1 實作。
 
-Status: review
+Status: done
 
