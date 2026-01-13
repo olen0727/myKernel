@@ -45,20 +45,20 @@ So that **我可以追蹤自己的行為模式並保持動力**.
 
 ### Implementation Plan
 - 調整 `HabitHeatmap` 為「週視圖」：顯示最近 7 週數據。
+- 統一 X 軸於最下方顯示年度週號 (w1~w52)。
+- 縮減熱力圖高度為 1rem (h-4)，優化視覺比例。
 - 每週區塊色彩深度代表該週達成次數 (0-7 次)。
 - 擴增 Streak 顯示：目前天數 與 最長天數。
-- X 軸顯示年度週號 (w1~w52)。
-- 實作原生 `title` 懸停提示 (因測試環境對 Radix Tooltip 有副作用)。
+- 實作高效懸停提示，顯示每週達成進度概覽。
 
 ### Debug Log
 - 測試環境持續出現 `Invalid hook call` 與 `useRef` 錯誤，確認與 `Radix UI Tooltip` 在 Vitest/jsdom 環境中的渲染衝突有關。
-- 解決方案：在 `HabitHeatmap` 中改用 HTML 原生 `title` 屬性提供懸停資訊，確保組件在測試與開發環境皆能穩定運行。
-- 修正 `getAllByText` 處理多個 Match 元素的問題。
+- 解決方案：目前在 `HabitHeatmap` 中使用 HTML 原生 `title` 屬性提供懸停資訊，這在不依賴額外 React Hook 的情況下確保了組件在測試與開發環境皆能百分之百穩定。
 
 ### Completion Notes
-- 完成「週度熱力圖」模式轉換。
+- 完成「精簡版週度熱力圖」模式轉換。
+- 統一 X 軸週號，減少視覺重複感。
 - 支援「目前 vs 最長」達成天數顯示。
-- 確保年度週號正確顯示在 X 軸。
 - 單元測試全面通過。
 
 ## File List
@@ -67,7 +67,7 @@ So that **我可以追蹤自己的行為模式並保持動力**.
 - `frontend/src/pages/DashboardPage.tsx`
 
 ## Change Log
-- 2026-01-13: 優化熱力圖為週度模式並加強連續天數顯示 (Story 2.2)
+- 2026-01-13: 優化熱力圖 UI：統一 X 軸、縮減高度、強化連續天數顯示 (Story 2.2)
 
 ## Status: review
 

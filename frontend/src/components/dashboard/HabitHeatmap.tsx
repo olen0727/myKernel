@@ -1,6 +1,7 @@
 import React, { useMemo } from "react"
 import { format, subWeeks, startOfWeek, eachDayOfInterval, addDays, getWeek } from "date-fns"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 // Mock Data
@@ -16,7 +17,6 @@ const HABITS = [
  */
 const generateWeeklyMockData = () => {
     const end = new Date()
-    // 取得 6 週前的週初
     const start = startOfWeek(subWeeks(end, 6))
 
     return HABITS.map(habit => {
@@ -42,77 +42,133 @@ const generateWeeklyMockData = () => {
 }
 
 const getIntensityClass = (count: number) => {
-    if (count === 0) return "bg-muted hover:bg-muted-foreground/20"
-    if (count <= 2) return "bg-green-100 dark:bg-green-900/30 hover:bg-green-200"
-    if (count <= 4) return "bg-green-300 dark:bg-green-700/50 hover:bg-green-400"
+    if (count === 0) return "bg-muted/50 hover:bg-muted-foreground/20"
+    if (count <= 2) return "bg-green-100 dark:bg-green-900/20 hover:bg-green-200"
+    if (count <= 4) return "bg-green-300 dark:bg-green-700/40 hover:bg-green-400"
     if (count <= 6) return "bg-green-500 hover:bg-green-600"
     return "bg-green-700 hover:bg-green-800"
 }
 
 export const HabitHeatmap: React.FC = () => {
     const habitData = useMemo(() => generateWeeklyMockData(), [])
-    // 取得 X 軸週號標籤 (取第一項習慣的週資料即可)
     const weekLabels = habitData[0]?.weeks.map(w => `w${w.weekNum}`) || []
 
     return (
-        <Card data-testid="habit-heatmap">
-            <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-semibold flex items-center justify-between">
-                    <span>習慣追蹤 (最近 7 週)</span>
-                    <div className="flex items-center gap-4 text-xs font-normal text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-sm bg-muted" /> 0
+        <Card data-testid="habit-heatmap" className="overflow-hidden border-none shadow-md bg-card/50 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-bold flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="bg-primary/10 text-primary p-1.5 rounded-lg">📊</span>
+                        <span>習慣追蹤 (最近 7 週)</span>
+                    </div>
+                    <div className="flex items-center gap-4 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-sm bg-muted/50" />
+                            <span>很少</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-sm bg-green-700" /> 7
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-sm bg-green-700" />
+                            <span>經常</span>
                         </div>
                     </div>
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="space-y-8">
-                    {habitData.map(habit => (
-                        <div key={habit.id} className="space-y-3">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="font-semibold text-foreground/80">{habit.name}</span>
-                                <div className="flex gap-3 items-center">
-                                    <span className="text-orange-500 font-bold flex items-center gap-1">
-                                        🔥 {habit.currentStreak}
+                <div className="space-y-6">
+                    <TooltipProvider delayDuration={50}>
+                        {habitData.map((habit) => (
+                            <div key={habit.id} className="group/habit">
+                                <div className="flex items-center justify-between text-sm mb-3">
+                                    <span className="font-bold text-foreground/90 group-hover/habit:text-primary transition-colors">
+                                        {habit.name}
                                     </span>
-                                    <span className="text-muted-foreground text-xs bg-muted px-2 py-0.5 rounded-full">
-                                        Max {habit.maxStreak}
-                                    </span>
+                                    <div className="flex gap-4 items-center">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-orange-500 font-black animate-pulse-slow">🔥</span>
+                                            <span className="font-bold text-orange-600" data-testid="streak-current">{habit.currentStreak}</span>
+                                        </div>
+                                        <div className="bg-muted/80 px-2.5 py-0.5 rounded-full border border-border/50">
+                                            <span className="text-[10px] text-muted-foreground font-bold" data-testid="streak-max">
+                                                MAX {habit.maxStreak}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="flex flex-col gap-2">
-                                <div className="flex gap-3">
+                                <div className="flex gap-2">
                                     {habit.weeks.map((week, wIdx) => (
-                                        <div
-                                            key={wIdx}
-                                            className="flex-1 group cursor-help relative"
-                                            title={`Week ${week.weekNum} (${week.completedCount}/7)\n${week.days.map(d => `${format(d.date, "MM/dd")}: ${d.completed ? "✓" : "✗"}`).join("\n")}`}
-                                        >
-                                            <div className={cn(
-                                                "h-10 rounded-md transition-all duration-200 border border-border/10",
-                                                getIntensityClass(week.completedCount)
-                                            )} />
-                                        </div>
-                                    ))}
-                                </div>
-                                {/* X-axis week numbers */}
-                                <div className="flex text-[10px] text-muted-foreground font-mono">
-                                    {weekLabels.map((label, lIdx) => (
-                                        <div key={lIdx} className="flex-1 text-center">
-                                            {label}
-                                        </div>
+                                        <Tooltip key={wIdx}>
+                                            <TooltipTrigger asChild>
+                                                <div className="flex-1 cursor-help transition-transform hover:scale-[1.02] active:scale-[0.98]">
+                                                    <div className={cn(
+                                                        "h-4 rounded-sm border border-black/5 dark:border-white/5 shadow-inner transition-all duration-300",
+                                                        getIntensityClass(week.completedCount)
+                                                    )} />
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent
+                                                side="top"
+                                                className="p-0 overflow-hidden rounded-xl border-none shadow-2xl bg-popover/95 backdrop-blur-md min-w-[180px]"
+                                                sideOffset={10}
+                                            >
+                                                <div className="bg-primary/10 px-3 py-2 border-b border-primary/5">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">Week {week.weekNum}</span>
+                                                        <span className="text-xs font-black text-primary">{week.completedCount} <span className="text-[10px] opacity-70">/ 7</span></span>
+                                                    </div>
+                                                </div>
+                                                <div className="p-3">
+                                                    <div className="flex justify-between items-center gap-1.5">
+                                                        {week.days.map((day, dIdx) => (
+                                                            <div
+                                                                key={dIdx}
+                                                                className="flex flex-col items-center gap-1.5"
+                                                            >
+                                                                <div
+                                                                    className={cn(
+                                                                        "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black shadow-sm transition-all border-2",
+                                                                        day.completed
+                                                                            ? "bg-green-500 border-green-400 text-white shadow-green-500/20"
+                                                                            : "bg-red-500 border-red-400 text-white shadow-red-500/20"
+                                                                    )}
+                                                                >
+                                                                    {format(day.date, "eeeee")}
+                                                                </div>
+                                                                <span className="text-[8px] font-medium text-muted-foreground/60">{format(day.date, "MM/dd")}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </TooltipContent>
+                                        </Tooltip>
                                     ))}
                                 </div>
                             </div>
+                        ))}
+                    </TooltipProvider>
+
+                    {/* Unified X-axis week numbers */}
+                    <div className="pt-4 mt-2 border-t border-dashed border-border/50">
+                        <div className="flex text-[9px] text-muted-foreground/60 font-black uppercase tracking-widest">
+                            {weekLabels.map((label, lIdx) => (
+                                <div key={lIdx} className="flex-1 text-center" data-testid="week-label">
+                                    {label}
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </div>
                 </div>
             </CardContent>
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @keyframes pulse-slow {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.8; transform: scale(1.1); }
+                }
+                .animate-pulse-slow {
+                    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+                }
+            `}} />
         </Card>
     )
 }

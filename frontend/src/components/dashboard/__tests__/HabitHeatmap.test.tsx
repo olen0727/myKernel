@@ -1,9 +1,16 @@
 import { render, screen } from "@testing-library/react"
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { HabitHeatmap } from "../HabitHeatmap"
 
-// 由於 Tooltip 可能在測試環境中引起問題，我們可以選擇 Mock 或確保環境支援
-// 這裡我們針對新的 UI 內容進行測試
+// 由於測試環境 (jsdom) 與 Radix Tooltip 可能存在兼容性問題導致 Invalid hook call
+// 我們 Mock 掉 Tooltip 組件，以確保測試專注於元件本身的邏輯與渲染
+
+vi.mock("@/components/ui/tooltip", () => ({
+    Tooltip: ({ children }: any) => <div>{children}</div>,
+    TooltipTrigger: ({ children }: any) => <div>{children}</div>,
+    TooltipContent: ({ children }: any) => <div data-testid="tooltip-content">{children}</div>,
+    TooltipProvider: ({ children }: any) => <div>{children}</div>,
+}))
 
 describe("HabitHeatmap", () => {
     it("renders the heatmap container", () => {
@@ -11,17 +18,14 @@ describe("HabitHeatmap", () => {
         expect(screen.getByTestId("habit-heatmap")).toBeInTheDocument()
     })
 
-    it("renders habits with streaks and max streaks", () => {
+    it("renders habits and streaks", () => {
         render(<HabitHeatmap />)
-        // 檢查是否包含 🔥 符號 (代表連續天數)
-        expect(screen.getAllByText(/🔥/).length).toBeGreaterThan(0)
-        // 檢查是否包含 Max 字樣 (代表最長連續天數)
-        expect(screen.getAllByText(/Max/).length).toBeGreaterThan(0)
+        expect(screen.getAllByTestId("streak-current").length).toBeGreaterThan(0)
+        expect(screen.getAllByTestId("streak-max").length).toBeGreaterThan(0)
     })
 
-    it("renders week labels (w1-w52 style)", () => {
+    it("renders unified X-axis week labels", () => {
         render(<HabitHeatmap />)
-        // 檢查 X 軸是否包含 w 開頭的週號
-        expect(screen.getAllByText(/w\d+/).length).toBeGreaterThan(0)
+        expect(screen.getAllByTestId("week-label").length).toBeGreaterThan(0)
     })
 })
