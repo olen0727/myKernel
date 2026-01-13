@@ -1,6 +1,6 @@
 import { useSidebarStore } from "@/stores/sidebar-store"
 import { cn } from "@/lib/utils"
-
+import { NavLink } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -25,8 +25,6 @@ import {
     Folder,
     ChevronDown
 } from "lucide-react"
-
-
 
 export function Sidebar() {
     const { isCollapsed, toggleSidebar } = useSidebarStore()
@@ -80,13 +78,13 @@ export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
         <TooltipProvider delayDuration={0}>
             <div className="flex flex-col w-full h-full items-center">
                 {/* Logo Area */}
-                <div className={cn("flex items-center justify-center w-full mb-6 h-10 transition-all", isCollapsed ? "px-2" : "px-6")}>
+                <NavLink to="/inbox" className={cn("flex items-center justify-center w-full mb-6 h-10 transition-all", isCollapsed ? "px-2" : "px-6")}>
                     {isCollapsed ? (
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold font-serif cursor-pointer">K</div>
                     ) : (
-                        <span className="text-xl font-bold font-serif tracking-tight cursor-pointer">Kernel</span>
+                        <span className="text-xl font-bold font-serif tracking-tight cursor-pointer text-foreground">Kernel</span>
                     )}
-                </div>
+                </NavLink>
 
                 {/* Quick Capture */}
                 <div className="mb-4 w-full px-2 flex justify-center">
@@ -111,35 +109,38 @@ export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
                         {navItems.map((item, index) => (
                             <Tooltip key={index}>
                                 <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size={isCollapsed ? "icon" : "default"}
-                                        className={cn(
-                                            "w-full transition-all",
-                                            isCollapsed ? "justify-center" : "justify-start gap-3 px-3",
-                                            // Active state simulation
-                                            index === 0 && "bg-accent text-accent-foreground"
-                                        )}
-                                    >
-                                        <item.icon className="h-5 w-5" />
-                                        {!isCollapsed && (
-                                            <div className="flex flex-1 items-center justify-between">
-                                                <span>{item.label}</span>
-                                                {item.count && (
-                                                    <span className="text-xs font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-md">
-                                                        {item.count}
-                                                    </span>
+                                    <NavLink to={item.href}>
+                                        {({ isActive }) => (
+                                            <Button
+                                                variant={isActive ? "secondary" : "ghost"}
+                                                size={isCollapsed ? "icon" : "default"}
+                                                className={cn(
+                                                    "w-full transition-all",
+                                                    isCollapsed ? "justify-center" : "justify-start gap-3 px-3",
+                                                    isActive && "bg-accent text-accent-foreground"
                                                 )}
-                                            </div>
+                                            >
+                                                <item.icon className="h-5 w-5" />
+                                                {!isCollapsed && (
+                                                    <div className="flex flex-1 items-center justify-between">
+                                                        <span>{item.label}</span>
+                                                        {item.count && (
+                                                            <span className="text-xs font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-md">
+                                                                {item.count}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </Button>
                                         )}
-                                    </Button>
+                                    </NavLink>
                                 </TooltipTrigger>
                                 {isCollapsed && <TooltipContent side="right">{item.label}</TooltipContent>}
                             </Tooltip>
                         ))}
                     </nav>
 
-                    {/* Recent Items (Desktop Only when expanded) */}
+                    {/* Recent Items */}
                     {!isCollapsed && (
                         <Collapsible defaultOpen className="mt-8 px-3">
                             <div className="flex items-center justify-between mb-2">
@@ -160,7 +161,6 @@ export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
                             </CollapsibleContent>
                         </Collapsible>
                     )}
-
                 </ScrollArea>
 
                 {/* Footer: User Profile & Settings */}
@@ -169,37 +169,45 @@ export function SidebarContent({ forceExpanded = false }: SidebarContentProps) {
 
                     <div className={cn("flex items-center gap-2", isCollapsed ? "flex-col" : "flex-row")}>
                         {/* User Profile Trigger */}
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" className={cn("h-12", isCollapsed ? "w-10 px-0" : "w-full justify-start gap-3 px-2")}>
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage src="https://github.com/shadcn.png" />
-                                        <AvatarFallback>OL</AvatarFallback>
-                                    </Avatar>
-                                    {!isCollapsed && (
-                                        <div className="flex flex-col items-start text-left">
-                                            <span className="text-sm font-medium">Olen</span>
-                                            <span className="text-xs text-muted-foreground">Pro Plan</span>
-                                        </div>
-                                    )}
-                                </Button>
-                            </TooltipTrigger>
-                            {isCollapsed && <TooltipContent side="right">Profile</TooltipContent>}
-                        </Tooltip>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" className={cn("h-12", isCollapsed ? "w-10 px-0" : "w-full justify-start gap-3 px-2")}>
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage src="https://github.com/shadcn.png" />
+                                            <AvatarFallback>OL</AvatarFallback>
+                                        </Avatar>
+                                        {!isCollapsed && (
+                                            <div className="flex flex-col items-start text-left">
+                                                <span className="text-sm font-medium">Olen</span>
+                                                <span className="text-xs text-muted-foreground">Pro Plan</span>
+                                            </div>
+                                        )}
+                                    </Button>
+                                </TooltipTrigger>
+                                {isCollapsed && <TooltipContent side="right">Profile</TooltipContent>}
+                            </Tooltip>
+                        </TooltipProvider>
 
                         {/* Settings Trigger */}
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className={cn("text-muted-foreground hover:text-foreground", isCollapsed ? "h-10 w-10" : "h-8 w-8")}
-                                >
-                                    <Settings className="h-4 w-4" />
-                                </Button>
-                            </TooltipTrigger>
-                            {isCollapsed && <TooltipContent side="right">Settings</TooltipContent>}
-                        </Tooltip>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <NavLink to="/settings">
+                                        {({ isActive }) => (
+                                            <Button
+                                                variant={isActive ? "secondary" : "ghost"}
+                                                size="icon"
+                                                className={cn("text-muted-foreground hover:text-foreground", isCollapsed ? "h-10 w-10" : "h-8 w-8", isActive && "bg-accent text-accent-foreground")}
+                                            >
+                                                <Settings className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </NavLink>
+                                </TooltipTrigger>
+                                {isCollapsed && <TooltipContent side="right">Settings</TooltipContent>}
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
                 </div>
             </div>
