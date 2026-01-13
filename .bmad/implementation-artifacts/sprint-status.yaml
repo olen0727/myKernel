@@ -54,7 +54,7 @@ development_status:
   2-1-dashboard-stats: review
   2-2-habit-heatmap: review
   2-3-metric-charts: review
-  2-4-inbox-list: ready-for-dev
+  2-4-inbox-list: review
   2-5-quick-capture: ready-for-dev
   epic-2-retrospective: optional
 

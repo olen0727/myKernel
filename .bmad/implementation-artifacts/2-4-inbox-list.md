@@ -26,26 +26,42 @@ So that **我可以檢視並決定如何處理這些資訊**.
 
 ## Tasks / Subtasks
 
-- [ ] 實作 InboxPage
-    - [ ] 建立 `src/pages/InboxPage.tsx`。
-    - [ ] 實作列表渲染邏輯 (map mock data)。
-- [ ] 實作 ResourceItem Component
-    - [ ] 建立 `src/components/resources/ResourceItem.tsx`。
-    - [ ] 實作 Hover Group 顯示 Action Buttons。
-    - [ ] 實作 Context Menu (Shadcn/UI `ContextMenu` 可選)。
-- [ ] 實作 EmptyState Component
-    - [ ] 建立通用的 `src/components/ui/empty-state.tsx`。
+- [x] 實作 InboxPage
+    - [x] 建立 `src/pages/InboxPage.tsx`。
+    - [x] 實作列表渲染邏輯 (使用 Mock Data)。
+- [x] 實作 ResourceItem Component
+    - [x] 建立 `src/components/resources/ResourceItem.tsx`。
+    - [x] 實作 Hover Group 顯示 Action Buttons (歸檔、刪除、連結)。
+    - [x] 實作 Context Menu (Shadcn/UI `ContextMenu`)。
+- [x] 實作 EmptyState Component
+    - [x] 建立通用的 `src/components/ui/empty-state.tsx`。
 
-## Dev Notes
+## Dev Agent Record
 
-### Architecture & Tech Stack
-- **Component**: Shadcn/UI (Button, ScrollArea)。
-- **Routing**: `useNavigate` (React Router)。
+### Implementation Plan
+- 建立 `InboxPage` 收件匣主頁面，採用大標題與清爽的列表佈局。
+- 實作 `ResourceItem` 元件，支援不同類型的圖示 (Note/Link)、時間戳記與摘要。
+- 為 `ResourceItem` 添加 Hover 快速操作欄 (Archived/Delete/Link) 與右鍵選單 (Context Menu)。
+- 實作通用 `EmptyState` 元件，用於收件匣清空時的激勵顯示。
+- 完善單元測試，涵蓋列表渲染、歸檔操作與空狀態切換。
 
-### File Structure Requirements
-- `src/pages/InboxPage.tsx`: 收件匣主頁。
-- `src/components/resources/ResourceItem.tsx`: 列表單項元件。
+### Completion Notes
+- 完成收件匣列表頁面開發。
+- 整合 Shadcn/UI ContextMenu 提升高級感。
+- 已同步至 `router.tsx`。
+- 單元測試通過。
 
-### References
+## File List
+- `frontend/src/pages/InboxPage.tsx`
+- `frontend/src/components/resources/ResourceItem.tsx`
+- `frontend/src/components/ui/empty-state.tsx`
+- `frontend/src/pages/__tests__/InboxPage.test.tsx`
+
+## Change Log
+- 2026-01-13: 初始化收件匣列表頁面與相關組件 (Story 2.4)
+
+## Status: review
+
+## References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-2.4)
