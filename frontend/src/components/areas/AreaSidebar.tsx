@@ -66,7 +66,7 @@ export const AreaSidebar: React.FC<AreaSidebarProps> = ({ area, onUpdate, onDele
             <div className="pt-4">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                        <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 flex items-center gap-2">
+                        <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors">
                             <Trash2 className="w-4 h-4" />
                             刪除此領域
                         </Button>

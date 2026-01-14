@@ -1,6 +1,6 @@
 # Story 4.1: Area List & Grid 領域列表與網格
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -55,6 +55,7 @@ So that **我可以看到人生版圖的全貌，並快速進入感興趣的領�
 - ✅ 實作 `CreateAreaModal` 組件，支援名稱輸入與封面預覽選擇。
 - ✅ 實作 `AreaListPage` 頁面，採用響應式網格佈局，整合完整增刪改查模擬邏輯。
 - ✅ 通過 `AreaCard.test.tsx` 與 `AreaListPage.test.tsx` 單元測試。
+- ✅ [AI-Review] 修正了 `AreaCard` 的視覺細節與無障礙標籤。
 
 ## File List
 - `src/services/mock-data-service.ts` (Modified)

@@ -95,18 +95,21 @@ const AreaDetailPage: React.FC = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {relatedProjects.length > 0 ? (
-                                    relatedProjects.map(project => (
-                                        <ProjectCard
-                                            key={project.id}
-                                            id={project.id}
-                                            name={project.name}
-                                            area={project.area}
-                                            status={project.status}
-                                            doneTasks={2} // Mocked for consistency
-                                            totalTasks={5} // Mocked for consistency
-                                            onClick={() => navigate(`/projects/${project.id}`)}
-                                        />
-                                    ))
+                                    relatedProjects.map(project => {
+                                        const stats = dataStore.getProjectStats(project.id)
+                                        return (
+                                            <ProjectCard
+                                                key={project.id}
+                                                id={project.id}
+                                                name={project.name}
+                                                area={project.area}
+                                                status={project.status}
+                                                doneTasks={stats.done}
+                                                totalTasks={stats.total}
+                                                onClick={() => navigate(`/projects/${project.id}`)}
+                                            />
+                                        )
+                                    })
                                 ) : (
                                     <div className="col-span-full py-16 text-center border-dashed border-2 rounded-2xl bg-muted/5">
                                         <p className="text-muted-foreground font-medium">此領域尚無關聯專案</p>

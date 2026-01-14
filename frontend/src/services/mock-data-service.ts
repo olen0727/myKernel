@@ -297,7 +297,17 @@ class DataStore {
     getResourcesByArea(areaId: string) {
         // Mock filtering some resources for the area
         // In a real app, this would be based on a link table
-        return INITIAL_INBOX_RESOURCES.filter((_, idx) => (idx + parseInt(areaId)) % 2 === 0)
+        // 使用字串雜湊代替 parseInt 以支援 UUID
+        const hash = areaId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        return INITIAL_INBOX_RESOURCES.filter((_, idx) => (idx + hash) % 3 === 0)
+    }
+
+    // Task Stats helper
+    getProjectStats(projectId: string) {
+        // In a real app, this would query tasks table
+        const total = 5
+        const done = projectId === '1' ? 3 : 1
+        return { total, done }
     }
 }
 

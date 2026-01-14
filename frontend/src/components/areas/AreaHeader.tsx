@@ -60,6 +60,7 @@ export const AreaHeader: React.FC<AreaHeaderProps> = ({ area, onTitleChange, onI
                                     onChange={(e) => setTitle(e.target.value)}
                                     onBlur={handleBlur}
                                     onKeyDown={handleKeyDown}
+                                    aria-label="編輯領域名稱"
                                 />
                             ) : (
                                 <h1

@@ -69,9 +69,9 @@ development_status:
 
   # Epic 4: 領域、習慣與資源庫
   epic-4: in-progress
-  4-1-area-list: ready-for-dev  # AI-Review: Passed (Persistence, A11y fixed)
-  4-2-area-detail: ready-for-dev  # AI-Review: Passed (Cover Mock UI, Related Projects fixed)
-  4-3-habit-manager: ready-for-dev  # AI-Review: Passed (Persistence, Validation fixed)
+  4-1-area-list: done  # AI-Review: Passed (Persistence, A11y fixed)
+  4-2-area-detail: done  # AI-Review: Passed (Cover Mock UI, Related Projects fixed)
+  4-3-habit-manager: done  # AI-Review: Passed (Persistence, Validation fixed)
   4-4-resource-library: ready-for-dev
   4-5-resource-editor: ready-for-dev
   4-6-resource-dispatch: ready-for-dev

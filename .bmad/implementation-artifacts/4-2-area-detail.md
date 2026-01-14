@@ -1,6 +1,6 @@
 # Story 4.2: Area Detail Layout 領域詳情頁
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -55,6 +55,9 @@ So that **我可以全面維護這個人生責任範圍**.
 - ✅ 實作 `AreaSidebar` 組件，包含描述編輯區 (`Textarea`)、隱藏開關 (`Switch`) 與刪除二次確認 (`AlertDialog`)。
 - ✅ 實作 `AreaDetailPage` 頁面，採用 Left (Content) + Right (Sidebar) 結構，並加入 Tabs 分隔專案與習慣區。
 - ✅ 通過 `AreaDetailPage.test.tsx` 整合測試，驗證頁面結構與數據渲染。
+- ✅ [AI-Review] 修正了 `getResourcesByArea` 的 UUID 雜湊邏輯，確保新領域能正確顯示關聯資源。
+- ✅ [AI-Review] 實作了專案任務進度的動態計算，取代硬編碼數值。
+- ✅ [AI-Review] 增強了 `AreaHeader` 編輯模式的 A11y 支援。
 
 ## File List
 - `src/services/mock-data-service.ts` (Modified)
