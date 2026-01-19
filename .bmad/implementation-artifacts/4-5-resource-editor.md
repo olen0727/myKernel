@@ -1,6 +1,6 @@
 # Story 4.5: Resource Editor Page 資源編輯頁
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -23,13 +23,13 @@ So that **我可以深度整理與分類這筆資訊**.
 
 ## Tasks / Subtasks
 
-- [ ] 實作 ResourceEditorPage
-    - [ ] 建立 `src/pages/ResourceEditorPage.tsx`。
-- [ ] 整合 TipTap Editor (Placeholder)
-    - [ ] 建立 `src/components/editor/TipTapEditor.tsx` (暫時使用 Textarea 或簡易實作)。
-- [ ] 實作 ResourceSidebar
-    - [ ] 建立 `src/components/resources/ResourceSidebar.tsx`。
-- [ ] 實作 OG Preview Card (Mock)
+- [x] 實作 ResourceEditorPage
+    - [x] 建立 `src/pages/ResourceEditorPage.tsx`。
+- [x] 整合 TipTap Editor (Placeholder)
+    - [x] 建立 `src/components/editor/TipTapEditor.tsx` (暫時使用 Textarea 或簡易實作)。
+- [x] 實作 ResourceSidebar
+    - [x] 建立 `src/components/resources/ResourceSidebar.tsx`。
+- [x] 實作 OG Preview Card (Mock)
 
 ## Dev Notes
 
@@ -43,3 +43,21 @@ So that **我可以深度整理與分類這筆資訊**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-4.5)
+
+## Dev Agent Record
+
+### Completion Notes
+- Implemented `TipTapEditor.tsx` with basic extension configuration.
+- Implemented `ResourceSidebar.tsx` with properties management (Status, Tags, PARA links).
+- Implemented `ResourceEditorPage.tsx` integrating editor and sidebar, with mock data support.
+- Added comprehensive unit tests in `ResourceEditorPage.test.tsx`.
+- Implemented Mock OG Preview Card within the Editor Page.
+
+## File List
+- frontend/src/components/editor/TipTapEditor.tsx
+- frontend/src/components/resources/ResourceSidebar.tsx
+- frontend/src/pages/ResourceEditorPage.tsx
+- frontend/src/pages/__tests__/ResourceEditorPage.test.tsx
+
+## Change Log
+- 2026-01-20: Completed Resource Editor implementation including TipTap integration and Sidebar.

@@ -10,11 +10,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { useQuickCapture } from "@/stores/quick-capture-store"
 import { toast } from "sonner"
-import { Sparkles, Command, CornerDownLeft, Loader2 } from "lucide-react"
+import { Sparkles, Command, CornerDownLeft, Loader2, Link as LinkIcon, FileText } from "lucide-react"
+import { parseContent, ParsedContent } from "@/lib/content-parser"
 
 export const QuickCaptureModal: React.FC = () => {
     const { isOpen, onClose, content, setContent } = useQuickCapture()
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [parsedPreview, setParsedPreview] = useState<ParsedContent | null>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
     // Auto-focus when modal opens
@@ -27,22 +29,37 @@ export const QuickCaptureModal: React.FC = () => {
         }
     }, [isOpen])
 
+    // Live Parse Preview
+    useEffect(() => {
+        const timer = setTimeout(async () => {
+            if (content.trim()) {
+                const result = await parseContent(content)
+                setParsedPreview(result)
+            } else {
+                setParsedPreview(null)
+            }
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [content])
+
     const handleSubmit = async () => {
         if (!content.trim()) return
-
         setIsSubmitting(true)
 
         // Mock API call delay
         await new Promise(resolve => setTimeout(resolve, 800))
 
-        console.log("Quick captured to Inbox:", content)
+        const finalData = parsedPreview || await parseContent(content)
+
+        console.log("Quick captured to Inbox:", finalData)
         toast.success("已儲存至 Inbox", {
-            description: "你可以稍後在收件匣中處理這項資源。",
+            description: finalData.url ? `已儲存連結: ${finalData.title}` : "已儲存筆記",
             icon: <Sparkles className="w-4 h-4 text-primary" />
         })
 
         setIsSubmitting(false)
         setContent("") // Clear after successful save
+        setParsedPreview(null)
         onClose()
     }
 
@@ -79,6 +96,30 @@ export const QuickCaptureModal: React.FC = () => {
                         onKeyDown={handleKeyDown}
                         disabled={isSubmitting}
                     />
+
+                    {/* Smart Parse Preview Area */}
+                    {parsedPreview && (
+                        <div className="mt-4 p-3 bg-muted/40 rounded-xl border border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-background rounded-lg shadow-sm shrink-0">
+                                    {parsedPreview.url ? (
+                                        <LinkIcon className="w-4 h-4 text-blue-500" />
+                                    ) : (
+                                        <FileText className="w-4 h-4 text-orange-500" />
+                                    )}
+                                </div>
+                                <div className="space-y-1 min-w-0">
+                                    <h4 className="text-sm font-bold truncate">{parsedPreview.title}</h4>
+                                    <p className="text-xs text-muted-foreground line-clamp-2">{parsedPreview.description}</p>
+                                    {parsedPreview.url && (
+                                        <div className="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded inline-block font-medium mt-1">
+                                            Smart Link Detect
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex items-center justify-between px-6 py-4 bg-muted/30 border-t border-border/50">

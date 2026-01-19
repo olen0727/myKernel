@@ -1,6 +1,6 @@
 # Story 4.6: Resource Dispatch & Smart Parse 資源分流與智慧解析
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -26,11 +26,11 @@ So that **我可以快速將資訊歸位至 PARA 系統**.
 
 ## Tasks / Subtasks
 
-- [ ] 實作 DispatchModal
-    - [ ] 建立 `src/components/resources/DispatchModal.tsx`。
-    - [ ] 復用 `Command` component 實作搜尋介面。
-- [ ] 實作解析邏輯 (Utils)
-    - [ ] 建立 `src/lib/content-parser.ts` (Mock logic for now)。
+- [x] 實作 DispatchModal
+    - [x] 建立 `src/components/resources/DispatchModal.tsx`。
+    - [x] 復用 `Command` component 實作搜尋介面。
+- [x] 實作解析邏輯 (Utils)
+    - [x] 建立 `src/lib/content-parser.ts` (Mock logic for now)。
 
 ## Dev Notes
 
@@ -44,3 +44,20 @@ So that **我可以快速將資訊歸位至 PARA 系統**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-4.6)
+
+## Dev Agent Record
+
+### Completion Notes
+- Implemented `DispatchModal` (refactored from `DispatchDialog`) with Command palette UI, search, and multi-selection for Projects/Areas.
+- Implemented `content-parser.ts` with mock smart parsing for URLs and mixed content.
+- Integrated Smart Parse into `QuickCaptureModal` to provide live previews (Link vs Note detection).
+- Added unit tests for parser logic.
+
+## File List
+- frontend/src/components/resources/DispatchModal.tsx
+- frontend/src/lib/content-parser.ts
+- frontend/src/components/quick-capture-modal.tsx
+- frontend/src/lib/__tests__/content-parser.test.ts
+
+## Change Log
+- 2026-01-20: Completed Resource Dispatch tools and Smart Parse integration.

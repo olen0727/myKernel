@@ -13,7 +13,7 @@ import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Check, Folder, Layers, X, MoveHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-interface DispatchDialogProps {
+interface DispatchModalProps {
     isOpen: boolean
     onOpenChange: (open: boolean) => void
     onConfirm: (selectedIds: string[]) => void
@@ -32,11 +32,11 @@ const MOCK_AREAS = [
     { id: "a3", name: "Health", type: "area" },
 ]
 
-export function DispatchDialog({
+export function DispatchModal({
     isOpen,
     onOpenChange,
     onConfirm,
-}: DispatchDialogProps) {
+}: DispatchModalProps) {
     const [selectedIds, setSelectedIds] = React.useState<string[]>([])
 
     const toggleSelection = (id: string) => {

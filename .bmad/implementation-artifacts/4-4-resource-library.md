@@ -1,6 +1,6 @@
 # Story 4.4: Resource Library & Filters 資源庫與篩選
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,13 +28,13 @@ So that **我可以快速找到需要的參考資料**.
 
 ## Tasks / Subtasks
 
-- [ ] 實作 ResourceLibraryPage
-    - [ ] 建立 `src/pages/ResourceLibraryPage.tsx`。
-- [ ] 實作 FilterBar Component
-    - [ ] 建立 `src/components/resources/FilterBar.tsx`。
-    - [ ] 實作 Select 與 Combobox (for tags)。
-- [ ] 復用 ResourceItem Component
-    - [ ] 確保 `ResourceItem` 支援不同 Context 下的顯示 (Inbox vs Library)。
+- [x] 實作 ResourceLibraryPage
+    - [x] 建立 `src/pages/ResourceLibraryPage.tsx`。
+- [x] 實作 FilterBar Component
+    - [x] 建立 `src/components/resources/FilterBar.tsx`。
+    - [x] 實作 Select 與 Combobox (for tags)。
+- [x] 復用 ResourceItem Component
+    - [x] 確保 `ResourceItem` 支援不同 Context 下的顯示 (Inbox vs Library)。
 
 ## Dev Notes
 
@@ -48,3 +48,19 @@ So that **我可以快速找到需要的參考資料**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-4.4)
+
+## Dev Agent Record
+
+### Completion Notes
+- Implemented `ResourceLibraryPage` with mock data.
+- Implemented `FilterBar` with Search, Status Select, Project Select, and Tags Combobox (using Popover+Command).
+- Reused `ResourceItem` which supports archive/delete actions.
+- Added unit tests in `ResourceLibraryPage.test.tsx` verifying title, filter bar presence, and items.
+
+## File List
+- frontend/src/pages/ResourceLibraryPage.tsx
+- frontend/src/components/resources/FilterBar.tsx
+- frontend/src/pages/__tests__/ResourceLibraryPage.test.tsx
+
+## Change Log
+- 2026-01-20: Initial implementation of Resource Library story.

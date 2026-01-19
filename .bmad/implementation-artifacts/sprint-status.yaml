@@ -72,9 +72,9 @@ development_status:
   4-1-area-list: done  # AI-Review: Passed (Persistence, A11y fixed)
   4-2-area-detail: done  # AI-Review: Passed (Cover Mock UI, Related Projects fixed)
   4-3-habit-manager: done  # AI-Review: Passed (Persistence, Validation fixed)
-  4-4-resource-library: ready-for-dev
-  4-5-resource-editor: ready-for-dev
-  4-6-resource-dispatch: ready-for-dev
+  4-4-resource-library: review
+  4-5-resource-editor: review
+  4-6-resource-dispatch: review
   epic-4-retrospective: optional
 
   # Epic 5: 日記與指標追蹤

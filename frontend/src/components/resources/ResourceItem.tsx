@@ -21,7 +21,7 @@ import {
     ContextMenuSeparator,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { DispatchDialog } from "./DispatchDialog"
+import { DispatchModal } from "./DispatchModal"
 
 export type ResourceType = "note" | "link"
 
@@ -166,7 +166,7 @@ export const ResourceItem: React.FC<ResourceItemProps> = ({
                     <span>刪除 (Del)</span>
                 </ContextMenuItem>
             </ContextMenuContent>
-            <DispatchDialog
+            <DispatchModal
                 isOpen={isDispatchOpen}
                 onOpenChange={setIsDispatchOpen}
                 onConfirm={handleConfirmDispatch}
