@@ -1,0 +1,147 @@
+/* Editor Styles */
+.tiptap {
+  line-height: 1.65;
+}
+
+.tiptap > * {
+  margin: 0.35rem 0;
+  padding-left: 1.75rem;
+  position: relative;
+}
+
+.tiptap > *:hover::before {
+  color: hsl(var(--muted-foreground));
+  content: "";
+  position: absolute;
+}
+
+.tiptap-drag-handle {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: hsl(var(--muted-foreground));
+  cursor: grab;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  height: 22px;
+  left: 0.25rem;
+  padding: 0.2rem 0.3rem;
+  position: absolute;
+  top: 0.3rem;
+  transition: background 120ms ease, border-color 120ms ease, opacity 120ms ease;
+  width: 22px;
+  z-index: 10;
+}
+
+.tiptap-drag-handle span {
+  background: hsl(var(--muted-foreground));
+  border-radius: 999px;
+  display: block;
+  height: 2px;
+  opacity: 0.8;
+  width: 10px;
+}
+
+.tiptap > *:hover .tiptap-drag-handle {
+  background: hsl(var(--muted) / 0.6);
+  border-color: hsl(var(--border));
+}
+
+.tiptap > *:active .tiptap-drag-handle {
+  cursor: grabbing;
+}
+
+.tiptap h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 1.2rem;
+}
+
+.tiptap h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 1rem;
+}
+
+.tiptap h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 0.8rem;
+}
+
+.tiptap p {
+  margin: 0.35rem 0;
+}
+
+.tiptap ul,
+.tiptap ol {
+  margin: 0.4rem 0;
+  padding-left: 2.5rem;
+}
+
+.tiptap li {
+  margin: 0.25rem 0;
+}
+
+.tiptap blockquote {
+  border-left: 2px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  margin: 0.8rem 0;
+  padding-left: 2.25rem;
+}
+
+.tiptap pre {
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: 10px;
+  font-size: 0.9rem;
+  margin: 0.8rem 0;
+  padding: 0.9rem 1rem;
+  white-space: pre-wrap;
+}
+
+.tiptap code {
+  background: hsl(var(--muted));
+  border-radius: 6px;
+  font-size: 0.9em;
+  padding: 0.1rem 0.3rem;
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 1.25rem 0;
+}
+
+.tiptap ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0 0 0 2.5rem;
+}
+
+.tiptap ul[data-type="taskList"] li {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.tiptap ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  user-select: none;
+}
+
+.tiptap ul[data-type="taskList"] li > div {
+    flex: 1 1 auto;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: hsl(var(--muted-foreground));
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+

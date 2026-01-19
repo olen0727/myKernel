@@ -11,7 +11,8 @@ const MOCK_DATA: Record<string, any> = {
     "1": {
         id: "1",
         title: "Kernel Architecture Design",
-        content: "<h2>Overview</h2><p>The system is divided into frontend and backend...</p>",
+        content: "## Overview\n\nThe system is divided into frontend and backend...\n\n### Notes\n- Uses **React** for UI\n- Uses _Node_ for services\n\n> This is a sample blockquote\n\n```ts\nconst hello = 'world'\n```",
+
         status: "processed",
         tags: ["architecture", "design"],
         linkedItems: [
@@ -43,7 +44,7 @@ export default function ResourceEditorPage() {
         }
     }, [id])
 
-    const handleContentChange = (content: string) => {
+    const handleContentChange = (_content: string) => {
         setIsSaving(true)
         // Debounce save logic
         setTimeout(() => {
@@ -51,6 +52,7 @@ export default function ResourceEditorPage() {
             setLastSaved(new Date())
         }, 1000)
     }
+
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setData((prev: any) => ({ ...prev, title: e.target.value }))
