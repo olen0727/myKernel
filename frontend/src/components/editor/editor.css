@@ -173,12 +173,10 @@
 }
 
 /* Task List - Explicit Logic */
-
-/* Task List - Explicit Logic */
 .tiptap ul[data-type="taskList"] {
   list-style: none;
-  padding-left: 2.3rem;
-  /* Keep indent */
+  padding-left: 4rem;
+  /* Base alignment */
 }
 
 .tiptap ul[data-type="taskList"] li {
@@ -191,8 +189,8 @@
   flex: 0 0 auto;
   margin-right: 0.5rem;
   user-select: none;
-  margin-top: 0.5em;
-  /* Adjusted for alignment with prose-lg line-height */
+  margin-top: 0.3em;
+  /* Optical alignment with prose-lg line-height */
 }
 
 /* Custom Checkbox Style mimicking Notion */
@@ -259,4 +257,51 @@
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* Table Styles mimicking Notion */
+.tiptap table {
+  border-collapse: collapse;
+  margin: 0;
+  overflow: hidden;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.tiptap table td,
+.tiptap table th {
+  border: 1px solid hsl(var(--border));
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 6px 8px;
+  position: relative;
+  vertical-align: top;
+}
+
+.tiptap table th {
+  background-color: hsl(var(--muted) / 0.5);
+  font-weight: bold;
+  text-align: left;
+}
+
+.tiptap table .selectedCell:after {
+  background: hsl(var(--primary) / 0.1);
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.tiptap table .column-resize-handle {
+  background-color: hsl(var(--primary));
+  bottom: -2px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 4px;
 }

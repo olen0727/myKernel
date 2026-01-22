@@ -11,6 +11,10 @@ import Blockquote from '@tiptap/extension-blockquote'
 import CodeBlock from '@tiptap/extension-code-block'
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import DragHandle from '@tiptap/extension-drag-handle'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
 import { cn } from "@/lib/utils"
 // Extensions
 import { configureSlashCommand } from './extensions/slash-command'
@@ -410,6 +414,12 @@ export function TipTapEditor({ content, onChange, editable = true }: TipTapEdito
                     return wrapper
                 },
             }),
+            Table.configure({
+                resizable: true,
+            }),
+            TableRow,
+            TableHeader,
+            TableCell,
             configureSlashCommand(),
 
         ],

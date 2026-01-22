@@ -237,6 +237,14 @@ const getSuggestionItems = ({ query }: { query: string }) => {
                 }
             },
         },
+        {
+            title: "Table",
+            description: "Insert a simple table.",
+            icon: <div className="w-4 h-4 flex items-center justify-center font-bold text-xs border rounded">T</div>,
+            command: ({ editor, range }: CommandItemProps['command']['arguments']) => {
+                editor.chain().focus().deleteRange(range).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+            },
+        },
     ].filter((item) =>
         item.title.toLowerCase().startsWith(query.toLowerCase())
     );
