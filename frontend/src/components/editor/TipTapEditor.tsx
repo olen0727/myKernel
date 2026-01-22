@@ -18,6 +18,11 @@ import { EditorBubbleMenu } from './EditorBubbleMenu'
 import 'tippy.js/dist/tippy.css' // Import tippy styles for the slash menu
 import './editor.css'
 
+// New Imports
+import { BlockMenu } from './extensions/BlockMenu'
+import { useState, useEffect, useCallback } from 'react'
+
+
 
 const escapeHtml = (value: string) =>
     value.replace(/&/g, "&amp;")
@@ -367,12 +372,42 @@ export function TipTapEditor({ content, onChange, editable = true }: TipTapEdito
             }),
             DragHandle.configure({
                 render: () => {
-                    const element = document.createElement('button')
-                    element.className = 'tiptap-drag-handle'
-                    element.setAttribute('data-drag-handle', 'true')
-                    element.setAttribute('type', 'button')
-                    element.innerHTML = '<span></span><span></span>'
-                    return element
+                    const wrapper = document.createElement('div')
+                    wrapper.classList.add('tiptap-drag-handle-group')
+
+                    // Add Button
+                    const addBtn = document.createElement('div')
+                    addBtn.classList.add('add-block-btn')
+                    addBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>'
+
+                    addBtn.onmousedown = (e) => e.stopPropagation() // Prevent drag
+                    addBtn.onclick = (e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        const rect = addBtn.getBoundingClientRect()
+                        document.dispatchEvent(new CustomEvent('bmad-block-add', {
+                            detail: { x: rect.left, y: rect.top + rect.height }
+                        }))
+                    }
+
+                    // Drag Handle
+                    const handle = document.createElement('div')
+                    handle.setAttribute('data-drag-handle', 'true') // Helper for extension
+                    handle.classList.add('tiptap-drag-handle')
+                    handle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>'
+
+                    handle.onclick = (e) => {
+                        const rect = handle.getBoundingClientRect()
+                        // Dispatch global event for React to pick up
+                        document.dispatchEvent(new CustomEvent('bmad-block-menu', {
+                            detail: { x: rect.left, y: rect.bottom + 5 }
+                        }))
+                    }
+
+                    wrapper.appendChild(addBtn)
+                    wrapper.appendChild(handle)
+
+                    return wrapper
                 },
             }),
             configureSlashCommand(),
@@ -400,6 +435,80 @@ export function TipTapEditor({ content, onChange, editable = true }: TipTapEdito
         <div className={cn("w-full transition-all relative", !editable && "opacity-80")}>
             <EditorBubbleMenu editor={editor} />
             <EditorContent editor={editor} />
+            <BlockMenuIntegration editor={editor} />
         </div>
+    )
+}
+
+function BlockMenuIntegration({ editor }: { editor: any }) {
+    const [menuOpen, setMenuOpen] = useState(false)
+    const [menuPos, setMenuPos] = useState<{ x: number, y: number } | null>(null)
+    const [targetBlock, setTargetBlock] = useState<{ node: any, pos: number } | null>(null)
+
+    useEffect(() => {
+        const handleMenu = (e: any) => {
+            const { x, y } = e.detail
+            const result = editor.view.posAtCoords({ left: x + 50, top: y - 10 })
+            if (result && result.pos !== null) {
+                const resolved = editor.state.doc.resolve(result.pos)
+                let depth = resolved.depth
+                // Normalize to block depth if possible, usually 1 for top level
+                // Or just use the resolved parent
+                // If we are deep inside text, we want the block wrapper.
+                // We'll walk up until we find a block node (not text)
+
+                // Simple logic: Use depth 1 if available, else depth.
+                // Actually resolved.node(1) is the top level block usually.
+                const targetDepth = 1
+                if (resolved.depth >= targetDepth) {
+                    setTargetBlock({ node: resolved.node(targetDepth), pos: resolved.before(targetDepth) })
+                } else {
+                    setTargetBlock({ node: resolved.parent, pos: resolved.before(resolved.depth) })
+                }
+
+                setMenuPos({ x, y })
+                setMenuOpen(true)
+            }
+        }
+
+        const handleAdd = (e: any) => {
+            const { x, y } = e.detail
+            // Try to find which block we are next to
+            const result = editor.view.posAtCoords({ left: x + 50, top: y + 10 })
+            if (result) {
+                const resolved = editor.state.doc.resolve(result.pos)
+                // Insert paragraph after the current block (depth 1 usually)
+                const targetDepth = 1
+                let insertPos = resolved.end(targetDepth) + 1
+                if (resolved.depth < targetDepth) insertPos = resolved.end(resolved.depth) + 1
+
+                editor.chain()
+                    .focus()
+                    .insertContentAt(insertPos, { type: 'paragraph' })
+                    .run()
+
+                // Focus the new node
+                // We can calculate new pos or just rely on insertContent setting selection? 
+                // Tiptap insertContent usually sets selection to end of inserted content.
+            }
+        }
+
+        document.addEventListener('bmad-block-menu', handleMenu)
+        document.addEventListener('bmad-block-add', handleAdd)
+        return () => {
+            document.removeEventListener('bmad-block-menu', handleMenu)
+            document.removeEventListener('bmad-block-add', handleAdd)
+        }
+    }, [editor])
+
+    return (
+        <BlockMenu
+            editor={editor}
+            isOpen={menuOpen}
+            onOpenChange={setMenuOpen}
+            position={menuPos}
+            targetNode={targetBlock?.node}
+            targetPos={targetBlock?.pos ?? null}
+        />
     )
 }
