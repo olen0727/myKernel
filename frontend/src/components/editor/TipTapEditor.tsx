@@ -16,6 +16,8 @@ import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
 import { cn } from "@/lib/utils"
+import { TableBubbleMenu } from './TableBubbleMenu'
+import { TableControls } from './TableControls'
 // Extensions
 import { configureSlashCommand } from './extensions/slash-command'
 import { EditorBubbleMenu } from './EditorBubbleMenu'
@@ -444,11 +446,14 @@ export function TipTapEditor({ content, onChange, editable = true }: TipTapEdito
     return (
         <div className={cn("w-full transition-all relative", !editable && "opacity-80")}>
             <EditorBubbleMenu editor={editor} />
+            <TableBubbleMenu editor={editor} />
+            <TableControls editor={editor} />
             <EditorContent editor={editor} />
             <BlockMenuIntegration editor={editor} />
         </div>
     )
 }
+
 
 function BlockMenuIntegration({ editor }: { editor: any }) {
     const [menuOpen, setMenuOpen] = useState(false)
