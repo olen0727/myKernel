@@ -99,21 +99,54 @@
   margin: 0.35rem 0;
 }
 
-.tiptap ul,
-.tiptap ol {
+
+/* Remove Prose default list markers and padding */
+.tiptap :where(ul, ol) {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tiptap :where(li)::before {
+  content: none !important;
+  display: none;
+}
+
+/* Apply our custom styles */
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 4rem;
+  /* Adjusted to 4rem as requested */
   margin: 0.4rem 0;
-  padding-left: 2.5rem;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 4rem;
+  /* Adjusted to 4rem as requested */
+  margin: 0.4rem 0;
 }
 
 .tiptap li {
   margin: 0.25rem 0;
+  padding-left: 0;
+  /* Native list markers need no extra padding usually if outside */
+}
+
+/* Nested lists */
+.tiptap li>ul,
+.tiptap li>ol {
+  margin: 0;
+  padding-left: 1.5rem;
+  /* Indent for nested levels */
 }
 
 .tiptap blockquote {
   border-left: 2px solid hsl(var(--border));
   color: hsl(var(--muted-foreground));
   margin: 0.8rem 0;
-  padding-left: 2.25rem;
+  padding-left: 1rem;
+  margin-left: 1.75rem;
 }
 
 .tiptap pre {
@@ -139,24 +172,85 @@
   margin: 1.25rem 0;
 }
 
+/* Task List - Explicit Logic */
+
+/* Task List - Explicit Logic */
 .tiptap ul[data-type="taskList"] {
   list-style: none;
-  padding: 0 0 0 2.5rem;
+  padding-left: 2.3rem;
+  /* Keep indent */
 }
 
 .tiptap ul[data-type="taskList"] li {
-  display: flex;
-  margin-bottom: 0.5rem;
+  display: flex !important;
+  align-items: flex-start;
+  margin-bottom: 0.2rem;
 }
 
 .tiptap ul[data-type="taskList"] li>label {
   flex: 0 0 auto;
   margin-right: 0.5rem;
   user-select: none;
+  margin-top: 0.5em;
+  /* Adjusted for alignment with prose-lg line-height */
+}
+
+/* Custom Checkbox Style mimicking Notion */
+.tiptap ul[data-type="taskList"] li>label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  /* Safari */
+  background-color: transparent;
+  margin: 0;
+  cursor: pointer;
+  width: 1.2em;
+  /* Relative to font size */
+  height: 1.2em;
+  border: 2px solid hsl(var(--muted-foreground) / 0.7);
+  border-radius: 3px;
+  display: grid;
+  place-content: center;
+  transition: all 0.2s ease;
+}
+
+.tiptap ul[data-type="taskList"] li>label input[type="checkbox"]:hover {
+  background-color: hsl(var(--muted));
+  border-color: hsl(var(--foreground) / 0.6);
+}
+
+.tiptap ul[data-type="taskList"] li>label input[type="checkbox"]::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transition: 0.1s transform ease-in-out;
+  box-shadow: inset 1em 1em white;
+  transform-origin: center;
+  /* Checkmark shape */
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.tiptap ul[data-type="taskList"] li>label input[type="checkbox"]:checked {
+  background-color: #2383e2;
+  /* Notion Blue */
+  border-color: #2383e2;
+}
+
+.tiptap ul[data-type="taskList"] li>label input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+/* Strikethrough for completed tasks */
+.tiptap ul[data-type="taskList"] li[data-checked="true"]>div {
+  text-decoration: line-through;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.8;
 }
 
 .tiptap ul[data-type="taskList"] li>div {
   flex: 1 1 auto;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .tiptap p.is-editor-empty:first-child::before {
