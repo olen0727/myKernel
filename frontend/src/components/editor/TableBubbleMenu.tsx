@@ -10,11 +10,16 @@ import {
     Rows,
     Trash,
     Split,
-    Merge
+    Merge,
+    ArrowLeft,
+    ArrowRight,
+    ArrowUp,
+    ArrowDown
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Editor } from '@tiptap/core'
 import { Separator } from '@/components/ui/separator'
+import { moveRow, moveColumn } from './utils/table-functions'
 
 interface TableBubbleMenuProps {
     editor: Editor
@@ -105,6 +110,39 @@ export function TableBubbleMenu({ editor }: TableBubbleMenuProps) {
                     title="Split Cell"
                 >
                     <Split className="w-4 h-4" />
+                </button>
+            </div>
+
+            <Separator orientation="vertical" className="h-6 mx-1" />
+
+            <div className="flex items-center gap-1">
+                <button
+                    onClick={() => moveColumn(editor, 'left')}
+                    className="p-1.5 rounded hover:bg-accent text-popover-foreground"
+                    title="Move Column Left"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => moveColumn(editor, 'right')}
+                    className="p-1.5 rounded hover:bg-accent text-popover-foreground"
+                    title="Move Column Right"
+                >
+                    <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => moveRow(editor, 'up')}
+                    className="p-1.5 rounded hover:bg-accent text-popover-foreground"
+                    title="Move Row Up"
+                >
+                    <ArrowUp className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => moveRow(editor, 'down')}
+                    className="p-1.5 rounded hover:bg-accent text-popover-foreground"
+                    title="Move Row Down"
+                >
+                    <ArrowDown className="w-4 h-4" />
                 </button>
             </div>
 
