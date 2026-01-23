@@ -34,6 +34,13 @@ export function EditorBubbleMenu(props: EditorBubbleMenuProps) {
     return (
         <BubbleMenu
             {...props}
+            shouldShow={({ from, to, editor }) => {
+                if (editor.isActive('table')) {
+                    return false
+                }
+                // Default behavior: show only if selection is not empty
+                return from !== to
+            }}
             className="flex items-center gap-1 rounded-lg border bg-popover p-1 shadow-md"
         >
 

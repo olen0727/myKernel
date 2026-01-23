@@ -14,12 +14,18 @@ import {
     ArrowLeft,
     ArrowRight,
     ArrowUp,
-    ArrowDown
+    ArrowDown,
+    Bold,
+    Italic,
+    Strikethrough,
+    Code,
+    Link as LinkIcon
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Editor } from '@tiptap/core'
 import { Separator } from '@/components/ui/separator'
 import { moveRow, moveColumn } from './utils/table-functions'
+import { useCallback } from 'react'
 
 interface TableBubbleMenuProps {
     editor: Editor
@@ -28,22 +34,76 @@ interface TableBubbleMenuProps {
 export function TableBubbleMenu({ editor }: TableBubbleMenuProps) {
     if (!editor) return null
 
-    // Only show if selection is in a table
-    // Tiptap's BubbleMenu `shouldShow` prop can handle this, but better to control here too?
-    // Actually standard BubbleMenu usage:
-    // <BubbleMenu shouldShow={({ editor }) => editor.isActive('table')} ... >
+    const setLink = useCallback(() => {
+        const previousUrl = editor?.getAttributes('link').href
+        const url = window.prompt('URL', previousUrl)
 
-    // We will use the shouldShow prop in the implementation below
+        if (url === null) return
+        if (url === '') {
+            editor?.chain().extendMarkRange('link').unsetLink().run()
+            return
+        }
+        editor?.chain().extendMarkRange('link').setLink({ href: url }).run()
+    }, [editor])
 
     return (
         <BubbleMenu
             editor={editor}
-
             shouldShow={({ editor }) => {
                 return editor.isActive('table')
             }}
             className="flex items-center gap-1 rounded-lg border bg-popover p-1 shadow-md overflow-hidden max-w-[90vw] flex-wrap"
         >
+            <div className="flex items-center gap-1">
+                <button
+                    onClick={() => editor.chain().toggleBold().run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-accent hover:text-accent-foreground text-popover-foreground transition-colors",
+                        editor.isActive('bold') && "bg-accent text-accent-foreground"
+                    )}
+                >
+                    <Bold className="w-3 h-3" />
+                </button>
+                <button
+                    onClick={() => editor.chain().toggleItalic().run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-accent hover:text-accent-foreground text-popover-foreground transition-colors",
+                        editor.isActive('italic') && "bg-accent text-accent-foreground"
+                    )}
+                >
+                    <Italic className="w-3 h-3" />
+                </button>
+                <button
+                    onClick={() => editor.chain().toggleStrike().run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-accent hover:text-accent-foreground text-popover-foreground transition-colors",
+                        editor.isActive('strike') && "bg-accent text-accent-foreground"
+                    )}
+                >
+                    <Strikethrough className="w-3 h-3" />
+                </button>
+                <button
+                    onClick={() => editor.chain().toggleCode().run()}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-accent hover:text-accent-foreground text-popover-foreground transition-colors",
+                        editor.isActive('code') && "bg-accent text-accent-foreground"
+                    )}
+                >
+                    <Code className="w-3 h-3" />
+                </button>
+                <button
+                    onClick={setLink}
+                    className={cn(
+                        "p-1.5 rounded hover:bg-accent hover:text-accent-foreground text-popover-foreground transition-colors",
+                        editor.isActive('link') && "bg-accent text-accent-foreground"
+                    )}
+                >
+                    <LinkIcon className="w-3 h-3" />
+                </button>
+            </div>
+
+            <Separator orientation="vertical" className="h-6 mx-1" />
+
             <div className="flex items-center gap-1">
                 <button
                     onClick={() => editor.chain().focus().addColumnBefore().run()}
