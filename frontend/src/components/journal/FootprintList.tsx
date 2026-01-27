@@ -11,6 +11,7 @@ interface FootprintListProps {
 }
 
 export function FootprintList({ date }: FootprintListProps) {
+    const navigate = useNavigate()
     const [footprints, setFootprints] = useState<ResourceFootprint[]>([])
     const dateStr = format(date, "yyyy-MM-dd")
 
@@ -41,7 +42,7 @@ export function FootprintList({ date }: FootprintListProps) {
     }
 
 
-    const navigate = useNavigate()
+
 
     const handleItemClick = (fp: ResourceFootprint) => {
         if (fp.type === 'journal') {

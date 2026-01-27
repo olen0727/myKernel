@@ -1,5 +1,6 @@
 
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { FootprintList } from "../FootprintList"
 import { dataStore } from "@/services/mock-data-service"
@@ -22,7 +23,11 @@ describe("FootprintList", () => {
     it("renders empty state when no footprints exist", () => {
         vi.mocked(dataStore.getResourceFootprints).mockReturnValue([])
 
-        render(<FootprintList date={testDate} />)
+        render(
+            <MemoryRouter>
+                <FootprintList date={testDate} />
+            </MemoryRouter>
+        )
 
         expect(screen.getByText("無資源足跡")).toBeInTheDocument()
     })
@@ -47,9 +52,13 @@ describe("FootprintList", () => {
             }
         ]
 
-        vi.mocked(dataStore.getResourceFootprints).mockReturnValue(mockFootprints)
+        vi.mocked(dataStore.getResourceFootprints).mockReturnValue(mockFootprints as any)
 
-        render(<FootprintList date={testDate} />)
+        render(
+            <MemoryRouter>
+                <FootprintList date={testDate} />
+            </MemoryRouter>
+        )
 
         // Check Items
         expect(screen.getByText("Test Note Created")).toBeInTheDocument()
@@ -67,7 +76,11 @@ describe("FootprintList", () => {
     it("queries footprints for the correct date", () => {
         vi.mocked(dataStore.getResourceFootprints).mockReturnValue([])
 
-        render(<FootprintList date={testDate} />)
+        render(
+            <MemoryRouter>
+                <FootprintList date={testDate} />
+            </MemoryRouter>
+        )
 
         expect(dataStore.getResourceFootprints).toHaveBeenCalledWith(format(testDate, "yyyy-MM-dd"))
     })

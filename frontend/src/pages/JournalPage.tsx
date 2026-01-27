@@ -95,30 +95,31 @@ export default function JournalPage() {
                             <FootprintList date={currentDate} />
                         </div>
                     </div>
-                </div>
 
-                {/* Right 40% -> 2/5 cols */}
-                <div className="lg:col-span-2 overflow-y-auto p-6 space-y-6 bg-muted/10">
-                    <div
-                        className={cn("space-y-4", isFutureDay && "opacity-50 pointer-events-none")}
-                        aria-disabled={isFutureDay}
-                    >
-                        <h2 className="text-xl font-semibold tracking-tight">Habits</h2>
-                        <DailyHabitList date={currentDate} readOnly={isFutureDay} />
-                    </div>
 
-                    <div
-                        className={cn("space-y-4", isFutureDay && "opacity-50 pointer-events-none")}
-                        aria-disabled={isFutureDay}
-                    >
-                        <h2 className="text-xl font-semibold tracking-tight">Metrics</h2>
-                        <MetricInputList date={currentDate} readOnly={isFutureDay} />
-                    </div>
+                    {/* Right 40% -> 2/5 cols */}
+                    <div className="lg:col-span-2 overflow-y-auto p-6 space-y-6 bg-muted/10">
+                        <div
+                            className={cn("space-y-4", isFutureDay && "opacity-50 pointer-events-none")}
+                            aria-disabled={isFutureDay}
+                        >
+                            <h2 className="text-xl font-semibold tracking-tight">Habits</h2>
+                            <DailyHabitList date={currentDate} readOnly={isFutureDay} />
+                        </div>
 
-                    <div className="space-y-2">
-                        <h2 className="text-xl font-semibold tracking-tight">Action Guide</h2>
-                        <div className="p-4 border rounded-lg bg-background h-32 flex items-center justify-center text-muted-foreground">
-                            Action Guide Placeholder
+                        <div
+                            className={cn("space-y-4", isFutureDay && "opacity-50 pointer-events-none")}
+                            aria-disabled={isFutureDay}
+                        >
+                            <h2 className="text-xl font-semibold tracking-tight">Metrics</h2>
+                            <MetricInputList date={currentDate} readOnly={isFutureDay} />
+                        </div>
+
+                        <div className="space-y-2">
+                            <h2 className="text-xl font-semibold tracking-tight">Action Guide</h2>
+                            <div className="p-4 border rounded-lg bg-background h-32 flex items-center justify-center text-muted-foreground">
+                                Action Guide Placeholder
+                            </div>
                         </div>
                     </div>
                 </div>
