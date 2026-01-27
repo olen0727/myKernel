@@ -1,6 +1,6 @@
 # Story 5.6: Metrics Management Page 指標管理列表
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -26,12 +26,14 @@ So that **我可以定義需要長期追蹤的量化數據**.
 
 ## Tasks / Subtasks
 
-- [ ] 實作 MetricsPage
-    - [ ] 建立 `src/pages/MetricsPage.tsx`。
-- [ ] 實作 MetricList Component
-    - [ ] 列表渲染邏輯。
-- [ ] 實作 CreateMetricModal
-    - [ ] 建立 `src/components/metrics/CreateMetricModal.tsx`。
+- [x] 實作 MetricsPage
+    - [x] 建立 `src/pages/MetricsPage.tsx`。
+- [x] 實作 MetricList Component
+    - [x] 列表渲染邏輯。
+- [x] 實作 CreateMetricModal
+    - [x] 建立 `src/components/metrics/CreateMetricModal.tsx`。
+- [x] [AI-Review][HIGH] Implement "Edit Metric" functionality (AC 3). `src/components/metrics/MetricList.tsx`
+- [x] [AI-Review][MEDIUM] Replace `window.confirm` with Shadcn AlertDialog.
 
 ## Dev Notes
 
@@ -44,3 +46,18 @@ So that **我可以定義需要長期追蹤的量化數據**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-5.4)
+
+## File List
+- src/pages/MetricsPage.tsx
+- src/pages/__tests__/MetricsPage.test.tsx
+- src/components/metrics/MetricList.tsx
+- src/components/metrics/__tests__/MetricList.test.tsx
+- src/components/metrics/CreateMetricModal.tsx
+- src/services/mock-data-service.ts
+
+## Change Log
+- 2026-01-27: Implemented MetricsPage with Active/Archived tabs.
+- 2026-01-27: Implemented MetricList and CreateMetricModal components.
+- 2026-01-27: Updated Mock Data Service to support metric management (Add/Update/Delete).
+- 2026-01-27: Code Review performed. Action items created for missing Edit functionality and UI improvements.
+- 2026-01-28: Implemented Edit functionality and AlertDialog.

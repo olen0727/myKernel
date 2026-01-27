@@ -26,6 +26,15 @@ export const generateMockMetricData = (days: number, min: number, max: number): 
     return data
 }
 
+export interface ResourceFootprint {
+    id: string
+    title: string
+    type: "note" | "link" | "journal"
+    action: "created" | "modified"
+    timestamp: Date
+    summary?: string
+}
+
 // --- Inbox Mock Data ---
 export interface Resource {
     id: string
@@ -261,11 +270,14 @@ export const INITIAL_AREAS: Area[] = [
 export interface MetricDefinition {
     id: string
     name: string
-    type: 'number' | 'rating'
+    type: 'number' | 'rating' | 'select' | 'time'
     min?: number
     max?: number
     step?: number
     unit?: string
+    status: 'active' | 'archived'
+    isSystem: boolean
+    options?: string[] // For select type
 }
 
 export interface MetricEntry {
@@ -275,10 +287,10 @@ export interface MetricEntry {
 }
 
 export const METRIC_DEFINITIONS: MetricDefinition[] = [
-    { id: 'mood', name: '心情 (Mood)', type: 'rating', min: 1, max: 5 },
-    { id: 'energy', name: '能量 (Energy)', type: 'rating', min: 1, max: 5 },
-    { id: 'sleep', name: '睡眠 (Sleep)', type: 'number', min: 0, max: 24, step: 0.5, unit: 'hrs' },
-    { id: 'focus', name: '專注度 (Focus)', type: 'rating', min: 1, max: 10 },
+    { id: 'mood', name: '心情 (Mood)', type: 'rating', min: 1, max: 5, status: 'active', isSystem: true },
+    { id: 'energy', name: '能量 (Energy)', type: 'rating', min: 1, max: 5, status: 'active', isSystem: true },
+    { id: 'sleep', name: '睡眠 (Sleep)', type: 'number', min: 0, max: 24, step: 0.5, unit: 'hrs', status: 'active', isSystem: true },
+    { id: 'focus', name: '專注度 (Focus)', type: 'rating', min: 1, max: 10, status: 'active', isSystem: false },
 ]
 
 // --- Journal Mock Data ---
@@ -296,6 +308,7 @@ class DataStore {
     private habits: Habit[] = [...HABITS]
     private taskLists: TaskListGroup[] = [...INITIAL_TASK_LISTS]
     private metricEntries: MetricEntry[] = []
+    private metricDefinitions: MetricDefinition[] = [...METRIC_DEFINITIONS]
     private journalEntries: JournalEntry[] = []
 
     // Journal
@@ -320,7 +333,19 @@ class DataStore {
     }
 
     // Metrics
-    getMetricDefinitions() { return METRIC_DEFINITIONS }
+    getMetricDefinitions() { return this.metricDefinitions }
+
+    addMetricDefinition(def: MetricDefinition) {
+        this.metricDefinitions.push(def)
+    }
+
+    updateMetricDefinition(id: string, updates: Partial<MetricDefinition>) {
+        this.metricDefinitions = this.metricDefinitions.map(d => d.id === id ? { ...d, ...updates } : d)
+    }
+
+    deleteMetricDefinition(id: string) {
+        this.metricDefinitions = this.metricDefinitions.filter(d => d.id !== id)
+    }
 
     getMetricEntries(date: string) {
         return this.metricEntries.filter(e => e.date === date)
@@ -435,6 +460,66 @@ class DataStore {
         const total = 5
         const done = projectId === '1' ? 3 : 1
         return { total, done }
+    }
+
+    // Footprints
+    getResourceFootprints(dateStr: string): ResourceFootprint[] {
+        const targetDate = new Date(dateStr)
+        const footprints: ResourceFootprint[] = []
+
+        // 1. Inbox Resources (using timestamp as creation/action time)
+        INITIAL_INBOX_RESOURCES.forEach(r => {
+            if (format(r.timestamp, 'yyyy-MM-dd') === dateStr) {
+                footprints.push({
+                    id: r.id,
+                    title: r.title,
+                    type: r.type,
+                    action: 'created', // Simplify for mock
+                    timestamp: r.timestamp,
+                    summary: r.summary
+                })
+            }
+        })
+
+        // 2. Project Resources
+        INITIAL_PROJECT_RESOURCES.forEach(r => {
+            if (format(r.createdAt, 'yyyy-MM-dd') === dateStr) {
+                footprints.push({
+                    id: r.id,
+                    title: r.title,
+                    type: r.type,
+                    action: 'created',
+                    timestamp: r.createdAt,
+                    summary: r.content.substring(0, 100) + '...'
+                })
+            }
+        })
+
+        // 3. Journal Entry
+        this.journalEntries.forEach(e => {
+            // Check creation
+            if (format(e.createdAt, 'yyyy-MM-dd') === dateStr) {
+                footprints.push({
+                    id: `journal-create-${e.date}`,
+                    title: `Journal Entry (${e.date})`,
+                    type: 'journal',
+                    action: 'created',
+                    timestamp: e.createdAt,
+                    summary: e.content ? (e.content.substring(0, 60) + (e.content.length > 60 ? '...' : '')) : 'No content'
+                })
+            } else if (format(e.updatedAt, 'yyyy-MM-dd') === dateStr) {
+                footprints.push({
+                    id: `journal-update-${e.date}`,
+                    title: `Journal Entry (${e.date})`,
+                    type: 'journal',
+                    action: 'modified',
+                    timestamp: e.updatedAt,
+                    summary: e.content ? (e.content.substring(0, 60) + (e.content.length > 60 ? '...' : '')) : 'No content'
+                })
+            }
+        })
+
+        return footprints.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     }
 }
 

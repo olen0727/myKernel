@@ -34,6 +34,7 @@ vi.mock("@/services/mock-data-service", () => ({
         getMetricDefinitions: vi.fn().mockReturnValue([]),
         getMetricEntries: vi.fn().mockReturnValue([]),
         toggleHabitCompletion: vi.fn(),
+        getResourceFootprints: vi.fn().mockReturnValue([]),
     }
 }))
 

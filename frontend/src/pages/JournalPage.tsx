@@ -5,6 +5,7 @@ import { format, parse, isValid, startOfDay, isAfter } from "date-fns"
 import { DateNavigator } from "@/components/journal/DateNavigator"
 import { DailyHabitList } from "@/components/journal/DailyHabitList"
 import { MetricInputList } from "@/components/journal/MetricInputList"
+import { FootprintList } from "@/components/journal/FootprintList"
 import { cn } from "@/lib/utils"
 import { TipTapEditor } from "@/components/editor/TipTapEditor"
 import { dataStore } from "@/services/mock-data-service"
@@ -91,9 +92,7 @@ export default function JournalPage() {
 
                         <div className="space-y-2">
                             <h2 className="text-xl font-semibold tracking-tight">Resource Footprints</h2>
-                            <div className="p-4 border rounded-lg bg-muted/20 h-32 flex items-center justify-center text-muted-foreground">
-                                Footprints Placeholder
-                            </div>
+                            <FootprintList date={currentDate} />
                         </div>
                     </div>
                 </div>
