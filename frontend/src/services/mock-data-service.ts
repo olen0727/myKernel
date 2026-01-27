@@ -197,13 +197,14 @@ export interface Habit {
     frequency: "daily" | "weekly"
     days?: number[] // 0-6 for Sun-Sat
     areaId: string
+    completedDates: string[] // YYYY-MM-DD
 }
 
 export const HABITS: Habit[] = [
-    { id: "1", name: "寫日記", currentStreak: 42, maxStreak: 60, status: "active", frequency: "daily", areaId: "1" },
-    { id: "2", name: "閱讀 30 分鐘", currentStreak: 5, maxStreak: 15, status: "active", frequency: "daily", areaId: "2" },
-    { id: "3", name: "冥想", currentStreak: 12, maxStreak: 12, status: "active", frequency: "daily", areaId: "2" },
-    { id: "4", name: "運動", currentStreak: 3, maxStreak: 10, status: "active", frequency: "weekly", days: [1, 3, 5], areaId: "3" },
+    { id: "1", name: "寫日記", currentStreak: 42, maxStreak: 60, status: "active", frequency: "daily", areaId: "1", completedDates: [] },
+    { id: "2", name: "閱讀 30 分鐘", currentStreak: 5, maxStreak: 15, status: "active", frequency: "daily", areaId: "2", completedDates: [] },
+    { id: "3", name: "冥想", currentStreak: 12, maxStreak: 12, status: "active", frequency: "daily", areaId: "2", completedDates: [] },
+    { id: "4", name: "運動", currentStreak: 3, maxStreak: 10, status: "active", frequency: "weekly", days: [1, 3, 5], areaId: "3", completedDates: [] },
 ]
 
 // --- Area Mock Data ---
@@ -256,11 +257,53 @@ export const INITIAL_AREAS: Area[] = [
     }
 ]
 
+// --- Metric Mock Data ---
+export interface MetricDefinition {
+    id: string
+    name: string
+    type: 'number' | 'rating'
+    min?: number
+    max?: number
+    step?: number
+    unit?: string
+}
+
+export interface MetricEntry {
+    date: string // YYYY-MM-DD
+    metricId: string
+    value: number
+}
+
+export const METRIC_DEFINITIONS: MetricDefinition[] = [
+    { id: 'mood', name: '心情 (Mood)', type: 'rating', min: 1, max: 5 },
+    { id: 'energy', name: '能量 (Energy)', type: 'rating', min: 1, max: 5 },
+    { id: 'sleep', name: '睡眠 (Sleep)', type: 'number', min: 0, max: 24, step: 0.5, unit: 'hrs' },
+    { id: 'focus', name: '專注度 (Focus)', type: 'rating', min: 1, max: 10 },
+]
+
 // --- Persistent store simulation ---
 class DataStore {
     private areas: Area[] = [...INITIAL_AREAS]
     private habits: Habit[] = [...HABITS]
     private taskLists: TaskListGroup[] = [...INITIAL_TASK_LISTS]
+    private metricEntries: MetricEntry[] = []
+
+    // Metrics
+    getMetricDefinitions() { return METRIC_DEFINITIONS }
+
+    getMetricEntries(date: string) {
+        return this.metricEntries.filter(e => e.date === date)
+    }
+
+    saveMetricEntry(date: string, metricId: string, value: number) {
+        const index = this.metricEntries.findIndex(e => e.date === date && e.metricId === metricId)
+        if (index >= 0) {
+            this.metricEntries[index].value = value
+        } else {
+            this.metricEntries.push({ date, metricId, value })
+        }
+    }
+
 
     // Areas
     getAreas() { return this.areas }
@@ -274,13 +317,66 @@ class DataStore {
     }
 
     // Habits
+    getAllHabits() { return this.habits }
     getHabitsByArea(areaId: string) { return this.habits.filter(h => h.areaId === areaId) }
-    addHabit(habit: Habit) { this.habits.push(habit) }
+    addHabit(habit: Habit) {
+        if (!habit.completedDates) habit.completedDates = []
+        this.habits.push(habit)
+    }
     updateHabit(id: string, updates: Partial<Habit>) {
         this.habits = this.habits.map(h => h.id === id ? { ...h, ...updates } : h)
     }
     deleteHabit(id: string) {
         this.habits = this.habits.filter(h => h.id !== id)
+    }
+
+    toggleHabitCompletion(habitId: string, dateStr: string) {
+        const habit = this.habits.find(h => h.id === habitId)
+        if (!habit) return
+
+        const isCompleted = habit.completedDates.includes(dateStr)
+        let newCompletedDates = [...habit.completedDates]
+
+        if (isCompleted) {
+            newCompletedDates = newCompletedDates.filter(d => d !== dateStr)
+        } else {
+            newCompletedDates.push(dateStr)
+        }
+
+        // Recalculate streak
+        // Sort dates descending
+        newCompletedDates.sort((a, b) => b.localeCompare(a))
+
+        let newStreak = 0
+        if (newCompletedDates.length > 0) {
+            // Check if the most recent completion is today or yesterday (to allow keeping streak alive)
+            // But for "current streak", usually it means consecutive days ending today or yesterday.
+            // For this mock, let's just count backwards from the most recent completed date
+            // IF that date is recent enough.
+
+            // const today = format(new Date(), 'yyyy-MM-dd') // Unused
+            const latest = newCompletedDates[0]
+
+            // simple check: if strict streak, needs to include today or yesterday?
+            // let's just count consecutive days from the latest completion backwards
+
+            let current = new Date(latest)
+            newStreak = 1
+
+            for (let i = 1; i < newCompletedDates.length; i++) {
+                const prevDate = subDays(current, 1)
+                const prevDateStr = format(prevDate, 'yyyy-MM-dd')
+
+                if (newCompletedDates[i] === prevDateStr) {
+                    newStreak++
+                    current = prevDate
+                } else {
+                    break
+                }
+            }
+        }
+
+        this.updateHabit(habitId, { completedDates: newCompletedDates, currentStreak: newStreak })
     }
 
     // Projects

@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Archive, Trash2, FolderPlus, ExternalLink, Link as LinkIcon, Hash } from "lucide-react"
-import { DispatchModal } from "./DispatchModal"
+import { DispatchModal, DispatchItem } from "./DispatchModal"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import {
@@ -13,15 +13,17 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
+export type ResourceSidebarStatus = "processed" | "archived" | "inbox"
+
 export interface ResourceSidebarProps {
-    status: "processed" | "archived" | "inbox"
+    status: ResourceSidebarStatus
     tags: string[]
     sourceUrl?: string
-    linkedItems: { id: string; name: string; type: "project" | "area" }[]
-    onStatusChange: (status: string) => void
+    linkedItems: DispatchItem[]
+    onStatusChange: (status: ResourceSidebarStatus) => void
     onAddTag: (tag: string) => void
     onRemoveTag: (tag: string) => void
-    onDispatch: (selectedIds: string[]) => void
+    onDispatch: (selectedItems: DispatchItem[]) => void
     onArchive: () => void
     onDelete: () => void
 }
@@ -48,13 +50,21 @@ export function ResourceSidebar({
         }
     }
 
+    const handleDispatchConfirm = (selectedItems: DispatchItem[]) => {
+        onDispatch(selectedItems)
+        // H5: Auto-change status to processed if currently inbox
+        if (status === "inbox" && selectedItems.length > 0) {
+            onStatusChange("processed")
+        }
+    }
+
     return (
         <div className="w-80 border-l h-full p-4 flex flex-col gap-6 bg-muted/10">
             {/* Status Section */}
             <div className="space-y-3">
                 <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Properties</h4>
                 <div className="grid gap-2">
-                    <Select value={status} onValueChange={onStatusChange}>
+                    <Select value={status} onValueChange={(v) => onStatusChange(v as ResourceSidebarStatus)}>
                         <SelectTrigger>
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
@@ -168,7 +178,8 @@ export function ResourceSidebar({
             <DispatchModal
                 isOpen={isDispatchOpen}
                 onOpenChange={setIsDispatchOpen}
-                onConfirm={onDispatch}
+                onConfirm={handleDispatchConfirm}
+                initialSelected={linkedItems}
             />
         </div>
     )

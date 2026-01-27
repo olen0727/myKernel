@@ -1,6 +1,6 @@
 # Story 4.4: Resource Library & Filters 資源庫與篩選
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -62,5 +62,14 @@ So that **我可以快速找到需要的參考資料**.
 - frontend/src/components/resources/FilterBar.tsx
 - frontend/src/pages/__tests__/ResourceLibraryPage.test.tsx
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][HIGH] H1: FilterBar 篩選不影響列表 - 已加入 onChange callback 並連接到 ResourceLibraryPage state
+- [x] [AI-Review][HIGH] H2: Tag 篩選應為多選 - 已改為 string[] 支援多選
+- [x] [AI-Review][HIGH] H3: 缺少 Context Badges - 已加入 tags/linkedItems 欄位，UI 顯示 badges
+- [x] [AI-Review][MEDIUM] M1: Archived 淡化樣式未實作 - 已加入 status 欄位和淡化樣式
+- [x] [AI-Review][MEDIUM] M2: 測試覆蓋不足 - 已補充篩選邏輯測試
+- [x] [AI-Review][LOW] L3: Project Select 無 onChange - 已加入 onValueChange handler
+
 ## Change Log
+- 2026-01-23: AI Code Review - 所有 6 個問題已修復 (3 HIGH, 2 MEDIUM, 1 LOW)
 - 2026-01-20: Initial implementation of Resource Library story.

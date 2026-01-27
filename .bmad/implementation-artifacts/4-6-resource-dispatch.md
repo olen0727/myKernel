@@ -1,6 +1,6 @@
 # Story 4.6: Resource Dispatch & Smart Parse 資源分流與智慧解析
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -59,5 +59,12 @@ So that **我可以快速將資訊歸位至 PARA 系統**.
 - frontend/src/components/quick-capture-modal.tsx
 - frontend/src/lib/__tests__/content-parser.test.ts
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][HIGH] H5: 狀態自動轉換未實作 - 已在 ResourceSidebar 實作 Dispatch 後自動轉 processed
+- [x] [AI-Review][MEDIUM] M4: Status 命名不一致 - AC 用 Pending ≈ inbox，已確認語義一致
+- [x] [AI-Review][MEDIUM] M5: content-parser 測試不足 - 已補充 15+ edge cases 測試
+- [x] [AI-Review][LOW] L1: DispatchModal 關閉時狀態未清空 - 已修復 reset selectedIds
+
 ## Change Log
+- 2026-01-23: AI Code Review - 所有 4 個問題已修復 (1 HIGH, 2 MEDIUM, 1 LOW)
 - 2026-01-20: Completed Resource Dispatch tools and Smart Parse integration.

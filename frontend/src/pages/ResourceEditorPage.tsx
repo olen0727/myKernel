@@ -1,13 +1,24 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { TipTapEditor } from "@/components/editor/TipTapEditor"
-import { ResourceSidebar } from "@/components/resources/ResourceSidebar"
+import { ResourceSidebar, ResourceSidebarStatus } from "@/components/resources/ResourceSidebar"
+import { DispatchItem } from "@/components/resources/DispatchModal"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Cloud, CheckCircle2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 
+interface ResourceData {
+    id: string
+    title: string
+    content: string
+    status: ResourceSidebarStatus
+    tags: string[]
+    sourceUrl?: string
+    linkedItems: DispatchItem[]
+}
+
 // Mock Data Source
-const MOCK_DATA: Record<string, any> = {
+const MOCK_DATA: Record<string, ResourceData> = {
     "1": {
         id: "1",
         title: "Kernel Architecture Design",
@@ -27,13 +38,21 @@ const MOCK_DATA: Record<string, any> = {
         tags: ["react", "frontend"],
         sourceUrl: "https://react.dev",
         linkedItems: []
+    },
+    "3": {
+        id: "3",
+        title: "Meeting Notes - Sprint Planning",
+        content: "## Sprint Planning\n\n- Review backlog\n- Assign tasks",
+        status: "inbox",
+        tags: [],
+        linkedItems: []
     }
 }
 
 export default function ResourceEditorPage() {
     const { id } = useParams()
     const navigate = useNavigate()
-    const [data, setData] = useState<any>(null)
+    const [data, setData] = useState<ResourceData | null>(null)
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState<Date | null>(null)
 
@@ -55,8 +74,24 @@ export default function ResourceEditorPage() {
 
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setData((prev: any) => ({ ...prev, title: e.target.value }))
+        setData((prev) => prev ? { ...prev, title: e.target.value } : null)
         handleContentChange("")
+    }
+
+    // H4: Properly update linkedItems when dispatch
+    const handleDispatch = (selectedItems: DispatchItem[]) => {
+        setData(prev => {
+            if (!prev) return null
+            return { ...prev, linkedItems: selectedItems }
+        })
+        toast.success("Dispatch updated", {
+            description: `Linked to ${selectedItems.length} items`
+        })
+    }
+
+    // Handle status change
+    const handleStatusChange = (status: ResourceSidebarStatus) => {
+        setData(prev => prev ? { ...prev, status } : null)
     }
 
     if (!data) return <div className="p-8">Loading...</div>
@@ -121,15 +156,12 @@ export default function ResourceEditorPage() {
                     tags={data.tags}
                     sourceUrl={data.sourceUrl}
                     linkedItems={data.linkedItems}
-                    onStatusChange={(status) => setData({ ...data, status })}
-                    onAddTag={(tag) => setData({ ...data, tags: [...data.tags, tag] })}
-                    onRemoveTag={(tag) => setData({ ...data, tags: data.tags.filter((t: string) => t !== tag) })}
-                    onDispatch={(ids) => {
-                        toast.success("Dispatch updated", { description: `Linked to ${ids.length} items` })
-                        // Mock update linked items from IDs
-                    }}
+                    onStatusChange={handleStatusChange}
+                    onAddTag={(tag) => setData(prev => prev ? { ...prev, tags: [...prev.tags, tag] } : null)}
+                    onRemoveTag={(tag) => setData(prev => prev ? { ...prev, tags: prev.tags.filter((t) => t !== tag) } : null)}
+                    onDispatch={handleDispatch}
                     onArchive={() => {
-                        setData({ ...data, status: 'archived' })
+                        setData(prev => prev ? { ...prev, status: 'archived' } : null)
                         toast("Resource archived")
                         navigate('/resources')
                     }}

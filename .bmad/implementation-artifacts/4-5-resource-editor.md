@@ -1,6 +1,6 @@
 # Story 4.5: Resource Editor Page 資源編輯頁
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -59,5 +59,11 @@ So that **我可以深度整理與分類這筆資訊**.
 - frontend/src/pages/ResourceEditorPage.tsx
 - frontend/src/pages/__tests__/ResourceEditorPage.test.tsx
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][HIGH] H4: Dispatch 後 linkedItems 不更新 - 已修復 onDispatch 實際更新 linkedItems
+- [x] [AI-Review][MEDIUM] M3: 測試只測基本渲染 - 已補充 auto-save UI 和 sidebar 互動測試
+- [ ] [AI-Review][LOW] L2: 缺少鍵盤快捷鍵 - 可考慮加入 Ctrl+S (Optional, auto-save 已實作)
+
 ## Change Log
+- 2026-01-23: AI Code Review - 2/3 問題已修復 (1 HIGH, 1 MEDIUM fixed; 1 LOW deferred)
 - 2026-01-20: Completed Resource Editor implementation including TipTap integration and Sidebar.

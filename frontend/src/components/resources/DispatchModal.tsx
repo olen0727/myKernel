@@ -13,31 +13,50 @@ import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Check, Folder, Layers, X, MoveHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+export interface DispatchItem {
+    id: string
+    name: string
+    type: "project" | "area"
+}
+
 interface DispatchModalProps {
     isOpen: boolean
     onOpenChange: (open: boolean) => void
-    onConfirm: (selectedIds: string[]) => void
+    onConfirm: (selectedItems: DispatchItem[]) => void
+    initialSelected?: DispatchItem[]
 }
 
 // Mock Data for Projects and Areas
-const MOCK_PROJECTS = [
+const MOCK_PROJECTS: DispatchItem[] = [
     { id: "p1", name: "Kernel Development", type: "project" },
     { id: "p2", name: "Home Renovation", type: "project" },
     { id: "p3", name: "Fitness Goal 2026", type: "project" },
 ]
 
-const MOCK_AREAS = [
+const MOCK_AREAS: DispatchItem[] = [
     { id: "a1", name: "Work", type: "area" },
     { id: "a2", name: "Personal", type: "area" },
     { id: "a3", name: "Health", type: "area" },
 ]
 
+const ALL_ITEMS = [...MOCK_PROJECTS, ...MOCK_AREAS]
+
 export function DispatchModal({
     isOpen,
     onOpenChange,
     onConfirm,
+    initialSelected = [],
 }: DispatchModalProps) {
-    const [selectedIds, setSelectedIds] = React.useState<string[]>([])
+    const [selectedIds, setSelectedIds] = React.useState<string[]>(
+        initialSelected.map(item => item.id)
+    )
+
+    // L1: Reset state when modal opens/closes
+    React.useEffect(() => {
+        if (isOpen) {
+            setSelectedIds(initialSelected.map(item => item.id))
+        }
+    }, [isOpen, initialSelected])
 
     const toggleSelection = (id: string) => {
         setSelectedIds((prev) =>
@@ -46,15 +65,24 @@ export function DispatchModal({
     }
 
     const handleConfirm = () => {
-        onConfirm(selectedIds)
+        // Return full item objects, not just IDs
+        const selectedItems = ALL_ITEMS.filter(item => selectedIds.includes(item.id))
+        onConfirm(selectedItems)
         onOpenChange(false)
-        setSelectedIds([])
     }
 
-    const selectedItems = [...MOCK_PROJECTS, ...MOCK_AREAS].filter(item => selectedIds.includes(item.id))
+    // L1: Handle close - reset state
+    const handleOpenChange = (open: boolean) => {
+        if (!open) {
+            setSelectedIds([])
+        }
+        onOpenChange(open)
+    }
+
+    const selectedItems = ALL_ITEMS.filter(item => selectedIds.includes(item.id))
 
     return (
-        <CommandDialog open={isOpen} onOpenChange={onOpenChange}>
+        <CommandDialog open={isOpen} onOpenChange={handleOpenChange}>
             <div className="px-4 pt-4 pb-2 border-b bg-muted/5 flex items-center justify-between">
                 <div className="space-y-0.5">
                     <DialogTitle className="text-sm font-black flex items-center gap-2 tracking-tight">
