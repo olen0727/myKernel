@@ -281,12 +281,43 @@ export const METRIC_DEFINITIONS: MetricDefinition[] = [
     { id: 'focus', name: '專注度 (Focus)', type: 'rating', min: 1, max: 10 },
 ]
 
+// --- Journal Mock Data ---
+export interface JournalEntry {
+    id: string
+    date: string // YYYY-MM-DD
+    content: string
+    createdAt: Date
+    updatedAt: Date
+}
+
 // --- Persistent store simulation ---
 class DataStore {
     private areas: Area[] = [...INITIAL_AREAS]
     private habits: Habit[] = [...HABITS]
     private taskLists: TaskListGroup[] = [...INITIAL_TASK_LISTS]
     private metricEntries: MetricEntry[] = []
+    private journalEntries: JournalEntry[] = []
+
+    // Journal
+    getJournalEntry(date: string) {
+        return this.journalEntries.find(e => e.date === date)
+    }
+
+    saveJournalEntry(date: string, content: string) {
+        const index = this.journalEntries.findIndex(e => e.date === date)
+        if (index >= 0) {
+            this.journalEntries[index].content = content
+            this.journalEntries[index].updatedAt = new Date()
+        } else {
+            this.journalEntries.push({
+                id: crypto.randomUUID(),
+                date,
+                content,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            })
+        }
+    }
 
     // Metrics
     getMetricDefinitions() { return METRIC_DEFINITIONS }

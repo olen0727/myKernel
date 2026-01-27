@@ -1,5 +1,5 @@
 
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen, fireEvent, act } from "@testing-library/react"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { format, addDays } from "date-fns"
@@ -17,13 +17,38 @@ vi.mock("react-router-dom", async () => {
 
 // Mock DateNavigator
 vi.mock("@/components/journal/DateNavigator", () => ({
-    DateNavigator: ({ currentDate, onDateChange }: any) => (
+    DateNavigator: ({ currentDate, onDateChange }: { currentDate: Date; onDateChange: (date: Date) => void }) => (
         <div data-testid="date-navigator">
             <span data-testid="current-date">{format(currentDate, "yyyy-MM-dd")}</span>
             <button onClick={() => onDateChange(new Date("2023-01-02"))}>Change Date</button>
         </div>
     )
 }))
+
+// Mock DataStore
+vi.mock("@/services/mock-data-service", () => ({
+    dataStore: {
+        getJournalEntry: vi.fn(),
+        saveJournalEntry: vi.fn(),
+        getAllHabits: vi.fn().mockReturnValue([]),
+        getMetricDefinitions: vi.fn().mockReturnValue([]),
+        getMetricEntries: vi.fn().mockReturnValue([]),
+        toggleHabitCompletion: vi.fn(),
+    }
+}))
+
+// Mock TipTapEditor
+vi.mock("@/components/editor/TipTapEditor", () => ({
+    TipTapEditor: ({ content, onChange }: { content: string; onChange: (content: string) => void }) => (
+        <textarea
+            data-testid="tiptap-editor"
+            value={content}
+            onChange={(e) => onChange(e.target.value)}
+        />
+    )
+}))
+
+import { dataStore } from "@/services/mock-data-service"
 
 describe("JournalPage", () => {
     beforeEach(() => {
@@ -89,5 +114,49 @@ describe("JournalPage", () => {
         const habitsContainer = habitsTitle.closest("div")
         expect(habitsContainer).toHaveAttribute("aria-disabled", "true")
         expect(habitsContainer).toHaveClass("opacity-50", "pointer-events-none")
+    })
+
+    it("loads daily note content from store", () => {
+        vi.mocked(dataStore.getJournalEntry).mockReturnValue({ content: "My Secret Note", id: '1', date: '2023-01-01', createdAt: new Date(), updatedAt: new Date() })
+
+        render(
+            <MemoryRouter initialEntries={["/journal/2023-01-01"]}>
+                <Routes>
+                    <Route path="/journal/:date" element={<JournalPage />} />
+                </Routes>
+            </MemoryRouter>
+        )
+
+        expect(dataStore.getJournalEntry).toHaveBeenCalledWith("2023-01-01")
+        expect(screen.getByTestId("tiptap-editor")).toHaveValue("My Secret Note")
+    })
+
+    it("auto-saves daily note content after debounce", async () => {
+        vi.mocked(dataStore.getJournalEntry).mockReturnValue({ content: "", id: '1', date: '2023-01-01', createdAt: new Date(), updatedAt: new Date() })
+
+        render(
+            <MemoryRouter initialEntries={["/journal/2023-01-01"]}>
+                <Routes>
+                    <Route path="/journal/:date" element={<JournalPage />} />
+                </Routes>
+            </MemoryRouter>
+        )
+
+        const editor = screen.getByTestId("tiptap-editor")
+
+            // Initial save might happen due to state sync
+            ; vi.mocked(dataStore.saveJournalEntry).mockClear()
+
+        fireEvent.change(editor, { target: { value: "Updated Note" } })
+
+        // Should not save immediately
+        expect(dataStore.saveJournalEntry).not.toHaveBeenCalled()
+
+        // Advance timer using real wait
+        await act(async () => {
+            await new Promise(resolve => setTimeout(resolve, 1100))
+        })
+
+        expect(dataStore.saveJournalEntry).toHaveBeenCalledWith("2023-01-01", "Updated Note")
     })
 })

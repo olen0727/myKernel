@@ -1,6 +1,6 @@
 # Story 5.4: Daily Note Editor 每日筆記編輯器
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -25,11 +25,11 @@ So that **我可以進行自由書寫 (Free-writing) 與反思**.
 
 ## Tasks / Subtasks
 
-- [ ] 復用 TipTap Editor
-    - [ ] 在 `JournalPage` 引用 `src/components/editor/TipTapEditor.tsx`。
-- [ ] 實作資料載入與儲存
-    - [ ] 根據 URL 日期載入 Content。
-    - [ ] 實作 Debounced Auto-save。
+- [x] 復用 TipTap Editor
+    - [x] 在 `JournalPage` 引用 `src/components/editor/TipTapEditor.tsx`。
+- [x] 實作資料載入與儲存
+    - [x] 根據 URL 日期載入 Content。
+    - [x] 實作 Debounced Auto-save。
 
 ## Dev Notes
 
@@ -43,3 +43,34 @@ So that **我可以進行自由書寫 (Free-writing) 與反思**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-5.4)
+
+## Dev Agent Record
+
+### Implementation Plan
+- [x] Integrated `TipTapEditor` into `JournalPage`.
+- [x] Implemented `useDebounce` hook for efficient auto-saving.
+- [x] Updated `MockDataService` to support `JournalEntry` storage.
+- [x] Added comprehensive unit tests for `JournalPage` editor integration and auto-save logic.
+
+### File List
+- `frontend/src/pages/JournalPage.tsx`: Integrated editor and auto-save logic.
+- `frontend/src/hooks/use-debounce.ts`: New hook for debouncing.
+- `frontend/src/services/mock-data-service.ts`: Added JournalEntry support.
+- `frontend/src/pages/__tests__/JournalPage.test.tsx`: Updated tests.
+
+### Completion Notes
+- Daily Note functionality is complete.
+- Editor supports rich text and slash commands.
+- Auto-save works with 1s debounce.
+- Validated with tests: `JournalPage.test.tsx` passed.
+- Note: Some unrelated tests in the repo are failing (CreateProjectModal), but JournalPage tests are green.
+
+## Senior Developer Review (AI)
+
+- **Date**: 2026-01-28
+- **Reviewer**: Olen (AI Agent)
+- **Outcome**: Approved with Fixes
+- **Issues Found & Fixed**: 2 (Medium)
+    1.  **Version Control**: Tracked `frontend/src/hooks/use-debounce.ts`.
+    2.  **Code Quality**: Removed `any` types in `JournalPage.test.tsx` mocks to comply with architecture standards.
+- **Status**: Ready to merge.
