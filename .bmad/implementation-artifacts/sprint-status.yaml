@@ -85,7 +85,7 @@ development_status:
   5-4-daily-note: done  # AI-Review: All 2 issues fixed
   5-5-resource-footprints: done  # AI-Review: All issues fixed
   5-6-metrics-list: done  # AI-Review: All issues fixed
-  5-7-sleep-tracking: in-progress
+  5-7-sleep-tracking: done  # AI-Review: All issues fixed (Refactor, A11y, Tests)
   5-8-settings: ready-for-dev
   epic-5-retrospective: optional
 

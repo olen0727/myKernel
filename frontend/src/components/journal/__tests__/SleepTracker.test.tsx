@@ -1,13 +1,9 @@
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { SleepTracker } from '../SleepTracker'
-import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { SleepTracker, calculateSleepStats } from '../SleepTracker'
+import { describe, it, expect } from 'vitest'
 
-// Mock the radix-ui select to behave simply or use basic interaction
-// Since Shadcn Select uses portals, it's annoying to test. 
-// We can try to rely on the fact that we are clicking the trigger and options exist.
-
-describe('SleepTracker', () => {
+describe('SleepTracker Component', () => {
     const today = new Date('2025-01-28T12:00:00')
 
     it('renders sleep tracker labels', () => {
@@ -16,18 +12,44 @@ describe('SleepTracker', () => {
         expect(screen.getByText(/Wake Up At/i)).toBeInTheDocument()
     })
 
-    // NOTE: Testing Radix Select with vanilla testing-library is complex due to Portals.
-    // For this environment, we will verify the structure exists and simpler interactions if possible.
-    // Or we mock the Select component to be a simple select for testing?
-    // No, let's try to find the buttons.
-
     it('renders time pickers', () => {
         render(<SleepTracker date={today} />)
-        // Should find placeholders HH and MM
+        // Should find placeholders HH and MM (2 sets)
         const placeholders = screen.getAllByText('HH')
         expect(placeholders.length).toBeGreaterThanOrEqual(2)
     })
+})
 
-    // Skip full interaction test for now due to Radix Portal complexity in this specific shell environment
-    // without user-event setup. verifying the component renders is 'good enough' for this UI tweak request.
+describe('calculateSleepStats Logic', () => {
+    const today = new Date('2025-01-28T12:00:00')
+
+    it('calculates duration for same day sleep (01:00 to 08:00)', () => {
+        const { text, minutes } = calculateSleepStats('01:00', '08:00', today)
+        expect(text).toBe('7 hrs 0 mins')
+        expect(minutes).toBe(420)
+    })
+
+    it('calculates duration for cross day sleep (23:00 to 07:00)', () => {
+        const { text, minutes } = calculateSleepStats('23:00', '07:00', today)
+        expect(text).toBe('8 hrs 0 mins')
+        expect(minutes).toBe(480)
+    })
+
+    it('calculates duration for partial hour (23:30 to 07:00)', () => {
+        const { text, minutes } = calculateSleepStats('23:30', '07:00', today)
+        expect(text).toBe('7 hrs 30 mins')
+        expect(minutes).toBe(450)
+    })
+
+    it('handles missing inputs gracefully', () => {
+        expect(calculateSleepStats('', '07:00', today)).toEqual({ text: null, minutes: undefined })
+        expect(calculateSleepStats('23:00', '', today)).toEqual({ text: null, minutes: undefined })
+    })
+
+    it('treats sleep time > wake time as yesterday', () => {
+        // Sleep 09:00, Wake 08:00 => Sleep was yesterday 09:00. Diff = 23h.
+        const { text, minutes } = calculateSleepStats('09:00', '08:00', today)
+        expect(minutes).toBe(23 * 60)
+        expect(text).toBe('23 hrs 0 mins')
+    })
 })

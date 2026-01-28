@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { differenceInMinutes, set, subDays } from 'date-fns'
-import { Input } from '@/components/ui/input' // Unused but let's keep or remove. Wait, I removed Input usage.
-import { Label } from '@/components/ui/label'
 import { Moon, Sun, Clock, X } from 'lucide-react'
 import {
     Select,
@@ -11,6 +9,30 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+
+export const calculateSleepStats = (sleepTime: string, wakeTime: string, date: Date) => {
+    if (!sleepTime || !wakeTime) return { text: null, minutes: undefined }
+
+    const [sleepH, sleepM] = sleepTime.split(':').map(Number)
+    const [wakeH, wakeM] = wakeTime.split(':').map(Number)
+
+    let sleepDate = set(date, { hours: sleepH, minutes: sleepM, seconds: 0 })
+    const wakeDate = set(date, { hours: wakeH, minutes: wakeM, seconds: 0 })
+
+    if (sleepDate > wakeDate) {
+        sleepDate = subDays(sleepDate, 1)
+    }
+
+    const diffMinutes = differenceInMinutes(wakeDate, sleepDate)
+
+    if (diffMinutes >= 0) {
+        const hrs = Math.floor(diffMinutes / 60)
+        const mins = diffMinutes % 60
+        return { text: `${hrs} hrs ${mins} mins`, minutes: diffMinutes }
+    } else {
+        return { text: 'Invalid range', minutes: undefined }
+    }
+}
 
 interface SleepTrackerProps {
     date: Date
@@ -110,27 +132,9 @@ export const SleepTracker: React.FC<SleepTrackerProps> = ({
             return
         }
 
-        const [sleepH, sleepM] = sleepTime.split(':').map(Number)
-        const [wakeH, wakeM] = wakeTime.split(':').map(Number)
-
-        let sleepDate = set(date, { hours: sleepH, minutes: sleepM, seconds: 0 })
-        const wakeDate = set(date, { hours: wakeH, minutes: wakeM, seconds: 0 })
-
-        if (sleepDate > wakeDate) {
-            sleepDate = subDays(sleepDate, 1)
-        }
-
-        const diffMinutes = differenceInMinutes(wakeDate, sleepDate)
-
-        if (diffMinutes >= 0) {
-            const hrs = Math.floor(diffMinutes / 60)
-            const mins = diffMinutes % 60
-            setDuration(`${hrs} hrs ${mins} mins`)
-            onDataChangeRef.current?.(diffMinutes, sleepTime, wakeTime)
-        } else {
-            setDuration('Invalid range')
-            onDataChangeRef.current?.(undefined, sleepTime, wakeTime)
-        }
+        const { text, minutes } = calculateSleepStats(sleepTime, wakeTime, date)
+        setDuration(text)
+        onDataChangeRef.current?.(minutes, sleepTime, wakeTime)
     }, [sleepTime, wakeTime, date])
 
     useEffect(() => {
@@ -146,10 +150,10 @@ export const SleepTracker: React.FC<SleepTrackerProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-2">
-                    <Label htmlFor="sleep-at-picker" className="text-xs text-muted-foreground flex items-center gap-1">
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 font-medium">
                         <Moon className="w-3 h-3" />
                         Sleep At
-                    </Label>
+                    </div>
                     <div id="sleep-at-picker">
                         <TimePicker
                             value={sleepTime}
@@ -160,10 +164,10 @@ export const SleepTracker: React.FC<SleepTrackerProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <Label htmlFor="wake-up-picker" className="text-xs text-muted-foreground flex items-center gap-1">
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 font-medium">
                         <Sun className="w-3 h-3" />
                         Wake Up At
-                    </Label>
+                    </div>
                     <div id="wake-up-picker">
                         <TimePicker
                             value={wakeTime}

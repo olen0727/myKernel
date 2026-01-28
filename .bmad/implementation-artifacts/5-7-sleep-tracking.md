@@ -1,6 +1,6 @@
 # Story 5.7: Sleep Tracking Module 睡眠追蹤模組
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,6 +28,11 @@ So that **我可以追蹤睡眠品質與規律性**.
 - [x] 整合至 Metric Input 流程
     - [x] 視為特殊類型的 Metric 處理。
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][High] Add unit tests for sleep duration calculation logic (SleepTracker.test.tsx)
+- [x] [AI-Review][Medium] Fix accessibility issue: Label htmlFor pointing to non-input element (SleepTracker.tsx)
+- [x] [AI-Review][Medium] Refactor: Extract calculation logic to pure function for better testability (SleepTracker.tsx)
+
 ## File List
 
 - src/components/journal/SleepTracker.tsx
@@ -39,6 +44,7 @@ So that **我可以追蹤睡眠品質與規律性**.
 ## Change Log
 
 - 2026-01-28: Implemented SleepTracker component with date-fns logic. Integrated into MetricInputList to handle separate sleep/wake times via metadata. Updated MetricItem to support accessibility. Added unit tests for SleepTracker.
+- 2026-01-29: [AI-Review] Refactored SleepTracker to extract calculation logic. Fixed accessibility issues. Added comprehensive unit tests in SleepTracker.test.tsx.
 
 ## Dev Notes
 
