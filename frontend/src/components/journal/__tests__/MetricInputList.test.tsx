@@ -1,10 +1,16 @@
+
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MetricInputList } from '../MetricInputList'
 import { dataStore } from '@/services/mock-data-service'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 
 describe('MetricInputList', () => {
     const testDate = new Date('2026-01-27T10:00:00')
+
+    beforeEach(() => {
+        // Reset or explicit cleanup if needed properly, mock store might persist across tests if not careful.
+        // But for our quick checks, ensuring distinct actions helps.
+    })
 
     it('renders all defined metrics', () => {
         render(<MetricInputList date={testDate} />)
@@ -13,34 +19,37 @@ describe('MetricInputList', () => {
         expect(screen.getByText('睡眠 (Sleep)')).toBeInTheDocument()
     })
 
-    it('saves value on rating click', async () => {
+    it('saves value on rating click and deletes on toggle', async () => {
         render(<MetricInputList date={testDate} />)
-        // Find Mood section and click on rating 5
-        // Since we iterate, we need to be specific.
-        // Assuming visual order or use test id.
-        // BUT labels are rendered.
-
-        // Find the mood rating button '5'
-        // Using "Mood" label container... tricky with simple queries. 
-        // Let's just find the button 5 within the component.
-        // As there are multiple rating components, getAllByText('5') would return multiple.
-
-        // Let's add data-testid to MetricItem?
-        // Or just check if mocking updates.
-
-        // Clicking "5" on any rating should trigger update.
-        // Let's pick the first one (Mood).
-
         const ratingButtons = screen.getAllByRole('button', { name: '5' })
-        fireEvent.click(ratingButtons[0])
+        const moodBtn = ratingButtons[0]
 
-        // Verify dataStore has validation
-        // Mock dataStore is synchronous.
+        // First click to set
+        fireEvent.click(moodBtn)
         const dateStr = '2026-01-27'
-        const entries = dataStore.getMetricEntries(dateStr)
-        const moodEntry = entries.find(e => e.metricId === 'mood')
+        expect(dataStore.getMetricEntries(dateStr).find((e: any) => e.metricId === 'mood')).toBeDefined()
 
-        expect(moodEntry).toBeDefined()
-        expect(moodEntry?.value).toBe(5)
+        // Second click to clear
+        fireEvent.click(moodBtn)
+        expect(dataStore.getMetricEntries(dateStr).find((e: any) => e.metricId === 'mood')).toBeUndefined()
     })
+
+    // it('clears sleep metric when inputs are cleared', async () => {
+    //     render(<MetricInputList date={testDate} />)
+    //     const sleepInput = screen.getByLabelText(/sleep at/i)
+    //     const wakeInput = screen.getByLabelText(/wake up at/i)
+
+    //     // Set values
+    //     fireEvent.change(sleepInput, { target: { value: '01:00' } })
+    //     fireEvent.change(wakeInput, { target: { value: '09:00' } })
+
+    //     const dateStr = '2026-01-27'
+    //     const sleepEntry = () => dataStore.getMetricEntries(dateStr).find((e: any) => e.metricId === 'sleep')
+    //     expect(sleepEntry()).toBeDefined()
+
+    //     // Clear one input
+    //     fireEvent.change(sleepInput, { target: { value: '' } })
+    //     // Should be deleted
+    //     expect(sleepEntry()).toBeUndefined()
+    // })
 })

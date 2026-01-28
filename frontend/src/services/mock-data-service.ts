@@ -284,6 +284,7 @@ export interface MetricEntry {
     date: string // YYYY-MM-DD
     metricId: string
     value: number
+    metadata?: Record<string, any>
 }
 
 export const METRIC_DEFINITIONS: MetricDefinition[] = [
@@ -351,13 +352,20 @@ class DataStore {
         return this.metricEntries.filter(e => e.date === date)
     }
 
-    saveMetricEntry(date: string, metricId: string, value: number) {
+    saveMetricEntry(date: string, metricId: string, value: number, metadata?: Record<string, any>) {
         const index = this.metricEntries.findIndex(e => e.date === date && e.metricId === metricId)
         if (index >= 0) {
             this.metricEntries[index].value = value
+            if (metadata) {
+                this.metricEntries[index].metadata = { ...this.metricEntries[index].metadata, ...metadata }
+            }
         } else {
-            this.metricEntries.push({ date, metricId, value })
+            this.metricEntries.push({ date, metricId, value, metadata })
         }
+    }
+
+    deleteMetricEntry(date: string, metricId: string) {
+        this.metricEntries = this.metricEntries.filter(e => !(e.date === date && e.metricId === metricId))
     }
 
 

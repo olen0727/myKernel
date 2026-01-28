@@ -9,7 +9,7 @@ import { Star, Moon, Zap, Target } from 'lucide-react'
 interface MetricItemProps {
     definition: MetricDefinition
     value: number | undefined
-    onChange: (value: number) => void
+    onChange: (value: number | undefined) => void
     readOnly?: boolean
 }
 
@@ -32,7 +32,8 @@ export const MetricItem: React.FC<MetricItemProps> = ({ definition, value, onCha
         if (localValue === '') {
             // allowing empty? If so, maybe 0 or undefined.
             // If empty string, treat as undefined/clear
-            // onChange(undefined) // If we want to support clearing number inputs
+            // If empty string, treat as undefined/clear
+            onChange(undefined)
             return
         }
         const num = parseFloat(localValue.toString())
@@ -57,7 +58,8 @@ export const MetricItem: React.FC<MetricItemProps> = ({ definition, value, onCha
         if (value === rating) {
             // Toggle off (clear) - passing 0 or handling undefined if supported.
             // Since props expects number, let's assume 0 is clear for rating
-            onChange(0)
+            // Toggle off (clear)
+            onChange(undefined)
         } else {
             onChange(rating)
         }
@@ -114,6 +116,7 @@ export const MetricItem: React.FC<MetricItemProps> = ({ definition, value, onCha
                             )}
                             onClick={() => handleRatingClick(rating)}
                             disabled={readOnly}
+                            aria-label={rating.toString()}
                         >
                             <Star className={cn("w-6 h-6", (value || 0) >= rating && "fill-current")} />
                         </Button>

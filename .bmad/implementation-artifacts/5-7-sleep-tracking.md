@@ -1,6 +1,6 @@
 # Story 5.7: Sleep Tracking Module 睡眠追蹤模組
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -22,11 +22,23 @@ So that **我可以追蹤睡眠品質與規律性**.
 
 ## Tasks / Subtasks
 
-- [ ] 實作 SleepTracker Component
-    - [ ] 建立 `src/components/journal/SleepTracker.tsx`。
-    - [ ] 使用 `date-fns` 計算時間差。
-- [ ] 整合至 Metric Input 流程
-    - [ ] 視為特殊類型的 Metric 處理。
+- [x] 實作 SleepTracker Component
+    - [x] 建立 `src/components/journal/SleepTracker.tsx`。
+    - [x] 使用 `date-fns` 計算時間差。
+- [x] 整合至 Metric Input 流程
+    - [x] 視為特殊類型的 Metric 處理。
+
+## File List
+
+- src/components/journal/SleepTracker.tsx
+- src/components/journal/__tests__/SleepTracker.test.tsx
+- src/components/journal/MetricInputList.tsx
+- src/components/journal/MetricItem.tsx
+- src/services/mock-data-service.ts
+
+## Change Log
+
+- 2026-01-28: Implemented SleepTracker component with date-fns logic. Integrated into MetricInputList to handle separate sleep/wake times via metadata. Updated MetricItem to support accessibility. Added unit tests for SleepTracker.
 
 ## Dev Notes
 
