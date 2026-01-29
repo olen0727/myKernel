@@ -3,7 +3,8 @@
     "allow": [
       "Skill(bmad:bmm:workflows:create-story)",
       "Skill(bmad:bmm:workflows:create-epics-and-stories)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(npx vitest:*)"
     ]
   }
 }

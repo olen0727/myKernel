@@ -86,7 +86,7 @@ development_status:
   5-5-resource-footprints: done  # AI-Review: All issues fixed
   5-6-metrics-list: done  # AI-Review: All issues fixed
   5-7-sleep-tracking: done  # AI-Review: All issues fixed (Refactor, A11y, Tests)
-  5-8-settings: ready-for-dev
+  5-8-settings: done  # AI-Review: All 10 issues fixed (Billing tab, Theme Radio, Font options, Shortcuts, Tests)
   epic-5-retrospective: optional
 
   # Epic 6: 資料庫整合
