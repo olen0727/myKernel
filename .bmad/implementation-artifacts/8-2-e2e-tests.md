@@ -41,3 +41,4 @@ So that **確保系統整合後的穩定性**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-8.2)
+- [Prerequisite] Story 6.4 (UI Integration) must be completed to ensure E2E tests run against real logic.

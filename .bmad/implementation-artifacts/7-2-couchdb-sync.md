@@ -43,3 +43,4 @@ So that **我可以在手機與電腦間無縫切換工作**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-7.2)
+- [Prerequisite] Story 6.4 (UI Integration) must be completed to verify UI updates.
