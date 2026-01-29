@@ -32,15 +32,15 @@ So that **應用程式可以正確地儲存、驗證與檢索資料**.
 
 ## Tasks / Subtasks
 
-- [ ] 安裝 RxDB
-    - [ ] `npm install rxdb rxjs`。
-- [ ] 實作 Schema 檔案
-    - [ ] 建立 `src/db/schemas/*.ts`。
-- [ ] 實作 Database Initializer
-    - [ ] 建立 `src/db/database.ts`。
-    - [ ] 實作 `createDatabase` 函式與 Collection 註冊。
-- [ ] 實作 React Provider
-    - [ ] 建立 `src/providers/DbProvider.tsx`。
+- [x] 安裝 RxDB
+    - [x] `npm install rxdb rxjs`。
+- [x] 實作 Schema 檔案
+    - [x] 建立 `src/db/schemas/*.ts`。
+- [x] 實作 Database Initializer
+    - [x] 建立 `src/db/database.ts`。
+    - [x] 實作 `createDatabase` 函式與 Collection 註冊。
+- [x] 實作 React Provider
+    - [x] 建立 `src/providers/DbProvider.tsx`。
 
 ## Dev Notes
 

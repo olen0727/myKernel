@@ -8,12 +8,15 @@ import '@fontsource/inter/500.css'
 import '@fontsource/inter/600.css'
 import App from './App'
 import { ThemeProvider } from '@/components/theme-provider'
+import { DbProvider } from '@/providers/DbProvider'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-            <App />
+            <DbProvider>
+                <App />
+            </DbProvider>
         </ThemeProvider>
     </React.StrictMode>,
 )
