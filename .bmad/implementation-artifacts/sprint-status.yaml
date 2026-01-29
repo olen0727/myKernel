@@ -92,7 +92,7 @@ development_status:
   # Epic 6: 資料庫整合
   epic-6: in-progress
   6-1-rxdb-init: review
-  6-2-service-layer: ready-for-dev
+  6-2-service-layer: review
   6-3-data-encryption: ready-for-dev
   epic-6-retrospective: optional
 

@@ -1,6 +1,6 @@
 # Story 6.2: Service Layer Encapsulation 服務層封裝
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -29,12 +29,16 @@ So that **UI 組件不直接依賴 RxDB，保持架構解耦與測試性**.
 
 ## Tasks / Subtasks
 
-- [ ] 實作 Service Factory
-    - [ ] 建立 `src/services/index.ts` 統一導出單例。
-- [ ] 實作各個 Service Class
-    - [ ] `src/services/resource-service.ts`
-    - [ ] `src/services/project-service.ts`
-    - ...
+- [x] 實作 Service Factory
+    - [x] 建立 `src/services/index.ts` 統一導出單例。
+- [x] 實作各個 Service Class
+    - [x] `src/services/resource-service.ts`
+    - [x] `src/services/project-service.ts`
+    - [x] `src/services/task-service.ts`
+    - [x] `src/services/habit-service.ts`
+    - [x] `src/services/metric-service.ts`
+    - [x] `src/services/log-service.ts`
+    - [x] `src/services/area-service.ts`
 
 ## Dev Notes
 
@@ -48,3 +52,35 @@ So that **UI 組件不直接依賴 RxDB，保持架構解耦與測試性**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-6.2)
+- [Project Context](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/implementation-artifacts/sprint-status.yaml)
+
+## File List
+- frontend/src/types/models.ts
+- frontend/src/services/base-service.ts
+- frontend/src/services/index.ts
+- frontend/src/services/project-service.ts
+- frontend/src/services/resource-service.ts
+- frontend/src/services/task-service.ts
+- frontend/src/services/habit-service.ts
+- frontend/src/services/metric-service.ts
+- frontend/src/services/log-service.ts
+- frontend/src/services/area-service.ts
+- frontend/src/services/__tests__/BaseService.test.ts
+- frontend/src/services/__tests__/Services.test.ts
+
+## Change Log
+- 2026-01-29: Implemented Service Layer with BaseService and concrete services (Project, Resource, Task, Habit, Metric, Log, Area). Added unit and integration tests.
+
+## Dev Agent Record
+
+### Implementation Plan
+- Defined `BaseService` abstract class with common CRUD and RxDB integration.
+- Implemented `ProjectService` with `recalculateProgress` logic.
+- Implemented `HabitService` with `toggleCompletion` logic using `Log` entries.
+- Implemented `MetricService` with `addEntry` logic.
+- Created singleton factory in `index.ts` using lazy loading for async DB access.
+- Added comprehensive tests for BaseService and ProjectService.
+
+### Debug Log
+- Fixed issue with `doc.patch` return value in `BaseService.update` (documents are immutable).
+- Configured tests to use `rxdb/plugins/storage-memory` to bypass missing IndexedDB in test environment.
