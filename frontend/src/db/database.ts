@@ -1,5 +1,6 @@
-import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
+import { createRxDatabase, addRxPlugin, RxDatabase, RxStorage } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
+import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-crypto-js';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 
 import { projectSchema } from './schemas/project.schema';
@@ -21,12 +22,24 @@ export type KernelDatabase = RxDatabase;
 
 let dbPromise: Promise<KernelDatabase> | null = null;
 
-const createDatabase = async (): Promise<KernelDatabase> => {
+// Exporting createDatabase for testing purposes
+export const createDatabase = async (password?: string): Promise<KernelDatabase> => {
     console.log('Initializing RxDB...');
+
+    let storage: RxStorage<any, any> = getRxStorageDexie();
+
+    // Enable encryption if password is provided (or always for now since we use schemas with encrypted fields)
+    // For MVP, we default to a simplified handling where encryption is always enabled when needed
+    if (password) {
+        storage = wrappedKeyEncryptionCryptoJsStorage({
+            storage
+        });
+    }
 
     const db = await createRxDatabase({
         name: 'kernel_db',
-        storage: getRxStorageDexie(),
+        storage,
+        password,
         ignoreDuplicate: true, // Useful for HMR
     });
 
@@ -46,9 +59,18 @@ const createDatabase = async (): Promise<KernelDatabase> => {
     return db;
 };
 
-export const getDatabase = () => {
+export const getDatabase = (password?: string) => {
     if (!dbPromise) {
-        dbPromise = createDatabase();
+        // Mock MVP password if not provided. In production this should come from user/env.
+        // In TEST environment, default to NO password to avoid slow encryption/crypto issues in simple unit tests,
+        // unless explicitly provided.
+        if (import.meta.env.MODE === 'test' && !password) {
+            dbPromise = createDatabase(undefined);
+        } else {
+            // For Story 6.3 AC, we need password input mechanism but "Mock for MVP: 可先寫死"
+            const finalPassword = password || 'mvp-secret-password-123';
+            dbPromise = createDatabase(finalPassword);
+        }
     }
     return dbPromise;
 };

@@ -23,7 +23,8 @@ export const resourceSchema: RxJsonSchema<any> = {
         content: {
             type: 'string',
             // TODO: [Story 6.3] Enable encryption when password handling is implemented
-            // encrypted: true 
+            // Encryption enabled via top-level 'encrypted' array 
+            // encrypted: true
         },
         context: {
             type: 'string'
@@ -37,5 +38,6 @@ export const resourceSchema: RxJsonSchema<any> = {
             format: 'date-time'
         }
     },
-    required: ['id', 'title', 'createdAt']
+    required: ['id', 'title', 'createdAt'],
+    encrypted: ['content']
 };
