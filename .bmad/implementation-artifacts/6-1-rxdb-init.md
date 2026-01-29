@@ -1,6 +1,6 @@
 # Story 6.1: RxDB Initialization & Schema RxDB 初始化與 Schema 定義
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -55,3 +55,15 @@ So that **應用程式可以正確地儲存、驗證與檢索資料**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-6.1)
+
+## Change Log
+- 2026-01-29: Implemented Core Database features.
+- 2026-01-30: Senior Developer Review - Approved. Fixed status alignment.
+
+## Senior Developer Review (AI)
+- [x] Status synchronized with sprint board.
+- [x] Encryption schema verified.
+- [x] Database typing enhancements applied (Generic Collections).
+- **Outcome**: Approved.
+
+## Dev Agent Record

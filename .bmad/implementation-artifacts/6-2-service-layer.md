@@ -1,6 +1,6 @@
 # Story 6.2: Service Layer Encapsulation 服務層封裝
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -70,6 +70,14 @@ So that **UI 組件不直接依賴 RxDB，保持架構解耦與測試性**.
 
 ## Change Log
 - 2026-01-29: Implemented Service Layer with BaseService and concrete services (Project, Resource, Task, Habit, Metric, Log, Area). Added unit and integration tests.
+- 2026-01-30: Refactored database types for strict type safety. Removed `any` casting in services.
+- 2026-01-30: Senior Developer Review - Approved.
+
+## Senior Developer Review (AI)
+- [x] Refactored `KernelDatabase` to use strict Collection mapping.
+- [x] Removed `as any` casting in `ProjectService`.
+- [x] Validated Service Factory pattern.
+- **Outcome**: Approved.
 
 ## Dev Agent Record
 

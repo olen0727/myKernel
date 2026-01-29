@@ -91,9 +91,9 @@ development_status:
 
   # Epic 6: 資料庫整合
   epic-6: in-progress
-  6-1-rxdb-init: review
-  6-2-service-layer: review
-  6-3-data-encryption: review
+  6-1-rxdb-init: done  # AI-Review: Passed (Status fixed)
+  6-2-service-layer: done  # AI-Review: Passed (Strict Typing implemented)
+  6-3-data-security: done  # AI-Review: Passed (Encryption verified)
   epic-6-retrospective: optional
 
   # Epic 7: 身分驗證與同步

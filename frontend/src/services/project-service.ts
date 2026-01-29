@@ -10,8 +10,7 @@ export class ProjectService extends BaseService<Project> {
 
     async recalculateProgress(projectId: string): Promise<void> {
         // Access tasks collection via db instance
-        // Casting explicit collection access helps if types were strict, here utilizing flexible access
-        const tasks = await (this.db as any).tasks.find({ selector: { projectId } }).exec();
+        const tasks = await this.db.tasks.find({ selector: { projectId } }).exec();
 
         if (tasks.length === 0) {
             await this.update(projectId, { progress: 0 });

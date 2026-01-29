@@ -17,8 +17,21 @@ if (import.meta.env.DEV) {
     addRxPlugin(RxDBDevModePlugin);
 }
 
-// Type Definitions (Expand as needed with generated types)
-export type KernelDatabase = RxDatabase;
+// Type Definitions
+import { Project, Area, Task, Resource, Habit, Metric, Log } from '../types/models';
+import { RxCollection } from 'rxdb';
+
+export type KernelCollections = {
+    projects: RxCollection<Project>;
+    areas: RxCollection<Area>;
+    tasks: RxCollection<Task>;
+    resources: RxCollection<Resource>;
+    habits: RxCollection<Habit>;
+    metrics: RxCollection<Metric>;
+    logs: RxCollection<Log>;
+};
+
+export type KernelDatabase = RxDatabase<KernelCollections>;
 
 // Prevent multiple instances during HMR (Hot Module Replacement)
 let dbPromise: Promise<KernelDatabase> | null = null;
@@ -50,6 +63,7 @@ const createRecoveryError = (msg: string) => {
 export const createDatabase = async (password?: string): Promise<KernelDatabase> => {
     // If we are creating a new database, ensure any old global instance is closed
     // This is critical for HMR environments
+    // @ts-ignore
     if (import.meta.env.DEV) {
         await closeExistingDatabase();
     }
@@ -74,7 +88,7 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
     };
 
     const init = async () => {
-        const db = await createRxDatabase(dbConfig);
+        const db = await createRxDatabase<KernelCollections>(dbConfig);
         console.log('RxDB created, ensuring collections...');
         await db.addCollections({
             projects: { schema: projectSchema },
@@ -128,6 +142,7 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
     }
 
     // Store in global for HMR cleanup
+    // @ts-ignore
     if (import.meta.env.DEV) {
         // @ts-ignore
         _global[DB_GLOBAL_KEY] = db;
