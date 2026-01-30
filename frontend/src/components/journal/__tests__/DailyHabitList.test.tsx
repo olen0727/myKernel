@@ -1,67 +1,66 @@
-import { render, screen } from '@testing-library/react'
+
+import { render, screen, waitFor } from '@testing-library/react'
 import { DailyHabitList } from '../DailyHabitList'
-import { dataStore, Habit } from '@/services/mock-data-service'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+// Mock services
+vi.mock("@/services", () => {
+    const { BehaviorSubject } = require('rxjs');
+    const mockHabits = [
+        { id: '1', name: 'Test Daily Habit', areaId: 'area-1', frequency: 'daily', status: 'active', currentStreak: 0, maxStreak: 0, completedDates: [], days: [] },
+        { id: '2', name: 'Test Weekly Habit', areaId: 'area-1', frequency: 'weekly', status: 'active', currentStreak: 0, maxStreak: 0, completedDates: [], days: [1] } // Monday
+    ];
+
+    return {
+        services: {
+            habit: Promise.resolve({
+                getAll$: () => new BehaviorSubject(mockHabits),
+                update: vi.fn(),
+            }),
+        }
+    };
+})
+
+vi.mock('sonner', () => ({
+    toast: { success: vi.fn(), error: vi.fn() },
+}))
+
 
 describe('DailyHabitList', () => {
-    const testDate = new Date('2026-01-27T10:00:00') // Tuesday
+    const testDate = new Date('2026-01-27T10:00:00') // Tuesday (Day 2)
 
     beforeEach(() => {
-        // Clear habits and set up test data
-        // Since dataStore is a singleton, we might need a way to clear or mock it.
-        // Assuming we can just manipulate it via public methods or it's just a variable.
-        // But dataStore properties are private.
-        // We can inspect behaviors or just add unique test habits.
+        vi.clearAllMocks()
     })
 
-    it('renders daily habits', () => {
-        const habitId = 'test-daily-habit'
-        const habit: Habit = {
-            id: habitId,
-            name: 'Test Daily Habit',
-            currentStreak: 0,
-            maxStreak: 0,
-            status: 'active',
-            frequency: 'daily',
-            areaId: 'area-1',
-            completedDates: []
-        }
-        dataStore.addHabit(habit)
-
+    it('renders daily habits', async () => {
         render(<DailyHabitList date={testDate} />)
+        await waitFor(() => expect(screen.queryByText("Loading Habits...")).not.toBeInTheDocument());
+
         expect(screen.getByText('Test Daily Habit')).toBeInTheDocument()
     })
 
-    it('renders weekly habits only on scheduled days', () => {
-        const tuesdayHabit: Habit = {
-            id: 'test-tues-habit',
-            name: 'Test Tuesday Habit',
-            currentStreak: 0,
-            maxStreak: 0,
-            status: 'active',
-            frequency: 'weekly',
-            days: [2], // Tuesday
-            areaId: 'area-1',
-            completedDates: []
-        }
-        const mondayHabit: Habit = {
-            id: 'test-mon-habit',
-            name: 'Test Monday Habit',
-            currentStreak: 0,
-            maxStreak: 0,
-            status: 'active',
-            frequency: 'weekly',
-            days: [1], // Monday
-            areaId: 'area-1',
-            completedDates: []
-        }
+    it('renders weekly habits only on scheduled days', async () => {
+        // Monday is day 1. Tuesday is day 2.
+        // Habit 2 is scheduled for Monday (1).
+        // Test date is Tuesday -> Should NOT show Habit 2?
+        // Wait, 
+        // 0=Sun, 1=Mon, 2=Tue...
+        // Habit 2 days=[1] (Mon).
+        // Test date is Tuesday (2).
+        // So shouldn't show.
 
-        dataStore.addHabit(tuesdayHabit)
-        dataStore.addHabit(mondayHabit)
+        render(<DailyHabitList date={testDate} />)
+        await waitFor(() => expect(screen.queryByText("Loading Habits...")).not.toBeInTheDocument());
 
-        render(<DailyHabitList date={testDate} />) // Tuesday
+        expect(screen.getByText('Test Daily Habit')).toBeInTheDocument()
+        expect(screen.queryByText('Test Weekly Habit')).not.toBeInTheDocument()
 
-        expect(screen.getByText('Test Tuesday Habit')).toBeInTheDocument()
-        expect(screen.queryByText('Test Monday Habit')).not.toBeInTheDocument()
+        // Render on Monday
+        const mondayDate = new Date('2026-01-26T10:00:00'); // Monday
+        render(<DailyHabitList date={mondayDate} />)
+        await waitFor(() => expect(screen.queryByText("Loading Habits...")).not.toBeInTheDocument());
+
+        expect(screen.getByText('Test Weekly Habit')).toBeInTheDocument();
     })
 })

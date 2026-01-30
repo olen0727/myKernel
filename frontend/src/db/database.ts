@@ -81,7 +81,7 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
     }
 
     const dbConfig = {
-        name: 'kernel_db',
+        name: 'kernel_db_v2',
         storage,
         password,
         ignoreDuplicate: true, // Useful for HMR
@@ -110,15 +110,20 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
         // Handle password mismatch (RxDB Error DB1)
         console.warn('⚠️ RxDB Error:', err.message);
 
-        // Check if error is related to password mismatch (DB1)
+        // Check if error is related to password mismatch (DB1) or Schema mismatch (DB6)
         // This can happen at DB creation OR collection creation time if metadata conflicts
-        const isPasswordError = err?.code === 'DB1' || err?.message?.includes('password');
+        const isRecoverableError =
+            err?.code === 'DB1' ||
+            err?.code === 'DB6' ||
+            err?.message?.includes('password') ||
+            err?.message?.includes('different schema');
+
         // @ts-ignore
         const isDevMode = import.meta.env.DEV || import.meta.env.MODE === 'development';
 
-        if (isPasswordError && isDevMode) {
-            console.warn('⚠️ Database password mismatch detected. This usually happens when enabling encryption on an existing unencrypted database.');
-            console.warn('♻️ Resetting database to apply new security settings...');
+        if (isRecoverableError && isDevMode) {
+            console.warn('⚠️ Database configuration mismatch detected (Password or Schema).');
+            console.warn('♻️ Resetting database to apply new settings...');
 
             try {
                 // Must remove using the exact name and storage
@@ -133,8 +138,29 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
                 db = await init(); // Retry the whole init process
                 console.log('✅ Database reset and recreated successfully.');
             } catch (resetErr) {
-                console.error('❌ Failed to reset database:', resetErr);
-                throw createRecoveryError('Database reset failed. Please manually clear your browser Application Storage (IndexedDB).');
+                console.error('❌ Failed to reset database via RxDB:', resetErr);
+
+                // Fallback: Try native IndexedDB deletion (Nuclear Option)
+                try {
+                    console.warn('🧨 Attempting manual IndexedDB deletion fallback...');
+                    await new Promise<void>((resolve, reject) => {
+                        // @ts-ignore
+                        const idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+                        if (!idb) throw new Error('IndexedDB not available');
+
+                        const req = idb.deleteDatabase('kernel_db');
+                        req.onsuccess = () => resolve();
+                        req.onerror = () => reject(req.error);
+                        req.onblocked = () => console.warn('⚠️ Native deletion blocked. Close other tabs!');
+                    });
+
+                    console.log('✅ Manual deletion successful. Retrying init...');
+                    db = await init();
+                    console.log('✅ Database reset and recreated successfully (via native nuke).');
+                } catch (finalErr) {
+                    console.error('❌ CRITICAL: Native deletion also failed:', finalErr);
+                    throw createRecoveryError('Database reset failed. Please manually clear your browser Application Storage (IndexedDB).');
+                }
             }
         } else {
             throw err;

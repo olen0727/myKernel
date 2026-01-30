@@ -29,7 +29,7 @@ class ServiceFactory {
         return ServiceFactory.instance;
     }
 
-    private async getDb() {
+    public async getDb() {
         return await getDatabase();
     }
 

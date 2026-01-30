@@ -36,7 +36,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { dataStore } from "@/services/mock-data-service"
+import { Area } from "@/types/models"
 
 const formSchema = z.object({
     name: z.string().min(2, {
@@ -53,6 +53,7 @@ interface CreateProjectModalProps {
     onOpenChange: (open: boolean) => void
     onSubmit: (values: z.infer<typeof formSchema>) => void
     defaultValues?: Partial<z.infer<typeof formSchema>>
+    areas: Area[]
 }
 
 export function CreateProjectModal({
@@ -60,6 +61,7 @@ export function CreateProjectModal({
     onOpenChange,
     onSubmit,
     defaultValues,
+    areas,
 }: CreateProjectModalProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -86,8 +88,6 @@ export function CreateProjectModal({
         form.reset()
         onOpenChange(false)
     }
-
-    const areas = dataStore.getAreas()
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -127,7 +127,7 @@ export function CreateProjectModal({
                                         </FormControl>
                                         <SelectContent>
                                             {areas.map(area => (
-                                                <SelectItem key={area.id} value={area.name}>
+                                                <SelectItem key={area.id} value={area.id}>
                                                     {area.name}
                                                 </SelectItem>
                                             ))}

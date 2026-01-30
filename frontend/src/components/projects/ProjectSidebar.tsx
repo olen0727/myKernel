@@ -29,6 +29,10 @@ import { cn } from "@/lib/utils"
 
 type ProjectStatus = "active" | "paused" | "completed" | "archived"
 
+import { Area } from "@/types/models"
+
+// ... imports
+
 interface ProjectSidebarProps {
     projectName: string
     status: ProjectStatus
@@ -39,6 +43,7 @@ interface ProjectSidebarProps {
     onDueDateChange: (date?: Date) => void
     onArchive: () => void
     onDelete: () => void
+    areas: Area[]
 }
 
 export function ProjectSidebar({
@@ -51,10 +56,11 @@ export function ProjectSidebar({
     onDueDateChange,
     onArchive,
     onDelete,
+    areas,
 }: ProjectSidebarProps) {
     return (
         <div className="space-y-8 h-full border-l pl-8">
-            {/* 狀態設定 */}
+            {/* Status Section */}
             <div className="space-y-3">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">目前狀態</h3>
                 <Select value={status} onValueChange={onStatusChange}>
@@ -80,7 +86,7 @@ export function ProjectSidebar({
                 </Select>
             </div>
 
-            {/* 截止日期 */}
+            {/* Due Date Section */}
             <div className="space-y-3">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">截止日期</h3>
                 <Popover>
@@ -107,7 +113,7 @@ export function ProjectSidebar({
                 </Popover>
             </div>
 
-            {/* 所屬 Area */}
+            {/* Area Section */}
             <div className="space-y-3">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">專案領域 (Area)</h3>
                 <Select value={area} onValueChange={onAreaChange}>
@@ -115,10 +121,11 @@ export function ProjectSidebar({
                         <SelectValue placeholder="選擇領域..." />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="Work">Work</SelectItem>
-                        <SelectItem value="Personal">Personal</SelectItem>
-                        <SelectItem value="Side Project">Side Project</SelectItem>
-                        <SelectItem value="Study">Study</SelectItem>
+                        {areas.map(a => (
+                            <SelectItem key={a.id} value={a.id}>
+                                {a.name}
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>

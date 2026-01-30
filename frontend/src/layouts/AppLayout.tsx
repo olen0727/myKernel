@@ -7,7 +7,12 @@ import { Toaster } from "@/components/ui/sonner"
 import { useQuickCapture } from "@/stores/quick-capture-store"
 import { useEffect } from "react"
 
+import { useAuth } from "@/providers/AuthProvider"
+import { Navigate, useLocation } from "react-router-dom"
+
 export default function AppLayout() {
+    const { user, isLoading } = useAuth()
+    const location = useLocation()
     const { toggle } = useQuickCapture()
 
     useEffect(() => {
@@ -21,6 +26,14 @@ export default function AppLayout() {
         document.addEventListener("keydown", down)
         return () => document.removeEventListener("keydown", down)
     }, [toggle])
+
+    if (isLoading) {
+        return <div className="flex items-center justify-center min-h-screen bg-background text-foreground">Loading...</div>
+    }
+
+    if (!user) {
+        return <Navigate to="/login" state={{ from: location }} replace />
+    }
 
     return (
         <div className="flex min-h-screen bg-background text-foreground font-sans">

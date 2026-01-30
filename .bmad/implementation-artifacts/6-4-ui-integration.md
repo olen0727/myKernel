@@ -27,24 +27,24 @@ So that **我的資料可以被永久儲存，並且在重整後不會消失**.
 ## Tasks / Subtasks
 
 - [ ] **Core / Hooks**
-    - [ ] 建立 `useObservable` hook (若尚未存在) 以簡化 Component 內的訂閱邏輯。
-    - [ ] 建立 `DataSeeder` (可選) 於 App 啟動時寫入一些預設資料供測試。
+    - [x] 建立 `useObservable` hook (若尚未存在) 以簡化 Component 內的訂閱邏輯。
+    - [x] 建立 `DataSeeder` (可選) 於 App 啟動時寫入一些預設資料供測試。
 - [ ] **Dashboard Integration**
-    - [ ] `DashboardPage`: 改為從 `MetricService`, `HabitService`, `TaskService`, `ResourceService` 聚合數據。
+    - [x] `DashboardPage`: 改為從 `MetricService`, `HabitService`, `TaskService`, `ResourceService` 聚合數據。
 - [ ] **Project Module Integration**
-    - [ ] `ProjectListPage`: 連接 `ProjectService.getAll()`。
-    - [ ] `ProjectDetailPage`: 連接 `ProjectService.getById()` 與 `TaskService` (取得關聯任務)。
+    - [x] `ProjectListPage`: 連接 `ProjectService.getAll()`。
+    - [x] `ProjectDetailPage`: 連接 `ProjectService.getById()` 與 `TaskService` (取得關聯任務)。
 - [ ] **Resource / Inbox Integration**
-    - [ ] `InboxPage`: 連接 `ResourceService` (篩選沒有 Project 的項目)。
-    - [ ] `ResourceLibraryPage`: 連接 `ResourceService.getAll()`。
-- [ ] **Area Module Integration**
-    - [ ] `AreaListPage`: 連接 `AreaService.getAll()`。
-    - [ ] `AreaDetailPage`: 顯示關聯的 Projects 和 Habits。
-- [ ] **Journal & Habit Integration**
-    - [ ] `JournalPage`: 連接 `LogService` 與 `HabitService` (顯示當日紀錄)。
-    - [ ] `HabitTracker`: 實作習慣打卡與 Streak 計算邏輯 (使用真實 DB 數據)。
-- [ ] **Settings Integration**
-    - [ ] 確認設定頁面 (如 Theme, Data Management) 功能正常。
+    - [x] `InboxPage`: 連接 `ResourceService` (篩選沒有 Project 的項目)。
+    - [x] `ResourceLibraryPage`: 連接 `ResourceService.getAll()`。
+- [x] **Area Module Integration**
+    - [x] `AreaListPage`: 連接 `AreaService.getAll()`。
+    - [x] `AreaDetailPage`: 顯示關聯的 Projects 和 Habits。
+- [x] **Journal & Habit Integration**
+    - [x] `JournalPage`: 連接 `LogService` 與 `HabitService` (顯示當日紀錄)。
+    - [x] `HabitTracker`: 實作習慣打卡與 Streak 計算邏輯 (使用真實 DB 數據)。
+- [x] **Settings Integration**
+    - [x] 確認設定頁面 (如 Theme, Data Management) 功能正常。
 
 ## Dev Notes
 

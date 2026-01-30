@@ -1,67 +1,127 @@
-import React from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { dataStore, Area } from '@/services/mock-data-service'
 import { AreaHeader } from '@/components/areas/AreaHeader'
 import { AreaSidebar } from '@/components/areas/AreaSidebar'
 import { CreateAreaModal } from '@/components/areas/CreateAreaModal'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { HabitManager } from '@/components/habits/HabitManager'
 import { ProjectCard } from '@/components/projects/ProjectCard'
-import { LayoutGrid, CalendarCheck, Plus, Library, FileText, Link as LinkIcon, ChevronRight } from 'lucide-react'
+import { LayoutGrid, CalendarCheck, Plus, Library, FileText, Link as LinkIcon, ChevronRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { format } from 'date-fns'
+import { services, AreaService, ProjectService, ResourceService, TaskService, HabitService } from '@/services'
+import { useObservable } from '@/hooks/use-observable'
+import { Area, Project, Resource, Task, Habit } from '@/types/models'
 
 const AreaDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const [area, setArea] = React.useState<Area | undefined>(
-        id ? dataStore.getAreaById(id) : undefined
-    )
+
+    const [areaService, setAreaService] = useState<AreaService | undefined>();
+    const [projectService, setProjectService] = useState<ProjectService | undefined>();
+    const [resourceService, setResourceService] = useState<ResourceService | undefined>();
+    const [taskService, setTaskService] = useState<TaskService | undefined>();
+    const [habitService, setHabitService] = useState<HabitService | undefined>();
+
+    useEffect(() => {
+        const load = async () => {
+            setAreaService(await services.area);
+            setProjectService(await services.project);
+            setResourceService(await services.resource);
+            setTaskService(await services.task);
+            setHabitService(await services.habit);
+        };
+        load();
+    }, []);
+
+    const area$ = useMemo(() => areaService?.getById$(id!), [areaService, id]);
+    const allProjects$ = useMemo(() => projectService?.getAll$(), [projectService]);
+    const allResources$ = useMemo(() => resourceService?.getAll$(), [resourceService]);
+    const allTasks$ = useMemo(() => taskService?.getAll$(), [taskService]);
+    const allHabits$ = useMemo(() => habitService?.getAll$(), [habitService]);
+
+    const area = useObservable<Area | null>(area$, null);
+    const allProjects = useObservable<Project[]>(allProjects$, []) || [];
+    const allResources = useObservable<Resource[]>(allResources$, []) || [];
+    const allTasks = useObservable<Task[]>(allTasks$, []) || [];
+    const allHabits = useObservable<Habit[]>(allHabits$, []) || [];
+
+    const relatedProjects = useMemo(() => allProjects.filter(p => p.areaId === id), [allProjects, id]);
+    const relatedResources = useMemo(() => allResources.filter(r => r.areaId === id), [allResources, id]);
+    // Assuming Habit has areaId, loosely typed for now as interface might not be updated
+    const relatedHabits = useMemo(() => allHabits.filter(h => (h as any).areaId === id), [allHabits, id]);
+
+    const areaWithStats = useMemo(() => {
+        if (!area) return null;
+        return {
+            ...area,
+            projectCount: relatedProjects.length,
+            habitCount: relatedHabits.length
+        };
+    }, [area, relatedProjects, relatedHabits]);
+
+
     const [isCreateProjectOpen, setIsCreateProjectOpen] = React.useState(false)
     const [isCoverModalOpen, setIsCoverModalOpen] = React.useState(false)
 
-    // Derived data - in real app would be filtered in dataStore
-    const relatedProjects = React.useMemo(() => {
-        return area ? dataStore.getProjectsByArea(area.name) : []
-    }, [area])
-
-    const relatedResources = React.useMemo(() => {
-        return area ? dataStore.getResourcesByArea(area.id) : []
-    }, [area])
-
-    if (!area) {
+    if (!areaWithStats || !areaService) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px]">
-                <h2 className="text-2xl font-bold">找不到此領域</h2>
-                <Button onClick={() => navigate('/areas')} variant="link">返回列表</Button>
+                {areaService ? (
+                    <>
+                        <h2 className="text-2xl font-bold">找不到此領域或正在載入</h2>
+                        <Button onClick={() => navigate('/areas')} variant="link">返回列表</Button>
+                    </>
+                ) : (
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                )}
             </div>
         )
     }
 
-    const handleUpdateArea = (updates: Partial<Area>) => {
-        if (!id) return
-        dataStore.updateArea(id, updates)
-        setArea({ ...area, ...updates })
-        toast.success('領域資訊已更新')
+    const handleUpdateArea = async (updates: Partial<Area>) => {
+        if (!id || !areaService) return
+        try {
+            await areaService.update(id, updates);
+            toast.success('領域資訊已更新')
+            // Observable updates UI
+        } catch (e) {
+            toast.error('更新失敗')
+        }
     }
 
-    const handleDeleteArea = () => {
-        if (!id) return
-        dataStore.deleteArea(id)
-        toast.error('領域已刪除')
-        navigate('/areas')
+    const handleDeleteArea = async () => {
+        if (!id || !areaService) return
+        try {
+            await areaService.delete(id);
+            toast.success('領域已刪除')
+            navigate('/areas')
+        } catch (e) {
+            toast.error('刪除失敗')
+        }
     }
 
-    const handleCreateProject = (values: any) => {
-        toast.success(`專案「${values.name}」已建立於 ${values.area}`)
+    const handleCreateProject = async (values: any) => {
+        if (!projectService) return;
+        try {
+            await projectService.create({
+                name: values.name,
+                areaId: areaWithStats.id,
+                status: 'active',
+                progress: 0
+            });
+            toast.success(`專案「${values.name}」已建立於 ${areaWithStats.name}`)
+        } catch (e) {
+            toast.error('建立專案失敗')
+        }
     }
 
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <AreaHeader
-                area={area}
+                area={areaWithStats as any}
                 onTitleChange={(name) => handleUpdateArea({ name })}
                 onImageClick={() => setIsCoverModalOpen(true)}
             />
@@ -96,16 +156,20 @@ const AreaDetailPage: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {relatedProjects.length > 0 ? (
                                     relatedProjects.map(project => {
-                                        const stats = dataStore.getProjectStats(project.id)
+                                        const pTasks = allTasks.filter(t => t.projectId === project.id);
+                                        const done = pTasks.filter(t => t.completed).length;
+                                        const total = pTasks.length;
+                                        const areaName = areaWithStats.name;
+
                                         return (
                                             <ProjectCard
                                                 key={project.id}
                                                 id={project.id}
                                                 name={project.name}
-                                                area={project.area}
+                                                area={areaName}
                                                 status={project.status}
-                                                doneTasks={stats.done}
-                                                totalTasks={stats.total}
+                                                doneTasks={done}
+                                                totalTasks={total}
                                                 onClick={() => navigate(`/projects/${project.id}`)}
                                             />
                                         )
@@ -120,7 +184,7 @@ const AreaDetailPage: React.FC = () => {
                         </TabsContent>
 
                         <TabsContent value="habits" className="">
-                            <HabitManager areaId={area.id} />
+                            <HabitManager areaId={areaWithStats.id} />
                         </TabsContent>
 
                         <TabsContent value="resources" className="space-y-6">
@@ -149,10 +213,10 @@ const AreaDetailPage: React.FC = () => {
                                                     {resource.title}
                                                 </h4>
                                                 <p className="text-sm text-muted-foreground line-clamp-2 mt-1 leading-relaxed opacity-80">
-                                                    {resource.summary}
+                                                    {resource.content || ''}
                                                 </p>
                                                 <div className="flex items-center gap-3 mt-3 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                                                    <span>{format(resource.timestamp, "yyyy/MM/dd")}</span>
+                                                    <span>{resource.createdAt ? format(new Date(resource.createdAt), "yyyy/MM/dd") : '-'}</span>
                                                     {resource.url && (
                                                         <>
                                                             <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
@@ -177,7 +241,7 @@ const AreaDetailPage: React.FC = () => {
 
                 <div className="space-y-6">
                     <AreaSidebar
-                        area={area}
+                        area={areaWithStats as any}
                         onUpdate={handleUpdateArea}
                         onDelete={handleDeleteArea}
                     />
@@ -185,11 +249,12 @@ const AreaDetailPage: React.FC = () => {
             </div>
 
             <CreateProjectModal
+                areas={[]}
                 open={isCreateProjectOpen}
                 onOpenChange={setIsCreateProjectOpen}
                 onSubmit={handleCreateProject}
                 defaultValues={{
-                    area: area.name
+                    area: areaWithStats?.name || ''
                 }}
             />
 
@@ -197,8 +262,8 @@ const AreaDetailPage: React.FC = () => {
                 isOpen={isCoverModalOpen}
                 onClose={() => setIsCoverModalOpen(false)}
                 initialData={{
-                    name: area.name,
-                    coverImage: area.coverImage
+                    name: areaWithStats.name,
+                    coverImage: areaWithStats.coverImage
                 }}
                 onSubmit={(name, cover) => handleUpdateArea({ name, coverImage: cover })}
             />

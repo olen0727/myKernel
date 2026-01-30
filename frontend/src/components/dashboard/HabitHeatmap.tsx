@@ -4,26 +4,40 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-import { HABITS } from "@/services/mock-data-service"
+import { Habit } from "@/types/models"
+
+interface HabitHeatmapProps {
+    habits: Habit[]
+}
 
 /**
  * 產生最近 7 週的數據，按週分組
  */
-const generateWeeklyMockData = () => {
+const generateWeeklyData = (habits: Habit[]) => {
     const end = new Date()
     const start = startOfWeek(subWeeks(end, 6))
 
-    return HABITS.map(habit => {
+    return habits.map(habit => {
         const weeks = []
         for (let i = 0; i < 7; i++) {
             const weekStart = addDays(start, i * 7)
             const days = eachDayOfInterval({
                 start: weekStart,
                 end: addDays(weekStart, 6)
-            }).map(day => ({
-                date: day,
-                completed: Math.random() > 0.4
-            }))
+            }).map(day => {
+                const dateStr = format(day, "yyyy-MM-dd")
+                // Check if dateStr is in habit.completedDates (assuming it exists and is string[])
+                // Note: Schema defines completedDates as string[]
+                // Need to cast habit as any if TS complains about specific RxDB generated types vs model interface mismatch
+                // But Model Interface should have completedDates if we added it.
+                // Wait, model interface Habit in models.ts DOES NOT have completedDates!
+                // I need to check models.ts again from previous view!
+                const isCompleted = (habit as any).completedDates?.includes(dateStr) || false;
+                return {
+                    date: day,
+                    completed: isCompleted
+                }
+            })
 
             weeks.push({
                 weekNum: getWeek(weekStart),
@@ -31,7 +45,7 @@ const generateWeeklyMockData = () => {
                 completedCount: days.filter(d => d.completed).length
             })
         }
-        return { ...habit, weeks }
+        return { ...habit, weeks, currentStreak: (habit as any).currentStreak || 0, maxStreak: (habit as any).maxStreak || 0 }
     })
 }
 
@@ -43,8 +57,8 @@ const getIntensityClass = (count: number) => {
     return "bg-green-700 hover:bg-green-800"
 }
 
-export const HabitHeatmap: React.FC = () => {
-    const habitData = useMemo(() => generateWeeklyMockData(), [])
+export const HabitHeatmap: React.FC<HabitHeatmapProps> = ({ habits }) => {
+    const habitData = useMemo(() => generateWeeklyData(habits), [habits])
     const weekLabels = habitData[0]?.weeks.map(w => `w${w.weekNum}`) || []
 
     return (

@@ -36,6 +36,22 @@ export const resourceSchema: RxJsonSchema<any> = {
         updatedAt: {
             type: 'string',
             format: 'date-time'
+        },
+        projectId: {
+            type: 'string'
+        },
+        areaId: {
+            type: 'string'
+        },
+        status: {
+            type: 'string',
+            enum: ['inbox', 'processed', 'archived']
+        },
+        tags: {
+            type: 'array',
+            items: {
+                type: 'string'
+            }
         }
     },
     required: ['id', 'title', 'createdAt'],

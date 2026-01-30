@@ -1,6 +1,6 @@
 # Story 7.1: OAuth Integration 身分驗證整合
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -25,14 +25,14 @@ So that **我不需要記憶新的帳號密碼，並能確保身分安全**.
 
 ## Tasks / Subtasks
 
-- [ ] Firebase Auth 集成 (或 Supabase/Auth0)
-    - [ ] 對應 `_bmad/config.yaml` 或專案設定，選擇 Auth Provider (假設 Firebase/Supabase)。
-    - [ ] 實作 `src/lib/auth.ts`。
-- [ ] 實作 AuthContext
-    - [ ] 建立 `src/providers/AuthProvider.tsx`。
-    - [ ] 提供 `useAuth` hook (user, login, logout)。
-- [ ] 實作 LoginPage
-    - [ ] 建立 `src/pages/LoginPage.tsx`。
+- [x] Firebase Auth 集成 (或 Supabase/Auth0)
+    - [x] 對應 `_bmad/config.yaml` 或專案設定，選擇 Auth Provider (假設 Firebase/Supabase)。
+    - [x] 實作 `src/lib/auth.ts` (Implemented as `src/services/auth-service.ts`).
+- [x] 實作 AuthContext
+    - [x] 建立 `src/providers/AuthProvider.tsx`。
+    - [x] 提供 `useAuth` hook (user, login, logout)。
+- [x] 實作 LoginPage
+    - [x] 建立 `src/pages/LoginPage.tsx`。
 
 ## Dev Notes
 
@@ -46,3 +46,22 @@ So that **我不需要記憶新的帳號密碼，並能確保身分安全**.
 ### References
 - [Architecture](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/architecture.md)
 - [Epics](file:///c:/Users/olen/.gemini/antigravity/scratch/Kernel/.bmad/planning-artifacts/epics.md#Story-7.1)
+
+## Change Log
+- 2026-01-30: Implemented OAuth logic using FastAPI backend flow (Architecture 7.1) instead of Firebase SDK. Created AuthService, AuthProvider and LoginPage.
+
+## Dev Agent Record
+Implemented AuthService using REST API to backend as per Architecture 7.1. 
+Replaced direct Firebase/Supabase SDK assumption with standard backend-mediated OAuth flow.
+Added automatic redirect to Login page in AppLayout.
+Validated with Unit Tests.
+
+## File List
+- frontend/src/services/auth-service.ts
+- frontend/src/services/__tests__/auth-service.test.ts
+- frontend/src/providers/AuthProvider.tsx
+- frontend/src/providers/__tests__/AuthProvider.test.tsx
+- frontend/src/pages/LoginPage.tsx
+- frontend/src/layouts/AppLayout.tsx
+- frontend/src/main.tsx
+- frontend/src/types/models.ts

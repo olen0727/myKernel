@@ -1,10 +1,11 @@
-
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { format } from "date-fns"
-import { dataStore, ResourceFootprint } from "@/services/mock-data-service"
+import { format, isSameDay } from "date-fns"
 import { cn } from "@/lib/utils"
 import { FileText, Link as LinkIcon, NotebookPen, ExternalLink } from "lucide-react"
+import { services, ResourceService } from "@/services"
+import { useObservable } from "@/hooks/use-observable"
+import { Resource } from "@/types/models"
 
 interface FootprintListProps {
     date: Date
@@ -12,13 +13,36 @@ interface FootprintListProps {
 
 export function FootprintList({ date }: FootprintListProps) {
     const navigate = useNavigate()
-    const [footprints, setFootprints] = useState<ResourceFootprint[]>([])
-    const dateStr = format(date, "yyyy-MM-dd")
+    const [resourceService, setResourceService] = useState<ResourceService | undefined>();
 
     useEffect(() => {
-        const data = dataStore.getResourceFootprints(dateStr)
-        setFootprints(data)
-    }, [dateStr])
+        const load = async () => {
+            setResourceService(await services.resource);
+        };
+        load();
+    }, []);
+
+    const allResources$ = useMemo(() => resourceService?.getAll$(), [resourceService]);
+    const allResources = useObservable<Resource[]>(allResources$, []) || [];
+
+    const footprints = useMemo(() => {
+        return allResources.filter(r => {
+            const time = r.updatedAt || r.createdAt;
+            return time && isSameDay(new Date(time), date);
+        }).map(r => {
+            const isCreated = r.createdAt && isSameDay(new Date(r.createdAt), date);
+            return {
+                id: r.id,
+                title: r.title,
+                type: r.type,
+                timestamp: new Date(r.updatedAt || r.createdAt || Date.now()),
+                action: isCreated ? 'created' : 'edited',
+                summary: r.content
+            };
+        }).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    }, [allResources, date]);
+
+    if (!resourceService) return <div className="p-4 text-center text-muted-foreground text-xs">Loading Footprints...</div>;
 
     if (footprints.length === 0) {
         return (
@@ -28,7 +52,7 @@ export function FootprintList({ date }: FootprintListProps) {
         )
     }
 
-    const getIcon = (type: ResourceFootprint["type"]) => {
+    const getIcon = (type: string) => {
         switch (type) {
             case "note":
                 return <FileText className="h-4 w-4" />
@@ -41,13 +65,8 @@ export function FootprintList({ date }: FootprintListProps) {
         }
     }
 
-
-
-
-    const handleItemClick = (fp: ResourceFootprint) => {
+    const handleItemClick = (fp: any) => {
         if (fp.type === 'journal') {
-            // Already on journal page, maybe focus editor?
-            // For now, do nothing or maybe expand logic later.
             return
         }
         navigate(`/resources/${fp.id}`)
@@ -57,7 +76,7 @@ export function FootprintList({ date }: FootprintListProps) {
         <div className="space-y-3">
             {footprints.map((fp) => (
                 <div
-                    key={fp.id}
+                    key={fp.id + fp.action}
                     className="border rounded-lg p-3 flex items-start gap-3 bg-card hover:bg-accent/50 transition-colors cursor-pointer group"
                     onClick={() => handleItemClick(fp)}
                 >

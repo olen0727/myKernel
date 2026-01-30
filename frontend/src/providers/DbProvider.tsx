@@ -1,22 +1,23 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { RxDatabase } from 'rxdb';
-import { getDatabase } from '../db/database';
+import { KernelDatabase, getDatabase } from '../db/database';
 import { Loader2 } from 'lucide-react';
+import { DataSeeder } from '../db/data-seeder';
 
-const DbContext = createContext<RxDatabase | null>(null);
+const DbContext = createContext<KernelDatabase | null>(null);
 
 interface DbProviderProps {
     children: ReactNode;
 }
 
 export const DbProvider = ({ children }: DbProviderProps) => {
-    const [db, setDb] = useState<RxDatabase | null>(null);
+    const [db, setDb] = useState<KernelDatabase | null>(null);
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
         const init = async () => {
             try {
                 const _db = await getDatabase();
+                await DataSeeder.seed();
                 setDb(_db);
             } catch (err) {
                 console.error("Failed to initialize database:", err);

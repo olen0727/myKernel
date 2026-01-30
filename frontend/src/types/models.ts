@@ -35,6 +35,10 @@ export interface Resource extends BaseModel {
     url?: string;
     content?: string;
     context?: string;
+    projectId?: string;
+    areaId?: string;
+    status?: 'inbox' | 'processed' | 'archived';
+    tags?: string[];
 }
 
 export type HabitFrequency = 'daily' | 'weekly';
@@ -42,6 +46,9 @@ export type HabitFrequency = 'daily' | 'weekly';
 export interface Habit extends BaseModel {
     name: string;
     frequency: HabitFrequency;
+    completedDates: string[];
+    currentStreak?: number;
+    maxStreak?: number;
 }
 
 export interface Metric extends BaseModel {
@@ -51,7 +58,16 @@ export interface Metric extends BaseModel {
 
 export interface Log extends BaseModel {
     date: string;
+    action: string;
     value?: string;
     metricId?: string;
     habitId?: string;
+    details?: string; // For note content or JSON metadata
+}
+
+export interface User extends BaseModel {
+    name: string;
+    email: string;
+    avatarUrl?: string;
+    plan?: 'free' | 'pro' | 'founder';
 }

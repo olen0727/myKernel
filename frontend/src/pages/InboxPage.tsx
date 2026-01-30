@@ -1,36 +1,90 @@
-import React, { useState } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { Sparkles, Plus } from "lucide-react"
-import { ResourceItem } from "@/components/resources/ResourceItem"
+import { ResourceItem, Resource as ComponentResource, ResourceStatus } from "@/components/resources/ResourceItem"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { toast } from "sonner"
 import { Archive, Trash2 } from "lucide-react"
-import { INITIAL_INBOX_RESOURCES, Resource } from "@/services/mock-data-service"
 import { useQuickCapture } from "@/stores/quick-capture-store"
+import { services, ResourceService } from "@/services"
+import { useObservable } from "@/hooks/use-observable"
+import { useNavigate } from "react-router-dom"
+import { Resource } from "@/types/models"
 
 export const InboxPage: React.FC = () => {
-    const [resources, setResources] = useState<Resource[]>(INITIAL_INBOX_RESOURCES)
+    const navigate = useNavigate();
     const { onOpen } = useQuickCapture()
 
-    const handleArchive = (id: string) => {
-        const resource = resources.find(r => r.id === id)
-        console.log("Archive resource:", id)
-        setResources(prev => prev.filter(r => r.id !== id))
-        toast.success("資源已歸檔", {
-            description: `「${resource?.title}」已移至封存庫。`,
-            icon: <Archive className="w-4 h-4 text-primary" />
-        })
+    const [resourceService, setResourceService] = useState<ResourceService | undefined>();
+
+    useEffect(() => {
+        const load = async () => {
+            setResourceService(await services.resource);
+        };
+        load();
+    }, []);
+
+    const resources$ = useMemo(() => resourceService?.getAll$(), [resourceService]);
+    const allResources = useObservable<Resource[]>(resources$, []) || [];
+
+    const inboxResources = useMemo(() => {
+        return allResources.filter(r => {
+            // Logic for "Inbox": No project, No area, and Status is not archived
+            // Or explicitly status === 'inbox' (if we set it)
+            // Default is inbox if context missing.
+            const isArchived = r.status === 'archived';
+            const isProcessed = r.status === 'processed' || (r.projectId || r.areaId);
+
+            return !isArchived && !isProcessed;
+        }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    }, [allResources]);
+
+    const handleArchive = async (id: string) => {
+        if (!resourceService) return;
+        try {
+            const r = allResources.find(res => res.id === id);
+            await resourceService.update(id, { status: 'archived' });
+            toast.success("資源已歸檔", {
+                description: `「${r?.title}」已移至封存庫。`,
+                icon: <Archive className="w-4 h-4 text-primary" />
+            })
+        } catch (e) {
+            toast.error("歸檔失敗");
+        }
     }
 
-    const handleDelete = (id: string) => {
-        const resource = resources.find(r => r.id === id)
-        console.log("Delete resource:", id)
-        setResources(prev => prev.filter(r => r.id !== id))
-        toast.error("資源已刪除", {
-            description: `「${resource?.title}」已從系統中移除。`,
-            icon: <Trash2 className="w-4 h-4 text-destructive" />
-        })
+    const handleDelete = async (id: string) => {
+        if (!resourceService) return;
+        try {
+            const r = allResources.find(res => res.id === id);
+            await resourceService.delete(id);
+            toast.success("資源已刪除", {
+                description: `「${r?.title}」已從系統中移除。`,
+                icon: <Trash2 className="w-4 h-4 text-destructive" />
+            })
+        } catch (e) {
+            toast.error("刪除失敗");
+        }
+    }
+
+    // Map DB Resource to Component Resource
+    const mappedResources: ComponentResource[] = useMemo(() => {
+        return inboxResources.map(r => ({
+            id: r.id,
+            type: r.type as any, // 'link' | 'note' | 'document' -> 'link' | 'note' 
+            title: r.title,
+            summary: r.content || '',
+            timestamp: new Date(r.createdAt || Date.now()),
+            url: r.url,
+            status: (r.status || 'inbox') as ResourceStatus,
+            tags: r.tags || [],
+            linkedItems: []
+        }));
+    }, [inboxResources]);
+
+    if (!resourceService) {
+        return <div className="h-full flex items-center justify-center">Loading Inbox...</div>
     }
 
     return (
@@ -43,12 +97,12 @@ export const InboxPage: React.FC = () => {
                         收件匣 Inbox
                     </h1>
                     <p className="text-sm text-muted-foreground font-medium pl-1">
-                        你有 <span className="text-primary font-bold">{resources.length}</span> 個待處理項目
+                        你有 <span className="text-primary font-bold">{inboxResources.length}</span> 個待處理項目
                     </p>
                 </div>
                 <Button
                     onClick={onOpen}
-                    className="rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all gap-2 px-6"
+                    className="rounded-xl font-bold font-mono shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all gap-2 px-6"
                 >
                     <Plus className="w-4 h-4" />
                     快速擷取
@@ -57,10 +111,10 @@ export const InboxPage: React.FC = () => {
 
             {/* List / Empty State Area */}
             <div className="flex-1 min-h-0">
-                {resources.length > 0 ? (
+                {mappedResources.length > 0 ? (
                     <ScrollArea className="h-full pr-4 -mr-4">
                         <div className="space-y-4 pb-8">
-                            {resources.map((resource) => (
+                            {mappedResources.map((resource) => (
                                 <ResourceItem
                                     key={resource.id}
                                     resource={resource}
@@ -77,7 +131,7 @@ export const InboxPage: React.FC = () => {
                             title=" Inbox 已清空！"
                             description="太棒了，你已經處理完所有的收件匣資源。現在是開始執行專案的好時機。"
                             action={
-                                <Button variant="outline" className="rounded-xl font-bold hover:bg-primary/5 hover:text-primary transition-colors">
+                                <Button variant="outline" className="rounded-xl font-bold hover:bg-primary/5 hover:text-primary transition-colors" onClick={() => navigate('/projects')}>
                                     查看進行中的專案
                                 </Button>
                             }
@@ -89,4 +143,4 @@ export const InboxPage: React.FC = () => {
     )
 }
 
-export default InboxPage
+export default InboxPage;

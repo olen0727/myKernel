@@ -3,6 +3,7 @@ import { AccountSettings } from "@/components/settings/AccountSettings"
 import { AppearanceSettings } from "@/components/settings/AppearanceSettings"
 import { ShortcutList } from "@/components/settings/ShortcutList"
 import { BillingSettings } from "@/components/settings/BillingSettings"
+import { DataManagementSettings } from "@/components/settings/DataManagementSettings"
 
 export default function SettingsPage() {
     return (
@@ -13,11 +14,12 @@ export default function SettingsPage() {
             </div>
 
             <Tabs defaultValue="general" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 max-w-[560px]">
+                <TabsList className="grid w-full grid-cols-5 max-w-[700px]">
                     <TabsTrigger value="general">General & Account</TabsTrigger>
                     <TabsTrigger value="appearance">Appearance</TabsTrigger>
-                    <TabsTrigger value="shortcuts">Keyboard Shortcuts</TabsTrigger>
-                    <TabsTrigger value="billing">Billing & Subscription</TabsTrigger>
+                    <TabsTrigger value="shortcuts">Shortcuts</TabsTrigger>
+                    <TabsTrigger value="billing">Billing</TabsTrigger>
+                    <TabsTrigger value="data">Data</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="general" className="mt-6 space-y-6">
@@ -34,6 +36,10 @@ export default function SettingsPage() {
 
                 <TabsContent value="billing" className="mt-6 space-y-6">
                     <BillingSettings />
+                </TabsContent>
+
+                <TabsContent value="data" className="mt-6 space-y-6">
+                    <DataManagementSettings />
                 </TabsContent>
             </Tabs>
         </div>

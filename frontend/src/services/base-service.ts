@@ -11,7 +11,8 @@ export abstract class BaseService<T extends BaseModel> {
     ) { }
 
     protected get collection() {
-        return this.db[this.collectionName];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (this.db as any)[this.collectionName];
     }
 
     /**
@@ -69,7 +70,7 @@ export abstract class BaseService<T extends BaseModel> {
      */
     getById$(id: string): Observable<T | null> {
         return this.collection.findOne(id).$.pipe(
-            map(doc => doc ? (doc.toJSON() as T) : null)
+            map((doc: any) => doc ? (doc.toJSON() as T) : null)
         );
     }
 
@@ -78,7 +79,7 @@ export abstract class BaseService<T extends BaseModel> {
      */
     async getAll(): Promise<T[]> {
         const docs = await this.collection.find().exec();
-        return docs.map(d => d.toJSON() as T);
+        return docs.map((d: any) => d.toJSON() as T);
     }
 
     /**
@@ -86,7 +87,7 @@ export abstract class BaseService<T extends BaseModel> {
      */
     getAll$(): Observable<T[]> {
         return this.collection.find().$.pipe(
-            map(docs => docs.map(d => d.toJSON() as T))
+            map((docs: any[]) => docs.map((d: any) => d.toJSON() as T))
         );
     }
 }

@@ -1,37 +1,80 @@
-import React from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { AreaCard } from '@/components/areas/AreaCard'
 import { CreateAreaModal } from '@/components/areas/CreateAreaModal'
-import { Area, dataStore } from '@/services/mock-data-service'
 import { Card } from '@/components/ui/card'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { services, AreaService, ProjectService, HabitService } from '@/services'
+import { useObservable } from '@/hooks/use-observable'
+import { Area, Project, Habit } from '@/types/models'
 
 const AreaListPage: React.FC = () => {
-    const [areas, setAreas] = React.useState<Area[]>([])
-    const [isModalOpen, setIsModalOpen] = React.useState(false)
     const navigate = useNavigate()
 
-    React.useEffect(() => {
-        setAreas([...dataStore.getAreas()])
-    }, [])
+    const [areaService, setAreaService] = useState<AreaService | undefined>();
+    const [projectService, setProjectService] = useState<ProjectService | undefined>();
+    const [habitService, setHabitService] = useState<HabitService | undefined>();
 
-    const handleCreateArea = (name: string, coverImage: string) => {
-        const newArea: Area = {
-            id: crypto.randomUUID(),
-            name,
-            status: 'active',
-            projectCount: 0,
-            habitCount: 0,
-            coverImage
+    useEffect(() => {
+        const load = async () => {
+            setAreaService(await services.area);
+            setProjectService(await services.project);
+            setHabitService(await services.habit);
+        };
+        load();
+    }, []);
+
+    const areas$ = useMemo(() => areaService?.getAll$(), [areaService]);
+    const projects$ = useMemo(() => projectService?.getAll$(), [projectService]);
+    const habits$ = useMemo(() => habitService?.getAll$(), [habitService]);
+
+    const areas = useObservable<Area[]>(areas$, []) || [];
+    const projects = useObservable<Project[]>(projects$, []) || [];
+    const habits = useObservable<Habit[]>(habits$, []) || [];
+
+    const [isModalOpen, setIsModalOpen] = React.useState(false)
+
+    // Map DB areas to UI Model (adding counts)
+    const mappedAreas = useMemo(() => {
+        return areas.map(area => {
+            const projectCount = projects.filter(p => p.areaId === area.id).length;
+            // Habit model doesn't explicitly store areaId in the interface we saw earlier?
+            // Checking models.ts: Habit extends BaseModel. No areaId.
+            // If Habit lacks areaId, habitCount will be 0 or we need to check if habits are linked differently.
+            // Assuming 0 for now if no areaId in Habit.
+            const habitCount = 0;
+
+            return {
+                ...area,
+                status: 'active', // Default status for UI
+                projectCount,
+                habitCount
+            };
+        });
+    }, [areas, projects, habits]);
+
+    const handleCreateArea = async (name: string, coverImage: string) => {
+        if (!areaService) return;
+        try {
+            await areaService.create({
+                name,
+                coverImage,
+                description: ''
+            });
+            toast.success(`領域 "${name}" 已建立`);
+            // Area list updates automatically via Observable
+        } catch (e) {
+            toast.error("建立領域失敗");
         }
-        dataStore.addArea(newArea)
-        setAreas([...dataStore.getAreas()])
-        toast.success(`領域 "${name}" 已建立`)
     }
 
     const handleAreaClick = (areaId: string) => {
         navigate(`/areas/${areaId}`)
+    }
+
+    if (!areaService) {
+        return <div className="h-full flex items-center justify-center">Loading Areas...</div>
     }
 
     return (
@@ -42,10 +85,10 @@ const AreaListPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {areas.map(area => (
+                {mappedAreas.map(area => (
                     <AreaCard
                         key={area.id}
-                        area={area}
+                        area={area as any} // Cast to match Mock Area interface expectation
                         onClick={() => handleAreaClick(area.id)}
                     />
                 ))}

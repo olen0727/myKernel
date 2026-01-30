@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Workbench } from "@/components/projects/Workbench"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -6,16 +6,10 @@ import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProjectCard, ProjectCardProps } from "@/components/projects/ProjectCard"
 import { CreateProjectModal } from "@/components/projects/CreateProjectModal"
-
-const INITIAL_PROJECTS: ProjectCardProps[] = [
-    { id: "1", name: "Kernel Project", area: "Work", status: "active", doneTasks: 8, totalTasks: 12 },
-    { id: "2", name: "Fitness Tracker", area: "Personal", status: "active", doneTasks: 2, totalTasks: 5 },
-    { id: "3", name: "Smart Home API", area: "Side Project", status: "paused", doneTasks: 3, totalTasks: 8 },
-    { id: "4", name: "Marketing Campaign", area: "Work", status: "active", doneTasks: 15, totalTasks: 20 },
-    { id: "5", name: "Vacation Planning", area: "Personal", status: "completed", doneTasks: 10, totalTasks: 10 },
-]
-
-type FilterStatus = "all" | "active" | "paused" | "completed" | "archived"
+import { services, ProjectService, AreaService, TaskService } from "@/services"
+import { useObservable } from "@/hooks/use-observable"
+import { ProjectStatus, Project, Area, Task } from "@/types/models"
+import { toast } from "sonner"
 
 import {
     ResizableHandle,
@@ -23,28 +17,78 @@ import {
     ResizablePanelGroup,
 } from "@/components/ui/resizable"
 
+type FilterStatus = "all" | ProjectStatus;
+
 export default function ProjectListPage() {
     const navigate = useNavigate()
-    const [projects, setProjects] = useState<ProjectCardProps[]>(INITIAL_PROJECTS)
+
+    const [projectService, setProjectService] = useState<ProjectService | undefined>();
+    const [areaService, setAreaService] = useState<AreaService | undefined>();
+    const [taskService, setTaskService] = useState<TaskService | undefined>();
+
+    useEffect(() => {
+        const load = async () => {
+            setProjectService(await services.project);
+            setAreaService(await services.area);
+            setTaskService(await services.task);
+        };
+        load();
+    }, []);
+
+    const projects$ = useMemo(() => projectService?.getAll$(), [projectService]);
+    const areas$ = useMemo(() => areaService?.getAll$(), [areaService]);
+    const allTasks$ = useMemo(() => taskService?.getAll$(), [taskService]);
+
+    const projects = useObservable<Project[]>(projects$, []) || [];
+    const areas = useObservable<Area[]>(areas$, []) || [];
+    const allTasks = useObservable<Task[]>(allTasks$, []) || [];
+
     const [filterStatus, setFilterStatus] = useState<FilterStatus>("active")
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    const filteredProjects = projects.filter(project => {
+    // Derived state for display
+    const projectCards: ProjectCardProps[] = useMemo(() => {
+        return projects.map(p => {
+            const pTasks = allTasks.filter(t => t.projectId === p.id);
+            const done = pTasks.filter(t => t.completed).length;
+            const total = pTasks.length;
+            const areaName = areas.find(a => a.id === p.areaId)?.name || 'General';
+
+            return {
+                id: p.id,
+                name: p.name,
+                area: areaName,
+                status: p.status,
+                doneTasks: done,
+                totalTasks: total
+            };
+        });
+    }, [projects, areas, allTasks]);
+
+    const filteredProjects = projectCards.filter(project => {
         if (filterStatus === "all") return true
         return project.status === filterStatus
     })
 
-    const handleCreateProject = (values: any) => {
-        const newProject: ProjectCardProps = {
-            id: Math.random().toString(36).substring(2, 11),
-            name: values.name,
-            area: values.area || "General",
-            status: "active",
-            doneTasks: 0,
-            totalTasks: 0,
+    const handleCreateProject = async (values: any) => {
+        if (!projectService) return;
+        try {
+            const newProject = await projectService.create({
+                name: values.name,
+                areaId: values.area, // CreateProjectModal returns areaId now
+                status: 'active',
+                progress: 0
+            });
+            toast.success("專案已建立");
+            navigate(`/projects/${newProject.id}`)
+        } catch (error) {
+            console.error("Failed to create project:", error);
+            toast.error("建立專案失敗");
         }
-        setProjects([newProject, ...projects])
-        navigate(`/projects/${newProject.id}`)
+    }
+
+    if (!projectService || !areaService || !taskService) {
+        return <div className="h-full flex items-center justify-center">Loading Projects...</div>
     }
 
     return (
@@ -104,6 +148,7 @@ export default function ProjectListPage() {
                 open={isModalOpen}
                 onOpenChange={setIsModalOpen}
                 onSubmit={handleCreateProject}
+                areas={areas}
             />
         </div>
     )

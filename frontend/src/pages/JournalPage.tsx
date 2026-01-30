@@ -1,5 +1,5 @@
 
-import { useEffect } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { format, parse, isValid, startOfDay, isAfter } from "date-fns"
 import { DateNavigator } from "@/components/journal/DateNavigator"
@@ -8,9 +8,10 @@ import { MetricInputList } from "@/components/journal/MetricInputList"
 import { FootprintList } from "@/components/journal/FootprintList"
 import { cn } from "@/lib/utils"
 import { TipTapEditor } from "@/components/editor/TipTapEditor"
-import { dataStore } from "@/services/mock-data-service"
 import { useDebounce } from "@/hooks/use-debounce"
-import { useState } from "react"
+import { services, LogService } from "@/services"
+import { useObservable } from "@/hooks/use-observable"
+import { Log } from "@/types/models"
 
 export default function JournalPage() {
     const { date } = useParams()
@@ -22,26 +23,71 @@ export default function JournalPage() {
     const dateStr = isValidDate ? format(currentDate, "yyyy-MM-dd") : ""
 
     const [content, setContent] = useState("")
-    const [isLoaded, setIsLoaded] = useState(false)
+    // const [isLoaded, setIsLoaded] = useState(false) // Driven by useObservable now
     const debouncedContent = useDebounce(content, 1000)
 
-    // Load content on date change
+    const [logService, setLogService] = useState<LogService | undefined>();
+
     useEffect(() => {
-        if (!dateStr) return
-        const entry = dataStore.getJournalEntry(dateStr)
-        setContent(entry?.content || "")
-        setIsLoaded(true)
-    }, [dateStr])
+        const load = async () => {
+            setLogService(await services.log);
+        };
+        load();
+    }, []);
+
+    const allLogs$ = useMemo(() => logService?.getAll$(), [logService]);
+    const allLogs = useObservable<Log[]>(allLogs$, []) || [];
+
+    const dailyNoteLog = useMemo(() => {
+        return allLogs.find(l => l.date === dateStr && l.action === 'daily_note');
+    }, [allLogs, dateStr]);
+
+    // Load content when dailyNoteLog changes (or initially)
+    // If we type, content state updates locally.
+    // If dailyNoteLog updates remotely (e.g. sync), we might overwrite local changes?
+    // For now, assume single user. Sync on mount/change of note ID.
+    const [noteId, setNoteId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (dailyNoteLog) {
+            // Only update content if we switched note (date change) or it's first load
+            // To avoid cursor jumping or overwrite while typing if observable emits same data
+            if (dailyNoteLog.id !== noteId) {
+                setContent(dailyNoteLog.details || "");
+                setNoteId(dailyNoteLog.id);
+            }
+        } else {
+            // No note found for this date.
+            if (noteId !== null) { // If we had a note before, and now none (deleted?) or changed date to empty day
+                setContent("");
+                setNoteId(null);
+            }
+            // If we just loaded and noteId is null, keep initialized empty content.
+        }
+    }, [dailyNoteLog, noteId]);
 
     // Save content on debounce
     useEffect(() => {
-        if (!isLoaded || !dateStr) return
-        // Prevent saving empty string if it's just initial load? 
-        // No, user might clear content.
-        // Prevent saving if content matches store? (Optional optimization)
+        if (!dateStr || !logService) return
+        if (debouncedContent === (dailyNoteLog?.details || "")) return; // No change
 
-        dataStore.saveJournalEntry(dateStr, debouncedContent)
-    }, [debouncedContent, dateStr, isLoaded])
+        const save = async () => {
+            if (dailyNoteLog) {
+                await logService.update(dailyNoteLog.id, { details: debouncedContent });
+            } else {
+                if (debouncedContent) { // Only create if content exists
+                    await logService.create({
+                        date: dateStr,
+                        action: 'daily_note',
+                        details: debouncedContent,
+                        timestamp: currentDate.getTime() // ensure timestamp is set if model requires it
+                    } as any); // Cast if model strictness mismatch
+                }
+            }
+        };
+        save();
+    }, [debouncedContent, dateStr, logService, dailyNoteLog, currentDate])
+
 
     useEffect(() => {
         if (!date) {
@@ -62,6 +108,7 @@ export default function JournalPage() {
     }
 
     if (!date || !isValidDate) return null
+    if (!logService) return <div className="h-full flex items-center justify-center">Loading Journal...</div>
 
     const isFutureDay = isAfter(startOfDay(currentDate), startOfDay(new Date()))
 

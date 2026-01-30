@@ -1,57 +1,11 @@
-import React, { useMemo } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { FilterBar, FilterState } from "@/components/resources/FilterBar"
-import { Resource, ResourceItem } from "@/components/resources/ResourceItem"
+import { Resource as ComponentResource, ResourceItem, ResourceStatus } from "@/components/resources/ResourceItem"
 import { ScrollArea } from "@/components/ui/scroll-area"
-
-// Mock Data with full Resource type
-const MOCK_RESOURCES: Resource[] = [
-    {
-        id: "1",
-        type: "note",
-        title: "Kernel Architecture Design",
-        summary: "Detailed architecture notes for the Kernel project, including frontend and backend separation.",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-        status: "processed",
-        tags: ["architecture", "design"],
-        linkedItems: [
-            { id: "p1", name: "Kernel Development", type: "project" }
-        ]
-    },
-    {
-        id: "2",
-        type: "link",
-        title: "React Documentation",
-        summary: "Official React documentation for hooks and components.",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-        url: "https://react.dev",
-        status: "processed",
-        tags: ["react", "frontend"],
-        linkedItems: []
-    },
-    {
-        id: "3",
-        type: "note",
-        title: "Meeting Notes - Sprint Planning",
-        summary: "Sprint planning notes from yesterday's meeting with the team.",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2 days ago
-        status: "inbox",
-        tags: [],
-        linkedItems: []
-    },
-    {
-        id: "4",
-        type: "link",
-        title: "Old Tutorial - Deprecated",
-        summary: "This tutorial is no longer relevant, kept for reference only.",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30), // 30 days ago
-        url: "https://old-tutorial.com",
-        status: "archived",
-        tags: ["backend"],
-        linkedItems: [
-            { id: "a1", name: "Work", type: "area" }
-        ]
-    }
-]
+import { services, ResourceService, ProjectService, AreaService } from "@/services"
+import { useObservable } from "@/hooks/use-observable"
+import { toast } from "sonner"
+import { Resource, Project, Area } from "@/types/models"
 
 const DEFAULT_FILTERS: FilterState = {
     search: "",
@@ -61,12 +15,66 @@ const DEFAULT_FILTERS: FilterState = {
 }
 
 export default function ResourceLibraryPage() {
-    const [resources, setResources] = React.useState<Resource[]>(MOCK_RESOURCES)
+    const [resourceService, setResourceService] = useState<ResourceService | undefined>();
+    const [projectService, setProjectService] = useState<ProjectService | undefined>();
+    const [areaService, setAreaService] = useState<AreaService | undefined>();
+
+    useEffect(() => {
+        const load = async () => {
+            setResourceService(await services.resource);
+            setProjectService(await services.project);
+            setAreaService(await services.area);
+        };
+        load();
+    }, []);
+
+    const resources$ = useMemo(() => resourceService?.getAll$(), [resourceService]);
+    const projects$ = useMemo(() => projectService?.getAll$(), [projectService]);
+    const areas$ = useMemo(() => areaService?.getAll$(), [areaService]);
+
+    const allResources = useObservable<Resource[]>(resources$, []) || [];
+    const allProjects = useObservable<Project[]>(projects$, []) || [];
+    const allAreas = useObservable<Area[]>(areas$, []) || [];
+
     const [filters, setFilters] = React.useState<FilterState>(DEFAULT_FILTERS)
+
+    // Map DB resources to Component resources
+    const mappedResources = useMemo(() => {
+        return allResources.map(r => {
+            const linkedItems = [];
+            if (r.projectId) {
+                const p = allProjects.find(p => p.id === r.projectId);
+                if (p) linkedItems.push({ id: p.id, name: p.name, type: 'project' as const });
+            }
+            if (r.areaId) {
+                const a = allAreas.find(a => a.id === r.areaId);
+                if (a) linkedItems.push({ id: a.id, name: a.name, type: 'area' as const });
+            }
+
+            // Infer status if missing
+            let status = r.status as ResourceStatus;
+            if (!status) {
+                if (!r.projectId && !r.areaId) status = 'inbox';
+                else status = 'processed';
+            }
+
+            return {
+                id: r.id,
+                type: (r.type === 'document' ? 'note' : r.type) as 'note' | 'link', // Adapt if document type not supported by Item
+                title: r.title,
+                summary: r.content || '',
+                timestamp: new Date(r.createdAt || Date.now()),
+                url: r.url,
+                status: status,
+                tags: r.tags || [],
+                linkedItems: linkedItems
+            } as ComponentResource;
+        }).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    }, [allResources, allProjects, allAreas]);
 
     // H1: Filter resources based on filter state
     const filteredResources = useMemo(() => {
-        return resources.filter(resource => {
+        return mappedResources.filter(resource => {
             const resourceStatus = resource.status ?? "inbox"
             const resourceTags = resource.tags ?? []
             const resourceLinkedItems = resource.linkedItems ?? []
@@ -101,42 +109,58 @@ export default function ResourceLibraryPage() {
 
             return true
         })
-    }, [resources, filters])
+    }, [mappedResources, filters])
 
-    const handleArchive = (id: string) => {
-        setResources(prev => prev.map(r =>
-            r.id === id ? { ...r, status: "archived" as const } : r
-        ))
+    const handleArchive = async (id: string) => {
+        if (!resourceService) return;
+        try {
+            await resourceService.update(id, { status: 'archived' });
+            toast.success("資源已歸檔");
+        } catch (e) {
+            toast.error("操作失敗");
+        }
     }
 
-    const handleDelete = (id: string) => {
-        setResources(prev => prev.filter(r => r.id !== id))
+    const handleDelete = async (id: string) => {
+        if (!resourceService) return;
+        try {
+            await resourceService.delete(id);
+            toast.success("資源已刪除");
+        } catch (e) {
+            toast.error("操作失敗");
+        }
     }
 
-    const handleStatusChange = (id: string, status: "inbox" | "processed" | "archived") => {
-        setResources(prev => prev.map(r =>
-            r.id === id ? { ...r, status } : r
-        ))
+    const handleStatusChange = async (id: string, status: "inbox" | "processed" | "archived") => {
+        if (!resourceService) return;
+        try {
+            await resourceService.update(id, { status });
+            toast.success("狀態已更新");
+        } catch (e) {
+            toast.error("操作失敗");
+        }
     }
 
     // Extract unique tags from resources for filter options
     const availableTags = useMemo(() => {
         const tagSet = new Set<string>()
-        resources.forEach(r => (r.tags ?? []).forEach(t => tagSet.add(t)))
+        mappedResources.forEach(r => (r.tags ?? []).forEach(t => tagSet.add(t)))
         return Array.from(tagSet).sort()
-    }, [resources])
+    }, [mappedResources])
 
     // Extract unique projects from resources
     const availableProjects = useMemo(() => {
         const projectMap = new Map<string, string>()
         projectMap.set("all", "所有專案")
-        resources.forEach(r => {
-            (r.linkedItems ?? [])
-                .filter(item => item.type === "project")
-                .forEach(item => projectMap.set(item.id, item.name))
-        })
+        allProjects.forEach(p => {
+            projectMap.set(p.id, p.name);
+        });
         return Array.from(projectMap.entries()).map(([id, name]) => ({ id, name }))
-    }, [resources])
+    }, [allProjects])
+
+    if (!resourceService || !projectService || !areaService) {
+        return <div className="h-full flex items-center justify-center">Loading Library...</div>
+    }
 
     return (
         <div className="flex flex-col gap-6 h-full p-6">

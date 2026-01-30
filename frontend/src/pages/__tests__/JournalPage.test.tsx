@@ -1,9 +1,10 @@
 
-import { render, screen, fireEvent, act } from "@testing-library/react"
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { format, addDays } from "date-fns"
 import JournalPage from "../JournalPage"
+import { services } from "@/services"
 
 // Mock useNavigate
 const mockNavigate = vi.fn()
@@ -25,18 +26,34 @@ vi.mock("@/components/journal/DateNavigator", () => ({
     )
 }))
 
-// Mock DataStore
-vi.mock("@/services/mock-data-service", () => ({
-    dataStore: {
-        getJournalEntry: vi.fn(),
-        saveJournalEntry: vi.fn(),
-        getAllHabits: vi.fn().mockReturnValue([]),
-        getMetricDefinitions: vi.fn().mockReturnValue([]),
-        getMetricEntries: vi.fn().mockReturnValue([]),
-        toggleHabitCompletion: vi.fn(),
-        getResourceFootprints: vi.fn().mockReturnValue([]),
-    }
-}))
+// Mock Services
+vi.mock("@/services", () => {
+    const { BehaviorSubject } = require('rxjs');
+
+    const mockLogs = [
+        { id: '1', date: '2023-01-01', action: 'daily_note', details: 'My Secret Note', timestamp: 1672531200000 }
+    ];
+
+    // We need a stable mock that can be updated in tests or we use `mockImplementation` in tests?
+    // Since `services` is imported as singleton, mocking it here sets it for all.
+    // We can expose the behavior subject or helper to push values.
+
+    const logSubject = new BehaviorSubject(mockLogs);
+    const mockLogService = {
+        getAll$: () => logSubject,
+        create: vi.fn(),
+        update: vi.fn(),
+    };
+
+    return {
+        services: {
+            log: Promise.resolve(mockLogService),
+            habit: Promise.resolve({ getAll$: () => new BehaviorSubject([]) }),
+            resource: Promise.resolve({ getAll$: () => new BehaviorSubject([]) }),
+            metric: Promise.resolve({ getAll$: () => new BehaviorSubject([]) }),
+        },
+    };
+})
 
 // Mock TipTapEditor
 vi.mock("@/components/editor/TipTapEditor", () => ({
@@ -49,14 +66,12 @@ vi.mock("@/components/editor/TipTapEditor", () => ({
     )
 }))
 
-import { dataStore } from "@/services/mock-data-service"
-
 describe("JournalPage", () => {
     beforeEach(() => {
         vi.clearAllMocks()
     })
 
-    it("redirects to today's date if no date is provided", () => {
+    it("redirects to today's date if no date is provided", async () => {
         const today = format(new Date(), "yyyy-MM-dd")
         render(
             <MemoryRouter initialEntries={["/journal"]}>
@@ -67,10 +82,10 @@ describe("JournalPage", () => {
             </MemoryRouter>
         )
 
-        expect(mockNavigate).toHaveBeenCalledWith(`/journal/${today}`, { replace: true })
+        await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith(`/journal/${today}`, { replace: true }));
     })
 
-    it("renders the journal layout and DateNavigator", () => {
+    it("renders the journal layout and DateNavigator", async () => {
         render(
             <MemoryRouter initialEntries={["/journal/2023-01-01"]}>
                 <Routes>
@@ -78,13 +93,15 @@ describe("JournalPage", () => {
                 </Routes>
             </MemoryRouter>
         )
+
+        await waitFor(() => expect(screen.queryByText("Loading Journal...")).not.toBeInTheDocument());
 
         // Check if DateNavigator is rendered with correct date
         expect(screen.getByTestId("date-navigator")).toBeInTheDocument()
         expect(screen.getByTestId("current-date")).toHaveTextContent("2023-01-01")
     })
 
-    it("navigates when date changes in DateNavigator", () => {
+    it("navigates when date changes in DateNavigator", async () => {
         render(
             <MemoryRouter initialEntries={["/journal/2023-01-01"]}>
                 <Routes>
@@ -92,12 +109,13 @@ describe("JournalPage", () => {
                 </Routes>
             </MemoryRouter>
         )
+        await waitFor(() => expect(screen.queryByText("Loading Journal...")).not.toBeInTheDocument());
 
         fireEvent.click(screen.getByText("Change Date"))
         expect(mockNavigate).toHaveBeenCalledWith("/journal/2023-01-02")
     })
 
-    it("disables habits and metrics for future dates", () => {
+    it("disables habits and metrics for future dates", async () => {
         const futureDate = addDays(new Date(), 1)
         const dateStr = format(futureDate, "yyyy-MM-dd")
 
@@ -108,6 +126,7 @@ describe("JournalPage", () => {
                 </Routes>
             </MemoryRouter>
         )
+        await waitFor(() => expect(screen.queryByText("Loading Journal...")).not.toBeInTheDocument());
 
         // Find the section container that should be disabled
         // We look for the h2 "Habits" and check its parent container for aria-disabled
@@ -117,9 +136,8 @@ describe("JournalPage", () => {
         expect(habitsContainer).toHaveClass("opacity-50", "pointer-events-none")
     })
 
-    it("loads daily note content from store", () => {
-        vi.mocked(dataStore.getJournalEntry).mockReturnValue({ content: "My Secret Note", id: '1', date: '2023-01-01', createdAt: new Date(), updatedAt: new Date() })
-
+    it("loads daily note content from store", async () => {
+        // Mock data is already set up in vi.mock
         render(
             <MemoryRouter initialEntries={["/journal/2023-01-01"]}>
                 <Routes>
@@ -127,13 +145,13 @@ describe("JournalPage", () => {
                 </Routes>
             </MemoryRouter>
         )
+        await waitFor(() => expect(screen.queryByText("Loading Journal...")).not.toBeInTheDocument());
 
-        expect(dataStore.getJournalEntry).toHaveBeenCalledWith("2023-01-01")
-        expect(screen.getByTestId("tiptap-editor")).toHaveValue("My Secret Note")
+        await waitFor(() => expect(screen.getByTestId("tiptap-editor")).toHaveValue("My Secret Note"));
     })
 
     it("auto-saves daily note content after debounce", async () => {
-        vi.mocked(dataStore.getJournalEntry).mockReturnValue({ content: "", id: '1', date: '2023-01-01', createdAt: new Date(), updatedAt: new Date() })
+        const logService = await services.log;
 
         render(
             <MemoryRouter initialEntries={["/journal/2023-01-01"]}>
@@ -142,22 +160,21 @@ describe("JournalPage", () => {
                 </Routes>
             </MemoryRouter>
         )
+        await waitFor(() => expect(screen.queryByText("Loading Journal...")).not.toBeInTheDocument());
 
         const editor = screen.getByTestId("tiptap-editor")
-
-            // Initial save might happen due to state sync
-            ; vi.mocked(dataStore.saveJournalEntry).mockClear()
+        expect(editor).toHaveValue("My Secret Note");
 
         fireEvent.change(editor, { target: { value: "Updated Note" } })
 
         // Should not save immediately
-        expect(dataStore.saveJournalEntry).not.toHaveBeenCalled()
+        expect(logService.update).not.toHaveBeenCalled()
 
         // Advance timer using real wait
         await act(async () => {
             await new Promise(resolve => setTimeout(resolve, 1100))
         })
 
-        expect(dataStore.saveJournalEntry).toHaveBeenCalledWith("2023-01-01", "Updated Note")
+        expect(logService.update).toHaveBeenCalledWith('1', expect.objectContaining({ details: "Updated Note" }))
     })
 })
