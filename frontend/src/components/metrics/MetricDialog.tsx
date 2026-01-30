@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { dataStore, MetricDefinition } from "@/services/mock-data-service"
+import { Metric } from "@/types/models"
 
 const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -20,11 +20,11 @@ const formSchema = z.object({
 interface MetricDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    onSuccess: () => void
-    metricToEdit?: MetricDefinition
+    onSubmit: (values: any) => Promise<void>
+    metricToEdit?: Metric & { unit?: string, options?: string[] }
 }
 
-export function MetricDialog({ open, onOpenChange, onSuccess, metricToEdit }: MetricDialogProps) {
+export function MetricDialog({ open, onOpenChange, onSubmit, metricToEdit }: MetricDialogProps) {
     const isEditing = !!metricToEdit
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -43,6 +43,7 @@ export function MetricDialog({ open, onOpenChange, onSuccess, metricToEdit }: Me
             if (metricToEdit) {
                 form.reset({
                     name: metricToEdit.name,
+                    // @ts-ignore
                     type: metricToEdit.type,
                     unit: metricToEdit.unit || "",
                     optionsStr: metricToEdit.options ? metricToEdit.options.join(", ") : ""
@@ -60,7 +61,7 @@ export function MetricDialog({ open, onOpenChange, onSuccess, metricToEdit }: Me
 
     const type = form.watch("type")
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function handleFormSubmit(values: z.infer<typeof formSchema>) {
         const commonData = {
             name: values.name,
             type: values.type,
@@ -68,24 +69,11 @@ export function MetricDialog({ open, onOpenChange, onSuccess, metricToEdit }: Me
             options: values.type === 'select' && values.optionsStr
                 ? values.optionsStr.split(',').map(s => s.trim()).filter(Boolean)
                 : undefined,
-            min: values.type === 'rating' ? 1 : undefined,
-            max: values.type === 'rating' ? 5 : undefined,
         }
 
-        if (isEditing && metricToEdit) {
-            dataStore.updateMetricDefinition(metricToEdit.id, commonData)
-        } else {
-            const newMetric: MetricDefinition = {
-                id: crypto.randomUUID(),
-                status: "active",
-                isSystem: false,
-                ...commonData
-            }
-            dataStore.addMetricDefinition(newMetric)
-        }
+        await onSubmit(commonData)
 
         form.reset()
-        onSuccess()
         onOpenChange(false)
     }
 
@@ -96,7 +84,7 @@ export function MetricDialog({ open, onOpenChange, onSuccess, metricToEdit }: Me
                     <DialogTitle>{isEditing ? "Edit Metric" : "Create Metric"}</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
                             name="name"

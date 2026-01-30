@@ -1,6 +1,6 @@
 
 import { useState } from "react"
-import { MetricDefinition, dataStore } from "@/services/mock-data-service"
+import { Metric } from "@/types/models"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Archive, Trash2, Undo2, Pencil } from "lucide-react"
@@ -16,25 +16,25 @@ import {
 } from "@/components/ui/alert-dialog"
 
 interface MetricListProps {
-    metrics: MetricDefinition[]
+    metrics: (Metric & { status?: string, isSystem?: boolean, unit?: string, options?: string[] })[]
     onUpdate: () => void
-    onEdit: (metric: MetricDefinition) => void
+    onArchive: (id: string, status: string | undefined) => void
+    onDelete: (id: string) => void
+    onEdit: (metric: Metric) => void
 }
 
-export function MetricList({ metrics, onUpdate, onEdit }: MetricListProps) {
+export function MetricList({ metrics, onUpdate, onEdit, onArchive, onDelete }: MetricListProps) {
     const [deleteId, setDeleteId] = useState<string | null>(null)
 
     if (metrics.length === 0) return <div className="text-muted-foreground p-4 text-center border rounded-lg border-dashed">No metrics found.</div>
 
-    const handleArchive = (id: string, currentStatus: string) => {
-        dataStore.updateMetricDefinition(id, { status: currentStatus === 'active' ? 'archived' : 'active' })
-        onUpdate()
+    const handleArchive = (id: string, currentStatus: string | undefined) => {
+        onArchive(id, currentStatus)
     }
 
     const confirmDelete = () => {
         if (deleteId) {
-            dataStore.deleteMetricDefinition(deleteId)
-            onUpdate()
+            onDelete(deleteId)
             setDeleteId(null)
         }
     }

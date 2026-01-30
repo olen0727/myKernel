@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MetricDefinition } from '@/services/mock-data-service'
+import { Metric } from '@/types/models'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { Star, Moon, Zap, Target } from 'lucide-react'
 
 interface MetricItemProps {
-    definition: MetricDefinition
+    definition: Metric & { min?: number, max?: number, step?: number, unit?: string, options?: string[] }
     value: number | undefined
     onChange: (value: number | undefined) => void
     readOnly?: boolean
