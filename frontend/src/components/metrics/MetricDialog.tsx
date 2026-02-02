@@ -43,8 +43,7 @@ export function MetricDialog({ open, onOpenChange, onSubmit, metricToEdit }: Met
             if (metricToEdit) {
                 form.reset({
                     name: metricToEdit.name,
-                    // @ts-ignore
-                    type: metricToEdit.type,
+                    type: metricToEdit.type as "number" | "rating" | "select" | "time",
                     unit: metricToEdit.unit || "",
                     optionsStr: metricToEdit.options ? metricToEdit.options.join(", ") : ""
                 })

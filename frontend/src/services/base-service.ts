@@ -38,10 +38,14 @@ export abstract class BaseService<T extends BaseModel> {
         const doc = await this.collection.findOne(id).exec();
         if (!doc) throw new Error(`Document with id ${id} not found in ${this.collectionName}`);
 
-        // RxDB update
-        const newDoc = await doc.patch({
-            ...data,
-            updatedAt: new Date().toISOString()
+        // Use incrementalModify to handle conflict errors automatically
+        // This retries the update function if the document has changed since read
+        const newDoc = await doc.incrementalModify((oldData: any) => {
+            return {
+                ...oldData,
+                ...data,
+                updatedAt: new Date().toISOString()
+            };
         });
 
         return newDoc.toJSON() as T;

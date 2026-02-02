@@ -100,7 +100,7 @@ development_status:
   # Epic 7: 身分驗證與同步
   epic-7: backlog
   7-1-oauth-integration: review
-  7-2-couchdb-sync: ready-for-dev
+  7-2-couchdb-sync: review
   7-3-url-parser: ready-for-dev
   epic-7-retrospective: optional
 

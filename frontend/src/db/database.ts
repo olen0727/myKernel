@@ -2,6 +2,9 @@ import { createRxDatabase, addRxPlugin, RxDatabase, RxStorage, removeRxDatabase 
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-crypto-js';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
+import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
+import { syncCollection } from './replication';
+import { AuthService } from '../services/auth-service';
 
 import { projectSchema } from './schemas/project.schema';
 import { areaSchema } from './schemas/area.schema';
@@ -10,6 +13,9 @@ import { resourceSchema } from './schemas/resource.schema';
 import { habitSchema } from './schemas/habit.schema';
 import { metricSchema } from './schemas/metric.schema';
 import { logSchema } from './schemas/log.schema';
+
+// Add the update plugin
+addRxPlugin(RxDBUpdatePlugin);
 
 // Enable dev mode plugins
 // @ts-ignore - Vite env types might be missing in current TS config
@@ -100,6 +106,31 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
             logs: { schema: logSchema },
         });
         console.log('RxDB collections initialized');
+
+        // Start replication if configured
+        // @ts-ignore
+        const COUCHDB_URL = import.meta.env.VITE_COUCHDB_URL;
+        if (COUCHDB_URL) {
+            console.log('✅ Detected VITE_COUCHDB_URL:', COUCHDB_URL);
+            console.log('🔄 Starting replication for all collections...');
+            // @ts-ignore
+            const COUCHDB_USER = import.meta.env.VITE_COUCHDB_USER;
+            // @ts-ignore
+            const COUCHDB_PASSWORD = import.meta.env.VITE_COUCHDB_PASSWORD;
+
+            console.log(`🔐 Using Basic Auth for sync. User: ${COUCHDB_USER || 'undefined'}`);
+
+            Object.values(db.collections).forEach(collection => {
+                syncCollection(collection, COUCHDB_URL, AuthService.getToken, {
+                    username: COUCHDB_USER,
+                    password: COUCHDB_PASSWORD
+                });
+            });
+            console.log('✅ Replication initialized.');
+        } else {
+            console.warn('⚠️ VITE_COUCHDB_URL is not set. Replication skipped.');
+        }
+
         return db;
     };
 
