@@ -7,6 +7,7 @@ from authlib.integrations.starlette_client import OAuth
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from typing import Optional
+from app.services.couchdb import ensure_user_databases
 
 router = APIRouter()
 settings = get_settings()
@@ -68,6 +69,11 @@ async def auth_google_callback(request: Request):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"OAuth failed: {str(e)}")
 
+
+
+    # Ensure User DBs exist
+    ensure_user_databases(user_data["sub"])
+
     # Generate JWT
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
@@ -89,6 +95,9 @@ async def auth_github_callback(request: Request):
     # Mock user for GitHub
     user_data = {"sub": "github-user-1", "email": "github@example.com"}
     
+    # Ensure User DBs exist
+    ensure_user_databases(user_data["sub"])
+
     access_token = create_access_token(
         data=user_data, 
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

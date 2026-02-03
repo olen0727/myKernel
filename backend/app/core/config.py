@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     # Frontend URL for redirect
     FRONTEND_URL: str = "http://localhost:5173"
 
+    # CouchDB
+    COUCHDB_URL: str = "http://localhost:5984"
+    COUCHDB_USER: str
+    COUCHDB_PASSWORD: str
+
     model_config = {
         "env_file": ".env",
         "case_sensitive": True

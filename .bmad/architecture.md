@@ -489,7 +489,7 @@ VITE_COUCHDB_URL=http://localhost:5984
 # Backend (.env)
 COUCHDB_URL=http://localhost:5984
 COUCHDB_USER=admin
-COUCHDB_PASSWORD=password
+COUCHDB_PASSWORD=<your_secure_password>
 GOOGLE_CLIENT_ID=xxx
 GOOGLE_CLIENT_SECRET=xxx
 GITHUB_CLIENT_ID=xxx
