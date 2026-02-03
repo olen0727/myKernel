@@ -42,7 +42,7 @@ const DashboardPage: React.FC = () => {
 
     // Brain-Sync Days: Habits where name includes '日記' or completed dates of all?
     // Using the 'Journal' habit's completed streak or count.
-    const journalHabit = habits.find(h => h.name.includes('日記') || h.name.includes('Journal'));
+    const journalHabit = habits.find(h => h.name?.includes('日記') || h.name?.includes('Journal'));
     const brainSyncDays = journalHabit ? (journalHabit.completedDates?.length || 0) : 0;
 
     const stats = [

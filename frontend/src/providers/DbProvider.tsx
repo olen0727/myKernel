@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { KernelDatabase, getDatabase } from '../db/database';
+import { KernelDatabase, getDatabase, syncDatabase, stopReplication } from '../db/database';
 import { Loader2 } from 'lucide-react';
 import { DataSeeder } from '../db/data-seeder';
+import { useAuth } from './AuthProvider';
 
 const DbContext = createContext<KernelDatabase | null>(null);
 
@@ -12,6 +13,7 @@ interface DbProviderProps {
 export const DbProvider = ({ children }: DbProviderProps) => {
     const [db, setDb] = useState<KernelDatabase | null>(null);
     const [error, setError] = useState<Error | null>(null);
+    const { user } = useAuth(); // Hook into Auth Context
 
     useEffect(() => {
         const init = async () => {
@@ -26,6 +28,15 @@ export const DbProvider = ({ children }: DbProviderProps) => {
         };
         init();
     }, []);
+
+    // Handle Sync Lifecycle based on User Auth
+    useEffect(() => {
+        if (db && user) {
+            syncDatabase(db, user);
+        } else if (db && !user) {
+            stopReplication();
+        }
+    }, [db, user]);
 
     if (error) {
         return (
@@ -59,3 +70,4 @@ export const useDb = () => {
     }
     return context;
 };
+

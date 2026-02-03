@@ -8,9 +8,9 @@ export const syncCollection = (
     basicAuth?: { username?: string, password?: string }
 ): RxReplicationState<any, any> => {
 
-    // Ensure remoteUrl ends with slash if not provided
-    let baseUrl = remoteUrl.endsWith('/') ? remoteUrl : remoteUrl + '/';
-    const dbUrl = `${baseUrl}${collection.name}`;
+    // Use the provided remoteUrl as the exact DB URL
+    const dbUrl = remoteUrl;
+
 
     const useBasicAuth = basicAuth?.username && basicAuth?.password;
 
@@ -73,9 +73,60 @@ export const syncCollection = (
         },
         push: {
             batchSize: 60,
-            async handler(docs) {
+            async handler(rows) {
                 const url = `${dbUrl}/_bulk_docs`;
-                const body = { docs };
+                const primaryPath = collection.schema.primaryPath;
+
+                // 1. Prepare docs: extract from rows and map primary key to _id
+                const preparedDocs = rows.map((row: any) => {
+                    const d: any = { ...row.newDocumentState };
+                    // Ensure _id exists for CouchDB
+                    if (!d._id && d[primaryPath]) {
+                        d._id = d[primaryPath];
+                    }
+                    // Fallback if primaryPath lookup failed but id exists
+                    if (!d._id && d.id) {
+                        d._id = d.id;
+                    }
+                    return d;
+                });
+
+                // 2. Fetch latest revisions for these docs to enable update/delete (Last Write Wins)
+                const ids = preparedDocs.map((d: any) => d._id).filter((id: any) => !!id);
+                if (ids.length > 0) {
+                    const revsUrl = `${dbUrl}/_all_docs`;
+                    try {
+                        const revsResponse = await fetch(revsUrl, {
+                            method: 'POST',
+                            headers: getHeaders(),
+                            body: JSON.stringify({ keys: ids })
+                        });
+
+                        if (revsResponse.ok) {
+                            const revsData = await revsResponse.json();
+                            const revMap = new Map();
+                            if (revsData.rows) {
+                                revsData.rows.forEach((row: any) => {
+                                    if (row.value && row.value.rev) {
+                                        revMap.set(row.id, row.value.rev);
+                                    }
+                                });
+                            }
+
+                            // Attach _rev
+                            preparedDocs.forEach((d: any) => {
+                                const currentRev = revMap.get(d._id);
+                                if (currentRev) {
+                                    d._rev = currentRev;
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.warn("Failed to fetch revisions, attempting blind push...", e);
+                    }
+                }
+
+                const body = { docs: preparedDocs };
 
                 try {
                     const response = await fetch(url, {
@@ -83,11 +134,20 @@ export const syncCollection = (
                         headers: getHeaders(),
                         body: JSON.stringify(body)
                     });
+
                     if (!response.ok) throw new Error('Push failed: ' + response.statusText);
 
-                    // CouchDB returns array of statuses, we need to parse them if needed
-                    // For now, assume success if 200/201
-                    return []; // Empty array means success for all docs
+                    // Check for partial failures
+                    const responseList = await response.json();
+
+                    const errors = Array.isArray(responseList) ? responseList.filter((res: any) => res.error) : [];
+
+                    if (errors.length > 0) {
+                        const errorMsg = errors.map((e: any) => `${e.id}: ${e.error} (${e.reason})`).join('; ');
+                        throw new Error(`Push partial failure: ${errorMsg}`);
+                    }
+
+                    return [];
                 } catch (err) {
                     console.error(`Push Error [${collection.name}]:`, err);
                     throw err;

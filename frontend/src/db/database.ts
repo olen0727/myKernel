@@ -43,6 +43,8 @@ export type KernelDatabase = RxDatabase<KernelCollections>;
 let dbPromise: Promise<KernelDatabase> | null = null;
 const _global = typeof window === 'object' ? window : global;
 const DB_GLOBAL_KEY = 'kernel_db_instance';
+const replicationStates: any[] = [];
+
 
 const closeExistingDatabase = async () => {
     // @ts-ignore
@@ -107,29 +109,10 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
         });
         console.log('RxDB collections initialized');
 
-        // Start replication if configured
-        // @ts-ignore
-        const COUCHDB_URL = import.meta.env.VITE_COUCHDB_URL;
-        if (COUCHDB_URL) {
-            console.log('✅ Detected VITE_COUCHDB_URL:', COUCHDB_URL);
-            console.log('🔄 Starting replication for all collections...');
-            // @ts-ignore
-            const COUCHDB_USER = import.meta.env.VITE_COUCHDB_USER;
-            // @ts-ignore
-            const COUCHDB_PASSWORD = import.meta.env.VITE_COUCHDB_PASSWORD;
+        // Replication is now handled manually via syncDatabase()
+        // to allow for user-specific DB URLs
+        console.log('✅ RxDB initialized (Local Mode). Waiting for Auth to sync...');
 
-            console.log(`🔐 Using Basic Auth for sync. User: ${COUCHDB_USER || 'undefined'}`);
-
-            Object.values(db.collections).forEach(collection => {
-                syncCollection(collection, COUCHDB_URL, AuthService.getToken, {
-                    username: COUCHDB_USER,
-                    password: COUCHDB_PASSWORD
-                });
-            });
-            console.log('✅ Replication initialized.');
-        } else {
-            console.warn('⚠️ VITE_COUCHDB_URL is not set. Replication skipped.');
-        }
 
         return db;
     };
@@ -216,4 +199,50 @@ export const getDatabase = (password?: string) => {
         dbPromise = createDatabase(finalPassword);
     }
     return dbPromise;
+};
+
+export const syncDatabase = async (db: KernelDatabase, user: { id: string, email: string }) => {
+    console.log('🔄 Starting sync for user:', user.email);
+
+    // Stop existing replications if any
+    await stopReplication();
+
+    // @ts-ignore
+    const COUCHDB_URL = import.meta.env.VITE_COUCHDB_URL;
+    if (!COUCHDB_URL) {
+        console.warn('⚠️ VITE_COUCHDB_URL is not set. Replication skipped.');
+        return;
+    }
+
+    // @ts-ignore
+    const COUCHDB_USER = import.meta.env.VITE_COUCHDB_USER;
+    // @ts-ignore
+    const COUCHDB_PASSWORD = import.meta.env.VITE_COUCHDB_PASSWORD;
+
+    // Use a user-specific prefix for isolation
+    // Assuming backend provisions: userdb-{userId}-{collectionName}
+    const userDbPrefix = `userdb-${user.id}-`;
+
+    Object.entries(db.collections).forEach(([name, collection]) => {
+        // Construct user-specific remote URL
+        // e.g. http://localhost:5984/userdb-123-projects
+        const remoteUrl = `${COUCHDB_URL}/${userDbPrefix}${name}`;
+
+        console.log(`🔌 Syncing ${name} to ${remoteUrl}`);
+
+        const replicationState = syncCollection(collection, remoteUrl, AuthService.getToken, {
+            username: COUCHDB_USER,
+            password: COUCHDB_PASSWORD
+        });
+
+        replicationStates.push(replicationState);
+    });
+};
+
+export const stopReplication = async () => {
+    if (replicationStates.length > 0) {
+        console.log('🛑 Stopping active replications...');
+        await Promise.all(replicationStates.map(state => state.cancel()));
+        replicationStates.length = 0;
+    }
 };

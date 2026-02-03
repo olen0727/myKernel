@@ -1,5 +1,7 @@
 import { useSidebarStore } from "@/stores/sidebar-store"
 import { useQuickCapture } from "@/stores/quick-capture-store"
+import { useAuth } from "@/providers/AuthProvider"
+
 import { cn } from "@/lib/utils"
 import { NavLink } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -24,8 +26,10 @@ import {
     Activity,
     FileText,
     Folder,
-    ChevronDown
+    ChevronDown,
+    LogOut
 } from "lucide-react"
+
 
 export function Sidebar() {
     const { isCollapsed } = useSidebarStore()
@@ -47,9 +51,26 @@ interface SidebarContentProps {
     onToggle?: () => void
 }
 
+const navItems = [
+    { icon: Layout, label: "Dashboard", href: "/dashboard" },
+    { icon: Inbox, label: "Inbox", href: "/inbox", count: 3 },
+    { icon: Layout, label: "Projects", href: "/projects" },
+    { icon: Layers, label: "Areas", href: "/areas" },
+    { icon: BookOpen, label: "Resources", href: "/resources" },
+    { icon: Activity, label: "Metrics", href: "/metrics" },
+    { icon: PenTool, label: "Journal", href: "/journal" },
+]
+
+const recentItems = [
+    { icon: Folder, label: "Kernel Development", type: "Project" },
+    { icon: FileText, label: "UX Research Note", type: "Resource" },
+    { icon: Layers, label: "Personal Growth", type: "Area" },
+]
+
 export function SidebarContent({ forceExpanded = false, onToggle }: SidebarContentProps) {
     const { isCollapsed: storeCollapsed, toggleSidebar } = useSidebarStore()
     const { onOpen } = useQuickCapture()
+    const { user, logout } = useAuth()
     const isCollapsed = forceExpanded ? false : storeCollapsed
 
     const handleToggle = () => {
@@ -59,22 +80,6 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
             toggleSidebar()
         }
     }
-
-    const navItems = [
-        { icon: Layout, label: "Dashboard", href: "/dashboard" },
-        { icon: Inbox, label: "Inbox", href: "/inbox", count: 3 },
-        { icon: Layout, label: "Projects", href: "/projects" },
-        { icon: Layers, label: "Areas", href: "/areas" },
-        { icon: BookOpen, label: "Resources", href: "/resources" },
-        { icon: Activity, label: "Metrics", href: "/metrics" },
-        { icon: PenTool, label: "Journal", href: "/journal" },
-    ]
-
-    const recentItems = [
-        { icon: Folder, label: "Kernel Development", type: "Project" },
-        { icon: FileText, label: "UX Research Note", type: "Resource" },
-        { icon: Layers, label: "Personal Growth", type: "Area" },
-    ]
 
     return (
         <TooltipProvider delayDuration={0}>
@@ -214,13 +219,13 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
                             <TooltipTrigger asChild>
                                 <Button variant="ghost" className={cn("h-12", isCollapsed ? "w-10 px-0" : "w-full justify-start gap-3 px-2")}>
                                     <Avatar className="h-8 w-8">
-                                        <AvatarImage src="https://github.com/shadcn.png" />
-                                        <AvatarFallback>OL</AvatarFallback>
+                                        <AvatarImage src={user?.avatarUrl || "https://github.com/shadcn.png"} />
+                                        <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
                                     </Avatar>
                                     {!isCollapsed && (
-                                        <div className="flex flex-col items-start text-left">
-                                            <span className="text-sm font-medium">Olen</span>
-                                            <span className="text-xs text-muted-foreground">Pro Plan</span>
+                                        <div className="flex flex-col items-start text-left shrink-0">
+                                            <span className="text-sm font-medium truncate max-w-[80px]">{user?.name || "User"}</span>
+                                            <span className="text-xs text-muted-foreground">{user?.plan || "Free"}</span>
                                         </div>
                                     )}
                                 </Button>
@@ -244,6 +249,21 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
                                 </NavLink>
                             </TooltipTrigger>
                             {isCollapsed && <TooltipContent side="right">Settings</TooltipContent>}
+                        </Tooltip>
+
+                        {/* Logout Trigger */}
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={logout}
+                                    className={cn("text-muted-foreground hover:text-destructive", isCollapsed ? "h-10 w-10" : "h-8 w-8")}
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            {isCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
                         </Tooltip>
                     </div>
                 </div>

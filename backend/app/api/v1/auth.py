@@ -4,12 +4,18 @@ from fastapi.security import OAuth2PasswordBearer
 from app.core.config import get_settings
 from starlette.config import Config
 from authlib.integrations.starlette_client import OAuth
-import json
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
+from typing import Optional
 
 router = APIRouter()
 settings = get_settings()
 
-# Initialize OAuth (only if credentials exist, otherwise Mock)
+# JWT Config
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+
+# Initialize OAuth
 oauth = OAuth()
 
 if settings.GOOGLE_CLIENT_ID:
@@ -21,77 +27,99 @@ if settings.GOOGLE_CLIENT_ID:
         client_kwargs={'scope': 'openid email profile'}
     )
 
-# Mock DB for users
-MOCK_USERS = {
-    "mock_token": {
-        "id": "mock-user-1",
-        "email": "user@example.com",
-        "name": "Mock User",
-        "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=mock"
-    }
-}
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 @router.get("/auth/google")
 async def login_google(request: Request):
-    if not settings.GOOGLE_CLIENT_ID:
-        # Mock Mode
-        redirect_uri = request.url_for('auth_google_callback')
-        # Simulate Google redirecting back immediately
-        return RedirectResponse(f"{redirect_uri}?code=mock_code")
-    
+    print("DEBUG: login_google endpoint hit!")
     redirect_uri = request.url_for('auth_google_callback')
+    if not settings.GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="Google Client ID not configured")
+    
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @router.get("/auth/google/callback")
 async def auth_google_callback(request: Request):
     if not settings.GOOGLE_CLIENT_ID:
-        # Mock Mode
-        token = "mock_token"
-    else:
-        # Real Mode
-        try:
-            token_data = await oauth.google.authorize_access_token(request)
-            user_info = token_data.get('userinfo')
-            # In a real app, you would create a JWT here based on user_info
-            # For now, we just pass a dummy token or the access token
-            token = "real_oauth_token_not_implemented_jwt" 
-            # In real impl, we should store user in DB and issue our own JWT
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"OAuth failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Google Client ID not configured")
 
-    # Redirect to frontend with token
-    frontend_url = f"{settings.FRONTEND_URL}?token={token}"
+    try:
+        token_data = await oauth.google.authorize_access_token(request)
+        user_info = token_data.get('userinfo')
+        if not user_info:
+            raise ValueError("No user info returned")
+        # Ensure we capture name and picture
+        user_data = {
+            "sub": user_info['sub'], 
+            "email": user_info['email'], 
+            "name": user_info.get('name'), 
+            "picture": user_info.get('picture')
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"OAuth failed: {str(e)}")
+
+    # Generate JWT
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data=user_data, expires_delta=access_token_expires
+    )
+
+    # Redirect to frontend with REAL JWT
+    frontend_url = f"{settings.FRONTEND_URL}?token={access_token}"
     return RedirectResponse(url=frontend_url)
 
 @router.get("/auth/github")
 async def login_github(request: Request):
-    # Mock for now regardless
+    # Github flow similar structure (Mock for now)
     redirect_uri = request.url_for('auth_github_callback')
     return RedirectResponse(f"{redirect_uri}?code=mock_github_code")
 
 @router.get("/auth/github/callback")
 async def auth_github_callback(request: Request):
-    token = "mock_token"
-    frontend_url = f"{settings.FRONTEND_URL}?token={token}"
+    # Mock user for GitHub
+    user_data = {"sub": "github-user-1", "email": "github@example.com"}
+    
+    access_token = create_access_token(
+        data=user_data, 
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    
+    frontend_url = f"{settings.FRONTEND_URL}?token={access_token}"
     return RedirectResponse(url=frontend_url)
 
-
-# User Endpoints
 @router.get("/api/v1/users/me")
 async def read_users_me(token: str = Depends(oauth2_scheme)):
-    if token == "mock_token":
-        return MOCK_USERS["mock_token"]
-    
-    # Simple validation for testing
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+             raise HTTPException(status_code=401, detail="Invalid token payload")
         
-    # If real token logic was here, we'd decode it.
-    # Return mock for fallback
-    return MOCK_USERS["mock_token"]
+        # Return data from JWT stamps (Real User Info)
+        return {
+            "id": user_id,
+            "email": payload.get("email"),
+            "name": payload.get("name") or "User",
+            "avatarUrl": payload.get("picture"),
+            "plan": "founder" # Default 
+        }
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
+

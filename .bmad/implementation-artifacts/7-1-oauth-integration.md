@@ -34,6 +34,11 @@ So that **我不需要記憶新的帳號密碼，並能確保身分安全**.
 - [x] 實作 LoginPage
     - [x] 建立 `src/pages/LoginPage.tsx`。
 
+### Review Follow-ups (AI)
+- [x] [AI-Review][CRITICAL] **Data Isolation**: Frontend DB sync currently points to global collections instead of per-user databases (`userdb-{uuid}`) defined in Architecture. Must refactor `database.ts` to perform sync *after* login with dynamic URLs.
+- [x] [AI-Review][CRITICAL] **Backend Security**: `auth.py` implementation is purely mock and allows arbitrary login bypass. Must implement proper structure for JWT provision and user DB creation (even if mocked for dev).
+- [x] [AI-Review][MEDIUM] **Sync Coordination**: DB initialization happens before Auth. startup. Should coordinate to avoid 401 errors and ensure correct DB target.
+
 ## Dev Notes
 
 ### Architecture & Tech Stack
