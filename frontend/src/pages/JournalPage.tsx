@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { format, parse, isValid, startOfDay, isAfter } from "date-fns"
 import { DateNavigator } from "@/components/journal/DateNavigator"
@@ -66,27 +66,41 @@ export default function JournalPage() {
         }
     }, [dailyNoteLog, noteId]);
 
-    // Save content on debounce
+    // Refs to hold current values for the save effect,
+    // so save only triggers on actual debouncedContent changes
+    const dateStrRef = useRef(dateStr);
+    const dailyNoteLogRef = useRef(dailyNoteLog);
+    const currentDateRef = useRef(currentDate);
+    dateStrRef.current = dateStr;
+    dailyNoteLogRef.current = dailyNoteLog;
+    currentDateRef.current = currentDate;
+
+    // Save content on debounce — only depends on debouncedContent + logService
+    // to prevent stale debounced value from saving to a newly switched date
     useEffect(() => {
-        if (!dateStr || !logService) return
-        if (debouncedContent === (dailyNoteLog?.details || "")) return; // No change
+        const ds = dateStrRef.current;
+        const noteLog = dailyNoteLogRef.current;
+        const curDate = currentDateRef.current;
+
+        if (!ds || !logService) return;
+        if (debouncedContent === (noteLog?.details || "")) return; // No change
 
         const save = async () => {
-            if (dailyNoteLog) {
-                await logService.update(dailyNoteLog.id, { details: debouncedContent });
+            if (noteLog) {
+                await logService.update(noteLog.id, { details: debouncedContent });
             } else {
                 if (debouncedContent) { // Only create if content exists
                     await logService.create({
-                        date: dateStr,
+                        date: ds,
                         action: 'daily_note',
                         details: debouncedContent,
-                        timestamp: currentDate.getTime() // ensure timestamp is set if model requires it
+                        timestamp: curDate.getTime()
                     });
                 }
             }
         };
         save();
-    }, [debouncedContent, dateStr, logService, dailyNoteLog, currentDate])
+    }, [debouncedContent, logService])
 
 
     useEffect(() => {
