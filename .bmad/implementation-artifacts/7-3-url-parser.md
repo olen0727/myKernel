@@ -36,6 +36,7 @@ So that **我可以省去手動複製貼上的時間**.
 
 ### Implementation Notes
 - Implemented Backend Parse API using FastAPI + Trafilatura (Architecture compliant).
+- **Refinement (2026-02-04)**: Switched to `readability-lxml` + `markdownify` for main content extraction to support high-fidelity Markdown (H1-H3, Images) as Trafilatura was stripping too much structure.
 - Note: Used `trafilatura` (Python) instead of `cheerio`/`readability` (Node.js) as per project's Backend Architecture choice.
 - Created `frontend/src/lib/parser-client.ts` to consume the API.
 - Integrated `parserClient` into `frontend/src/lib/content-parser.ts` replacing mock logic.
@@ -44,10 +45,10 @@ So that **我可以省去手動複製貼上的時間**.
 
 ### File List
 - backend/app/models/parser.py
-- backend/app/services/parser.py
+- backend/app/services/parser.py (updated with readability+markdownify)
 - backend/app/api/v1/parser.py
 - backend/main.py (updated)
-- backend/requirements.txt (updated)
+- backend/requirements.txt (updated with readability-lxml, markdownify)
 - backend/tests/test_parser.py
 - frontend/src/lib/parser-client.ts
 - frontend/src/lib/content-parser.ts (updated)
@@ -55,6 +56,7 @@ So that **我可以省去手動複製貼上的時間**.
 
 ### Change Log
 - 2026-02-04: Implemented URL Parser using FastAPI and Trafilatura. Integrated with Frontend Quick Capture.
+- 2026-02-04: Improved markdown fidelity using `readability-lxml` + `markdownify`.
 
 
 
