@@ -80,18 +80,16 @@ export const syncCollection = (
                 // 1. Prepare docs: extract from rows and map primary key to _id
                 const preparedDocs = rows.map((row: any) => {
                     const d: any = { ...row.newDocumentState };
-                    // Ensure _id exists for CouchDB
                     if (!d._id && d[primaryPath]) {
                         d._id = d[primaryPath];
                     }
-                    // Fallback if primaryPath lookup failed but id exists
                     if (!d._id && d.id) {
                         d._id = d.id;
                     }
                     return d;
                 });
 
-                // 2. Fetch latest revisions for these docs to enable update/delete (Last Write Wins)
+                // 2. Fetch latest revisions from CouchDB (Last Write Wins)
                 const ids = preparedDocs.map((d: any) => d._id).filter((id: any) => !!id);
                 if (ids.length > 0) {
                     const revsUrl = `${dbUrl}/_all_docs`;
@@ -113,11 +111,15 @@ export const syncCollection = (
                                 });
                             }
 
-                            // Attach _rev
+                            // Attach latest _rev from CouchDB;
+                            // For docs not found (e.g. already deleted in CouchDB),
+                            // remove _rev so CouchDB treats them as new inserts
                             preparedDocs.forEach((d: any) => {
                                 const currentRev = revMap.get(d._id);
                                 if (currentRev) {
                                     d._rev = currentRev;
+                                } else {
+                                    delete d._rev;
                                 }
                             });
                         }
@@ -137,14 +139,78 @@ export const syncCollection = (
 
                     if (!response.ok) throw new Error('Push failed: ' + response.statusText);
 
-                    // Check for partial failures
                     const responseList = await response.json();
+                    if (!Array.isArray(responseList)) return [];
 
-                    const errors = Array.isArray(responseList) ? responseList.filter((res: any) => res.error) : [];
+                    // Separate conflict errors from other errors
+                    const conflictIds: string[] = [];
+                    const otherErrors: any[] = [];
 
-                    if (errors.length > 0) {
-                        const errorMsg = errors.map((e: any) => `${e.id}: ${e.error} (${e.reason})`).join('; ');
+                    responseList.forEach((res: any) => {
+                        if (res.error === 'conflict') {
+                            conflictIds.push(res.id);
+                        } else if (res.error) {
+                            otherErrors.push(res);
+                        }
+                    });
+
+                    // For non-conflict errors, throw
+                    if (otherErrors.length > 0) {
+                        const errorMsg = otherErrors.map((e: any) => `${e.id}: ${e.error} (${e.reason})`).join('; ');
                         throw new Error(`Push partial failure: ${errorMsg}`);
+                    }
+
+                    // For conflicts: fetch current master state from CouchDB
+                    // and return them so RxDB can resolve via its conflict handler
+                    if (conflictIds.length > 0) {
+                        console.warn(`Push conflicts [${collection.name}], resolving:`, conflictIds);
+                        const masterDocs: any[] = [];
+
+                        const allDocsResp = await fetch(`${dbUrl}/_all_docs?include_docs=true`, {
+                            method: 'POST',
+                            headers: getHeaders(),
+                            body: JSON.stringify({ keys: conflictIds })
+                        });
+
+                        if (allDocsResp.ok) {
+                            const allDocsData = await allDocsResp.json();
+                            const foundIds = new Set<string>();
+                            if (allDocsData.rows) {
+                                allDocsData.rows.forEach((row: any) => {
+                                    if (row.doc) {
+                                        const doc = row.doc;
+                                        if (!doc[primaryPath] && doc._id) {
+                                            doc[primaryPath] = doc._id;
+                                        }
+                                        masterDocs.push(doc);
+                                        foundIds.add(row.id);
+                                    }
+                                });
+                            }
+
+                            // For docs not found in _all_docs (deleted in CouchDB),
+                            // fetch individually to get the tombstone
+                            const missingIds = conflictIds.filter(id => !foundIds.has(id));
+                            for (const docId of missingIds) {
+                                try {
+                                    const docResp = await fetch(
+                                        `${dbUrl}/${encodeURIComponent(docId)}?revs=true&latest=true`,
+                                        { headers: getHeaders() }
+                                    );
+                                    if (docResp.ok) {
+                                        const doc = await docResp.json();
+                                        if (!doc[primaryPath] && doc._id) {
+                                            doc[primaryPath] = doc._id;
+                                        }
+                                        masterDocs.push(doc);
+                                    }
+                                } catch (e) {
+                                    console.warn(`Could not fetch master state for ${docId}:`, e);
+                                }
+                            }
+                        }
+
+                        return masterDocs;
                     }
 
                     return [];
