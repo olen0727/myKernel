@@ -1,6 +1,7 @@
 import { useSidebarStore } from "@/stores/sidebar-store"
 import { useQuickCapture } from "@/stores/quick-capture-store"
 import { useAuth } from "@/providers/AuthProvider"
+import { useInbox } from "@/hooks/use-inbox"
 
 import { cn } from "@/lib/utils"
 import { NavLink } from "react-router-dom"
@@ -51,15 +52,7 @@ interface SidebarContentProps {
     onToggle?: () => void
 }
 
-const navItems = [
-    { icon: Layout, label: "Dashboard", href: "/dashboard" },
-    { icon: Inbox, label: "Inbox", href: "/inbox", count: 3 },
-    { icon: Layout, label: "Projects", href: "/projects" },
-    { icon: Layers, label: "Areas", href: "/areas" },
-    { icon: BookOpen, label: "Resources", href: "/resources" },
-    { icon: Activity, label: "Metrics", href: "/metrics" },
-    { icon: PenTool, label: "Journal", href: "/journal" },
-]
+
 
 const recentItems = [
     { icon: Folder, label: "Kernel Development", type: "Project" },
@@ -72,6 +65,19 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
     const { onOpen } = useQuickCapture()
     const { user, logout } = useAuth()
     const isCollapsed = forceExpanded ? false : storeCollapsed
+
+    // Fetch Inbox Data
+    const { count: inboxCount } = useInbox();
+
+    const navItems = [
+        { icon: Layout, label: "Dashboard", href: "/dashboard" },
+        { icon: Inbox, label: "Inbox", href: "/inbox", count: inboxCount > 0 ? inboxCount : undefined },
+        { icon: Layout, label: "Projects", href: "/projects" },
+        { icon: Layers, label: "Areas", href: "/areas" },
+        { icon: BookOpen, label: "Resources", href: "/resources" },
+        { icon: Activity, label: "Metrics", href: "/metrics" },
+        { icon: PenTool, label: "Journal", href: "/journal" },
+    ]
 
     const handleToggle = () => {
         if (onToggle) {

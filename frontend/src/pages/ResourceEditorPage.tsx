@@ -4,9 +4,12 @@ import { ResourceSidebar, ResourceSidebarStatus } from "@/components/resources/R
 import { DispatchItem } from "@/components/resources/DispatchModal"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Cloud, CheckCircle2 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
+import { services, ResourceService } from "@/services"
+import { Resource } from "@/types/models"
 
+// Helper to adapt DB Resource to UI format
 interface ResourceData {
     id: string
     title: string
@@ -17,84 +20,189 @@ interface ResourceData {
     linkedItems: DispatchItem[]
 }
 
-// Mock Data Source
-const MOCK_DATA: Record<string, ResourceData> = {
-    "1": {
-        id: "1",
-        title: "Kernel Architecture Design",
-        content: "## Overview\n\nThe system is divided into frontend and backend...\n\n### Notes\n- Uses **React** for UI\n- Uses _Node_ for services\n\n> This is a sample blockquote\n\n```ts\nconst hello = 'world'\n```",
-
-        status: "processed",
-        tags: ["architecture", "design"],
-        linkedItems: [
-            { id: "p1", name: "Kernel Development", type: "project" }
-        ]
-    },
-    "2": {
-        id: "2",
-        title: "React Documentation",
-        content: "<p>Link: https://react.dev</p>",
-        status: "processed",
-        tags: ["react", "frontend"],
-        sourceUrl: "https://react.dev",
-        linkedItems: []
-    },
-    "3": {
-        id: "3",
-        title: "Meeting Notes - Sprint Planning",
-        content: "## Sprint Planning\n\n- Review backlog\n- Assign tasks",
-        status: "inbox",
-        tags: [],
-        linkedItems: []
-    }
-}
-
 export default function ResourceEditorPage() {
     const { id } = useParams()
     const navigate = useNavigate()
     const [data, setData] = useState<ResourceData | null>(null)
+    const [originalResource, setOriginalResource] = useState<Resource | null>(null)
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState<Date | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
 
+    // Service Instance
+    const [resourceService, setResourceService] = useState<ResourceService | null>(null)
+
+    // Initialize Service
     useEffect(() => {
-        // Simulate fetch
-        if (id && MOCK_DATA[id]) {
-            setData(MOCK_DATA[id])
+        const init = async () => {
+            const svc = await services.resource
+            setResourceService(svc)
         }
-    }, [id])
+        init()
+    }, [])
 
-    const handleContentChange = (_content: string) => {
+    // Load Data
+    useEffect(() => {
+        const loadResource = async () => {
+            if (!id || !resourceService) return
+
+            try {
+                setIsLoading(true)
+                const resource = await resourceService.getById(id)
+
+                if (!resource) {
+                    toast.error("Resource not found")
+                    navigate("/inbox")
+                    return
+                }
+
+                setOriginalResource(resource)
+
+                // Fetch linked project/area names if needed (Skipping for MVP speed, using IDs as names temporarily or empty)
+                // In a real app we would join efficiently. Here we construct LinkedItems from projectId/areaId.
+                const linkedItems: DispatchItem[] = []
+                if (resource.projectId) {
+                    // Ideally fetch project name. For now let's hope we can optimize later.
+                    // We'll leave the name generic or empty if we don't fetch it, 
+                    // but to show it in UI we might need a separate fetch.
+                    // Let's do a quick hack: if connected, show generic badge until we load names.
+                    linkedItems.push({ id: resource.projectId, name: "Project", type: "project" })
+                }
+                if (resource.areaId) {
+                    linkedItems.push({ id: resource.areaId, name: "Area", type: "area" })
+                }
+
+                // If we really want names, we can fetch them here. 
+                // Let's keep it simple: Render now.
+
+                setData({
+                    id: resource.id,
+                    title: resource.title,
+                    content: resource.content || "",
+                    status: (resource.status as ResourceSidebarStatus) || "inbox",
+                    tags: resource.tags || [],
+                    sourceUrl: resource.url,
+                    linkedItems
+                })
+            } catch (err) {
+                console.error(err)
+                toast.error("Failed to load resource")
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        loadResource()
+    }, [id, resourceService, navigate])
+
+
+    // Generic Update Handler
+    const updateResource = useCallback(async (updates: Partial<Resource>) => {
+        if (!id || !resourceService) return
+
         setIsSaving(true)
-        // Debounce save logic
-        setTimeout(() => {
-            setIsSaving(false)
+        try {
+            await resourceService.update(id, updates)
             setLastSaved(new Date())
+
+            // Update local state to match
+            setOriginalResource(prev => prev ? { ...prev, ...updates } : null)
+        } catch (err) {
+            console.error(err)
+            toast.error("Failed to save changes")
+        } finally {
+            setIsSaving(false)
+        }
+    }, [id, resourceService])
+
+
+    const handleContentChange = (newContent: string) => {
+        // Optimistic UI update for editor is handled by TipTap, 
+        // we just sync to DB state on debounce or blur.
+        // For simplicity here we assume 'onChange' is debounced or we accept frequent writes (RxDB handles it well)
+        // But better to debounce at component level if TipTap triggers on every keystroke.
+        // TipTapEditor usually triggers onChange.
+
+        setData(prev => prev ? { ...prev, content: newContent } : null)
+
+        // Debounced Save (simplistic)
+        const timer = setTimeout(() => {
+            updateResource({ content: newContent })
         }, 1000)
+        return () => clearTimeout(timer)
     }
 
-
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setData((prev) => prev ? { ...prev, title: e.target.value } : null)
-        handleContentChange("")
+        const val = e.target.value
+        setData(prev => prev ? { ...prev, title: val } : null)
+
+        // Debounced Save
+        const timer = setTimeout(() => {
+            updateResource({ title: val })
+        }, 1000)
+        return () => clearTimeout(timer)
     }
 
     // H4: Properly update linkedItems when dispatch
-    const handleDispatch = (selectedItems: DispatchItem[]) => {
-        setData(prev => {
-            if (!prev) return null
-            return { ...prev, linkedItems: selectedItems }
-        })
+    const handleDispatch = async (selectedItems: DispatchItem[]) => {
+        // Map back to schema: User picks Project/Area
+        // Our schema only supports ONE project or ONE area? 
+        // Or both? Schema details: projectId, areaId. 
+        // So we extract the first project and first area found.
+
+        const project = selectedItems.find(i => i.type === 'project')
+        const area = selectedItems.find(i => i.type === 'area')
+
+        const updates: Partial<Resource> = {
+            projectId: project?.id || undefined, // undefined to remove? or null? RxDB might prefer null or empty
+            areaId: area?.id || undefined
+        }
+
+        setData(prev => prev ? { ...prev, linkedItems: selectedItems } : null)
+        await updateResource(updates)
+
         toast.success("Dispatch updated", {
-            description: `Linked to ${selectedItems.length} items`
+            description: `Linked updated`
         })
     }
 
     // Handle status change
-    const handleStatusChange = (status: ResourceSidebarStatus) => {
+    const handleStatusChange = async (status: ResourceSidebarStatus) => {
         setData(prev => prev ? { ...prev, status } : null)
+        await updateResource({ status })
     }
 
-    if (!data) return <div className="p-8">Loading...</div>
+    const handleAddTag = async (tag: string) => {
+        if (!data) return
+        const newTags = [...data.tags, tag]
+        setData(prev => prev ? { ...prev, tags: newTags } : null)
+        await updateResource({ tags: newTags })
+    }
+
+    const handleRemoveTag = async (tag: string) => {
+        if (!data) return
+        const newTags = data.tags.filter(t => t !== tag)
+        setData(prev => prev ? { ...prev, tags: newTags } : null)
+        await updateResource({ tags: newTags })
+    }
+
+    const handleArchive = async () => {
+        await handleStatusChange('archived')
+        toast("Resource archived")
+        navigate('/inbox') // Go back to inbox usually on archive from inbox flow
+    }
+
+    const handleDelete = async () => {
+        if (!id || !resourceService) return
+        if (confirm("Are you sure you want to delete this resource?")) {
+            await resourceService.delete(id)
+            toast.error("Resource deleted")
+            navigate('/inbox')
+        }
+    }
+
+    if (isLoading) return <div className="h-full flex items-center justify-center p-8 text-muted-foreground animate-pulse">Loading Resource...</div>
+    if (!data) return <div className="p-8">Resource not found</div>
 
     return (
         <div className="flex h-full max-h-[calc(100vh-64px)] overflow-hidden">
@@ -141,7 +249,7 @@ export default function ResourceEditorPage() {
                             <div className="w-32 h-24 bg-muted rounded-lg shrink-0 flex items-center justify-center text-muted-foreground text-xs">OG Image</div>
                             <div className="flex-1 py-1">
                                 <h4 className="font-bold text-sm mb-1 line-clamp-1">{data.title}</h4>
-                                <p className="text-xs text-muted-foreground line-clamp-2 mb-2">Detailed description fetched from og tags on the target URL...</p>
+                                <p className="text-xs text-muted-foreground line-clamp-2 mb-2">Source Link</p>
                                 <div className="text-[10px] text-muted-foreground/60">{new URL(data.sourceUrl).hostname}</div>
                             </div>
                         </div>
@@ -157,18 +265,11 @@ export default function ResourceEditorPage() {
                     sourceUrl={data.sourceUrl}
                     linkedItems={data.linkedItems}
                     onStatusChange={handleStatusChange}
-                    onAddTag={(tag) => setData(prev => prev ? { ...prev, tags: [...prev.tags, tag] } : null)}
-                    onRemoveTag={(tag) => setData(prev => prev ? { ...prev, tags: prev.tags.filter((t) => t !== tag) } : null)}
+                    onAddTag={handleAddTag}
+                    onRemoveTag={handleRemoveTag}
                     onDispatch={handleDispatch}
-                    onArchive={() => {
-                        setData(prev => prev ? { ...prev, status: 'archived' } : null)
-                        toast("Resource archived")
-                        navigate('/resources')
-                    }}
-                    onDelete={() => {
-                        toast.error("Resource deleted")
-                        navigate('/resources')
-                    }}
+                    onArchive={handleArchive}
+                    onDelete={handleDelete}
                 />
             </div>
         </div>

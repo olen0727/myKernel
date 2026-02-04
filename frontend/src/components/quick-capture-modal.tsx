@@ -12,6 +12,7 @@ import { useQuickCapture } from "@/stores/quick-capture-store"
 import { toast } from "sonner"
 import { Sparkles, Command, CornerDownLeft, Loader2, Link as LinkIcon, FileText } from "lucide-react"
 import { parseContent, ParsedContent } from "@/lib/content-parser"
+import { services } from "@/services"
 
 export const QuickCaptureModal: React.FC = () => {
     const { isOpen, onClose, content, setContent } = useQuickCapture()
@@ -46,21 +47,36 @@ export const QuickCaptureModal: React.FC = () => {
         if (!content.trim()) return
         setIsSubmitting(true)
 
-        // Mock API call delay
-        await new Promise(resolve => setTimeout(resolve, 800))
+        try {
+            const finalData = parsedPreview || await parseContent(content)
+            const resourceService = await services.resource;
 
-        const finalData = parsedPreview || await parseContent(content)
+            await resourceService.create({
+                title: finalData.title,
+                content: finalData.content || finalData.description || '',
+                url: finalData.url,
+                type: finalData.url ? 'link' : 'note',
+                status: 'inbox',
+                tags: []
+            });
 
-        console.log("Quick captured to Inbox:", finalData)
-        toast.success("已儲存至 Inbox", {
-            description: finalData.url ? `已儲存連結: ${finalData.title}` : "已儲存筆記",
-            icon: <Sparkles className="w-4 h-4 text-primary" />
-        })
+            console.log("Quick captured to Inbox:", finalData)
+            toast.success("已儲存至 Inbox", {
+                description: finalData.url ? `已儲存連結: ${finalData.title}` : "已儲存筆記",
+                icon: <Sparkles className="w-4 h-4 text-primary" />
+            })
 
-        setIsSubmitting(false)
-        setContent("") // Clear after successful save
-        setParsedPreview(null)
-        onClose()
+            setContent("") // Clear after successful save
+            setParsedPreview(null)
+            onClose()
+        } catch (error) {
+            console.error("Failed to save resource:", error);
+            toast.error("儲存失敗", {
+                description: "無法儲存資源，請稍後再試。"
+            });
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
