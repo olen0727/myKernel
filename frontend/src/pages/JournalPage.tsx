@@ -81,7 +81,7 @@ export default function JournalPage() {
                         action: 'daily_note',
                         details: debouncedContent,
                         timestamp: currentDate.getTime() // ensure timestamp is set if model requires it
-                    } as any); // Cast if model strictness mismatch
+                    });
                 }
             }
         };

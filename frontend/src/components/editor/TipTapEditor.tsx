@@ -26,7 +26,7 @@ import './editor.css'
 
 // New Imports
 import { BlockMenu } from './extensions/BlockMenu'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 
 
@@ -336,6 +336,7 @@ interface TipTapEditorProps {
 }
 
 export function TipTapEditor({ content, onChange, editable = true }: TipTapEditorProps) {
+    const lastMarkdownRef = useRef(content)
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -402,7 +403,7 @@ export function TipTapEditor({ content, onChange, editable = true }: TipTapEdito
                     handle.classList.add('tiptap-drag-handle')
                     handle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>'
 
-                    handle.onclick = (e) => {
+                    handle.onclick = () => {
                         const rect = handle.getBoundingClientRect()
                         // Dispatch global event for React to pick up
                         document.dispatchEvent(new CustomEvent('bmad-block-menu', {
@@ -429,6 +430,7 @@ export function TipTapEditor({ content, onChange, editable = true }: TipTapEdito
         editable,
         onUpdate: ({ editor }) => {
             const markdown = serializeMarkdown(editor)
+            lastMarkdownRef.current = markdown
             onChange?.(markdown)
         },
 
@@ -438,6 +440,13 @@ export function TipTapEditor({ content, onChange, editable = true }: TipTapEdito
             },
         },
     })
+
+    useEffect(() => {
+        if (!editor) return
+        if (content === lastMarkdownRef.current) return
+        editor.commands.setContent(parseMarkdown(content), { emitUpdate: false })
+        lastMarkdownRef.current = content
+    }, [content, editor])
 
     if (!editor) {
         return null
@@ -466,7 +475,6 @@ function BlockMenuIntegration({ editor }: { editor: any }) {
             const result = editor.view.posAtCoords({ left: x + 50, top: y - 10 })
             if (result && result.pos !== null) {
                 const resolved = editor.state.doc.resolve(result.pos)
-                let depth = resolved.depth
                 // Normalize to block depth if possible, usually 1 for top level
                 // Or just use the resolved parent
                 // If we are deep inside text, we want the block wrapper.

@@ -2,7 +2,7 @@ import { RxJsonSchema } from 'rxdb';
 
 export const logSchema: RxJsonSchema<any> = {
     title: 'log schema',
-    version: 0,
+    version: 2,
     primaryKey: 'id',
     type: 'object',
     properties: {
@@ -12,7 +12,10 @@ export const logSchema: RxJsonSchema<any> = {
         },
         date: {
             type: 'string',
-            format: 'date-time'
+            pattern: '^\\d{4}-\\d{2}-\\d{2}'
+        },
+        action: {
+            type: 'string'
         },
         value: {
             type: 'string' // Store value as string to be flexible or specific types? Keeping versatile.
@@ -22,6 +25,12 @@ export const logSchema: RxJsonSchema<any> = {
         },
         habitId: {
             type: 'string'
+        },
+        details: {
+            type: 'string'
+        },
+        timestamp: {
+            type: 'number'
         },
         createdAt: {
             type: 'string',

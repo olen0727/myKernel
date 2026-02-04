@@ -3,6 +3,7 @@ import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-crypto-js';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
+import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
 import { syncCollection } from './replication';
 import { AuthService } from '../services/auth-service';
 
@@ -16,6 +17,7 @@ import { logSchema } from './schemas/log.schema';
 
 // Add the update plugin
 addRxPlugin(RxDBUpdatePlugin);
+addRxPlugin(RxDBMigrationSchemaPlugin);
 
 // Enable dev mode plugins
 // @ts-ignore - Vite env types might be missing in current TS config
@@ -67,6 +69,132 @@ const createRecoveryError = (msg: string) => {
     return error;
 };
 
+const parseTimestamp = (value: unknown) => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+    }
+    if (typeof value === 'string' && value) {
+        const parsed = new Date(value);
+        if (!Number.isNaN(parsed.getTime())) {
+            return parsed.getTime();
+        }
+    }
+    return undefined;
+};
+
+const normalizeLogDate = (value: unknown) => {
+    if (typeof value === 'string') {
+        const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (match) {
+            return match[1];
+        }
+    }
+    const timestamp = parseTimestamp(value);
+    if (timestamp !== undefined) {
+        return new Date(timestamp).toISOString().slice(0, 10);
+    }
+    return new Date().toISOString().slice(0, 10);
+};
+
+const toIsoString = (value: unknown) => {
+    const timestamp = parseTimestamp(value);
+    if (timestamp !== undefined) {
+        return new Date(timestamp).toISOString();
+    }
+    return new Date().toISOString();
+};
+
+const getInternalCollectionDocId = (collectionName: string, version: number) =>
+    `collection|${collectionName}-${version}`;
+
+const cleanupDuplicateCollectionMeta = async (
+    db: KernelDatabase,
+    collectionName: string,
+    currentVersion: number
+) => {
+    if (currentVersion <= 0) {
+        return;
+    }
+
+    const ids = Array.from({ length: currentVersion }, (_, index) =>
+        getInternalCollectionDocId(collectionName, index)
+    );
+
+    const found = await db.internalStore.findDocumentsById(ids, false);
+    if (found.length <= 1) {
+        return;
+    }
+
+    const keep = found.reduce((latest, doc) => {
+        const latestVersion = latest.data?.version ?? -1;
+        const docVersion = doc.data?.version ?? -1;
+        return docVersion > latestVersion ? doc : latest;
+    });
+
+    const toDelete = found.filter(doc => doc.id !== keep.id);
+    await db.internalStore.bulkWrite(
+        toDelete.map(doc => ({
+            previous: doc,
+            document: { ...doc, _deleted: true }
+        })),
+        'cleanup-duplicate-collection-meta'
+    );
+};
+
+const migrateLogDoc = (oldDoc: any) => {
+    const nextDoc = { ...oldDoc };
+    const dateSource = oldDoc.date ?? oldDoc.timestamp ?? oldDoc.createdAt ?? oldDoc.updatedAt;
+
+    nextDoc.date = normalizeLogDate(dateSource);
+
+    const inferredTimestamp = typeof oldDoc.timestamp === 'number'
+        ? oldDoc.timestamp
+        : parseTimestamp(dateSource) ?? parseTimestamp(oldDoc.createdAt) ?? parseTimestamp(oldDoc.updatedAt);
+
+    if (inferredTimestamp !== undefined) {
+        nextDoc.timestamp = inferredTimestamp;
+    }
+
+    if (nextDoc.details === null) {
+        delete nextDoc.details;
+    } else if (nextDoc.details !== undefined && typeof nextDoc.details !== 'string') {
+        try {
+            nextDoc.details = JSON.stringify(nextDoc.details);
+        } catch (error) {
+            nextDoc.details = String(nextDoc.details);
+        }
+    }
+
+    if (nextDoc.value !== undefined && typeof nextDoc.value !== 'string') {
+        nextDoc.value = String(nextDoc.value);
+    }
+
+    if (!nextDoc.action || typeof nextDoc.action !== 'string') {
+        if (nextDoc.metricId) {
+            nextDoc.action = 'metric_entry';
+        } else if (nextDoc.habitId) {
+            nextDoc.action = 'habit_check';
+        } else if (nextDoc.details !== undefined) {
+            nextDoc.action = 'daily_note';
+        }
+    }
+
+    if (!nextDoc.createdAt || typeof nextDoc.createdAt !== 'string') {
+        nextDoc.createdAt = toIsoString(nextDoc.timestamp ?? dateSource ?? Date.now());
+    }
+
+    if (!nextDoc.updatedAt || typeof nextDoc.updatedAt !== 'string') {
+        nextDoc.updatedAt = nextDoc.createdAt;
+    }
+
+    return nextDoc;
+};
+
+const logMigrationStrategies = {
+    1: (oldDoc: any) => migrateLogDoc(oldDoc),
+    2: (oldDoc: any) => migrateLogDoc(oldDoc)
+};
+
 // Exporting createDatabase for testing purposes
 export const createDatabase = async (password?: string): Promise<KernelDatabase> => {
     // If we are creating a new database, ensure any old global instance is closed
@@ -98,6 +226,7 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
     const init = async () => {
         const db = await createRxDatabase<KernelCollections>(dbConfig);
         console.log('RxDB created, ensuring collections...');
+        await cleanupDuplicateCollectionMeta(db, 'logs', logSchema.version);
         await db.addCollections({
             projects: { schema: projectSchema },
             areas: { schema: areaSchema },
@@ -105,7 +234,7 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
             resources: { schema: resourceSchema },
             habits: { schema: habitSchema },
             metrics: { schema: metricSchema },
-            logs: { schema: logSchema },
+            logs: { schema: logSchema, migrationStrategies: logMigrationStrategies },
         });
         console.log('RxDB collections initialized');
 
@@ -142,10 +271,10 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
             try {
                 // Must remove using the exact name and storage
                 console.log('🧹 Attempting to clean up old database...');
-                await removeRxDatabase('kernel_db', storage);
+                await removeRxDatabase('kernel_db_v2', storage);
 
                 // ALSO try removing with raw Dexie storage just in case the wrapper didn't clean up the underlying IDB completely
-                await removeRxDatabase('kernel_db', getRxStorageDexie());
+                await removeRxDatabase('kernel_db_v2', getRxStorageDexie());
 
                 console.log('✅ Old database removed. Recreating...');
 
@@ -162,7 +291,7 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
                         const idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
                         if (!idb) throw new Error('IndexedDB not available');
 
-                        const req = idb.deleteDatabase('kernel_db');
+                        const req = idb.deleteDatabase('kernel_db_v2');
                         req.onsuccess = () => resolve();
                         req.onerror = () => reject(req.error);
                         req.onblocked = () => console.warn('⚠️ Native deletion blocked. Close other tabs!');

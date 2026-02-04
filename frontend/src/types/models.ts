@@ -62,6 +62,7 @@ export interface Log extends BaseModel {
     value?: string;
     metricId?: string;
     habitId?: string;
+    timestamp?: number;
     details?: string; // For note content or JSON metadata
 }
 
