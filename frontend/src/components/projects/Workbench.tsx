@@ -25,25 +25,42 @@ import {
 } from "@dnd-kit/sortable"
 import { cn } from "@/lib/utils"
 
-const INITIAL_DOING = [
-    { id: "1", title: "完成專案列表 UI 實作", projectName: "Kernel", completed: false },
-    { id: "2", title: "修復全站搜尋 Bug", projectName: "Kernel", completed: false },
-]
-
-const INITIAL_TODO = [
-    { id: "3", title: "設計資料庫 Schema", projectName: "Backend API", completed: false },
-    { id: "4", title: "撰寫單元測試", projectName: "Kernel", completed: false },
-    { id: "5", title: "與 UI/UX 團隊對接", projectName: "Design System", completed: false },
-    { id: "6", title: "研究 RxDB 分離存儲", projectName: "Kernel", completed: false },
-    { id: "7", title: "更新專案文件", projectName: "Infrastructure", completed: false },
-    { id: "8", title: "優化首頁載入速度", projectName: "Frontend", completed: false },
-    { id: "9", title: "實作使用者權限管理", projectName: "Admin Portal", completed: false },
-    { id: "10", title: "修復行動版佈局問題", projectName: "Kernel", completed: false },
-]
+import { TaskService, ProjectService, services } from "@/services"
+import { useObservable } from "@/hooks/use-observable"
+import { Task, Project } from "@/types/models"
 
 export function Workbench() {
-    const [doingTasks, setDoingTasks] = React.useState(INITIAL_DOING)
-    const [todoTasks, setTodoTasks] = React.useState(INITIAL_TODO)
+    const [taskService, setTaskService] = React.useState<TaskService | undefined>();
+    const [projectService, setProjectService] = React.useState<ProjectService | undefined>();
+
+    React.useEffect(() => {
+        const load = async () => {
+            setTaskService(await services.task);
+            setProjectService(await services.project);
+        };
+        load();
+    }, []);
+
+    const tasks$ = React.useMemo(() => taskService?.getAll$(), [taskService]);
+    const projects$ = React.useMemo(() => projectService?.getAll$(), [projectService]);
+
+    const allTasks = useObservable<Task[]>(tasks$, []) || [];
+    const allProjects = useObservable<Project[]>(projects$, []) || [];
+
+    const doingTasks = React.useMemo(() =>
+        allTasks.filter(t => t.status === 'doing').map(t => ({
+            ...t,
+            projectName: allProjects.find(p => p.id === t.projectId)?.name
+        })),
+        [allTasks, allProjects]);
+
+    const todoTasks = React.useMemo(() =>
+        allTasks.filter(t => t.status === 'todo').map(t => ({
+            ...t,
+            projectName: allProjects.find(p => p.id === t.projectId)?.name
+        })),
+        [allTasks, allProjects]);
+
     const [activeId, setActiveId] = React.useState<string | null>(null)
 
     const sensors = useSensors(
@@ -58,79 +75,45 @@ export function Workbench() {
     const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string)
 
     const handleDragOver = (event: DragOverEvent) => {
+        // Visual feedback only, logic handled in DragEnd for database updates to avoid thrashing
+    }
+
+    const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event
-        if (!over) return
+        if (!over || !taskService) return
 
         const activeId = active.id as string
         const overId = over.id as string
 
-        const activeContainer = findContainer(activeId)
-        const overContainer = findContainer(overId) || overId
+        // Find if dropped over a container directly or an item in a container
+        const overContainer =
+            overId === "doing" || overId === "todo" ? overId :
+                doingTasks.some(t => t.id === overId) ? "doing" :
+                    todoTasks.some(t => t.id === overId) ? "todo" : null;
 
-        if (!activeContainer || !overContainer || activeContainer === overContainer) return
+        if (!overContainer) return;
 
-        setDoingTasks(prev => {
-            if (activeContainer === "doing") return prev.filter(i => i.id !== activeId)
-            if (overContainer === "doing") {
-                const activeItem = todoTasks.find(i => i.id === activeId)!
-                const overItems = prev
-                const overIndex = overItems.findIndex(i => i.id === overId)
-                const newIndex = overIndex >= 0 ? overIndex : overItems.length
-                const newItems = [...prev]
-                newItems.splice(newIndex, 0, activeItem)
-                return newItems
-            }
-            return prev
-        })
+        // Determine new status
+        const newStatus = overContainer === "doing" ? 'doing' : 'todo';
 
-        setTodoTasks(prev => {
-            if (activeContainer === "todo") return prev.filter(i => i.id !== activeId)
-            if (overContainer === "todo") {
-                const activeItem = doingTasks.find(i => i.id === activeId)!
-                const overItems = prev
-                const overIndex = overItems.findIndex(i => i.id === overId)
-                const newIndex = overIndex >= 0 ? overIndex : overItems.length
-                const newItems = [...prev]
-                newItems.splice(newIndex, 0, activeItem)
-                return newItems
-            }
-            return prev
-        })
-    }
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event
-        if (over && active.id !== over.id) {
-            const activeId = active.id as string
-            const overId = over.id as string
-            const activeContainer = findContainer(activeId)
-            const overContainer = findContainer(overId) || overId
-
-            if (activeContainer === overContainer) {
-                if (activeContainer === "doing") {
-                    setDoingTasks(items => arrayMove(items, items.findIndex(i => i.id === activeId), items.findIndex(i => i.id === overId)))
-                } else {
-                    setTodoTasks(items => arrayMove(items, items.findIndex(i => i.id === activeId), items.findIndex(i => i.id === overId)))
-                }
-            }
+        // Only update if status changed
+        const task = allTasks.find(t => t.id === activeId);
+        if (task && task.status !== newStatus) {
+            await taskService.update(activeId, { status: newStatus });
         }
+
         setActiveId(null)
     }
 
-    const handleToggleTask = (id: string) => {
-        setDoingTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
-        setTodoTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
+    const handleToggleTask = async (id: string) => {
+        if (!taskService) return;
+        // If in workbench, toggling means completing it
+        await taskService.update(id, { status: 'done' });
     }
 
-    const handleTitleChange = (id: string, newTitle: string) => {
-        setDoingTasks(prev => prev.map(t => t.id === id ? { ...t, title: newTitle } : t))
-        setTodoTasks(prev => prev.map(t => t.id === id ? { ...t, title: newTitle } : t))
-    }
-
-    const findContainer = (id: string) => {
-        if (id === "doing" || doingTasks.some(t => t.id === id)) return "doing"
-        if (id === "todo" || todoTasks.some(t => t.id === id)) return "todo"
-        return null
+    const handleTitleChange = async (id: string, newTitle: string) => {
+        if (!taskService) return;
+        await taskService.update(id, { title: newTitle });
     }
 
     return (

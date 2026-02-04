@@ -106,7 +106,7 @@ export default function ProjectDetailPage() {
     // --- Stats ---
     const taskStats = React.useMemo(() => {
         const total = tasks.length
-        const done = tasks.filter(t => t.completed).length
+        const done = tasks.filter(t => t.status === 'done').length
         return { done, total }
     }, [tasks])
 
@@ -138,7 +138,8 @@ export default function ProjectDetailPage() {
     const handleTaskToggle = async (_listId: string, taskId: string) => {
         const task = tasks.find(t => t.id === taskId);
         if (task && taskService) {
-            await taskService.update(taskId, { completed: !task.completed });
+            const newStatus = task.status === 'done' ? 'todo' : 'done';
+            await taskService.update(taskId, { status: newStatus });
         }
     }
 
@@ -152,8 +153,9 @@ export default function ProjectDetailPage() {
         await taskService.create({
             title,
             projectId,
-            completed: false
-        });
+            status: 'todo',
+            completed: undefined // Ensure no legacy field is sent if type allows
+        } as any);
         toast.success("任務已建立");
     }
 

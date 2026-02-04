@@ -157,7 +157,7 @@ const AreaDetailPage: React.FC = () => {
                                 {relatedProjects.length > 0 ? (
                                     relatedProjects.map(project => {
                                         const pTasks = allTasks.filter(t => t.projectId === project.id);
-                                        const done = pTasks.filter(t => t.completed).length;
+                                        const done = pTasks.filter(t => t.status === 'done').length;
                                         const total = pTasks.length;
                                         const areaName = areaWithStats.name;
 
@@ -263,7 +263,7 @@ const AreaDetailPage: React.FC = () => {
                 onClose={() => setIsCoverModalOpen(false)}
                 initialData={{
                     name: areaWithStats.name,
-                    coverImage: areaWithStats.coverImage
+                    coverImage: areaWithStats.coverImage || ''
                 }}
                 onSubmit={(name, cover) => handleUpdateArea({ name, coverImage: cover })}
             />

@@ -50,7 +50,7 @@ export default function ProjectListPage() {
     const projectCards: ProjectCardProps[] = useMemo(() => {
         return projects.map(p => {
             const pTasks = allTasks.filter(t => t.projectId === p.id);
-            const done = pTasks.filter(t => t.completed).length;
+            const done = pTasks.filter(t => t.status === 'done').length;
             const total = pTasks.length;
             const areaName = areas.find(a => a.id === p.areaId)?.name || 'General';
 

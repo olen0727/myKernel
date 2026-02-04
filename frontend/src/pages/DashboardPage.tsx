@@ -35,7 +35,7 @@ const DashboardPage: React.FC = () => {
 
     // Calculations
     const activeProjects = projects.filter(p => p.status === 'active').length;
-    const pendingTasks = tasks.filter(t => !t.completed).length;
+    const pendingTasks = tasks.filter(t => t.status !== 'done').length;
 
     // Inbox: Resources with no project/area
     const inboxCount = resources.filter(r => !r.projectId && !r.areaId).length;

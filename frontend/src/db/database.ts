@@ -230,7 +230,22 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
         await db.addCollections({
             projects: { schema: projectSchema },
             areas: { schema: areaSchema },
-            tasks: { schema: taskSchema },
+            tasks: {
+                schema: taskSchema,
+                migrationStrategies: {
+                    1: (oldDoc: any) => {
+                        const newDoc = { ...oldDoc };
+                        // Migration: completed boolean -> status enum
+                        if (oldDoc.completed === true) {
+                            newDoc.status = 'done';
+                        } else {
+                            newDoc.status = 'todo';
+                        }
+                        delete newDoc.completed;
+                        return newDoc;
+                    }
+                }
+            },
             resources: { schema: resourceSchema },
             habits: { schema: habitSchema },
             metrics: { schema: metricSchema },

@@ -8,7 +8,7 @@ export interface TaskItemProps {
     id: string
     title: string
     projectName?: string
-    completed?: boolean
+    status: 'todo' | 'doing' | 'done'
     onToggle?: (id: string) => void
     onTitleChange?: (id: string, newTitle: string) => void
     onDelete?: (id: string) => void
@@ -20,7 +20,7 @@ export function TaskItem({
     id,
     title,
     projectName,
-    completed = false,
+    status = 'todo',
     onToggle,
     onTitleChange,
     onDelete,
@@ -50,7 +50,7 @@ export function TaskItem({
         <div className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded-md transition-colors group">
             <Checkbox
                 id={`task-${id}`}
-                checked={completed}
+                checked={status === 'done'}
                 onCheckedChange={() => onToggle?.(id)}
             />
             {isEditing && editable ? (
@@ -67,7 +67,7 @@ export function TaskItem({
                     htmlFor={`task-${id}`}
                     className={cn(
                         "flex-1 text-sm font-medium leading-none cursor-pointer",
-                        completed && "line-through text-muted-foreground"
+                        status === 'done' && "line-through text-muted-foreground"
                     )}
                     onClick={(e) => {
                         if (editable) {
