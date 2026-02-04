@@ -1,3 +1,5 @@
+import { parserClient } from "./parser-client";
+
 export interface ParsedContent {
     title: string;
     description: string;
@@ -10,9 +12,16 @@ export async function parseContent(input: string): Promise<ParsedContent> {
     const trimmed = input.trim();
     const isUrl = /^(http|https):\/\/[^ "]+$/.test(trimmed);
 
-    // Mock URL Parsing
+    // URL Parsing
     if (isUrl) {
-        return mockUrlParse(trimmed);
+        const result = await parserClient.parseUrl(trimmed);
+        if (result) return result;
+        // Fallback if client returns null (though client handles try/catch)
+        return {
+            title: trimmed,
+            description: "",
+            url: trimmed
+        };
     }
 
     // Mixed Content Parsing
@@ -22,11 +31,13 @@ export async function parseContent(input: string): Promise<ParsedContent> {
 
     // Check if the first line looks like a URL
     if (/^(http|https):\/\/[^ "]+$/.test(title)) {
-        const urlData = await mockUrlParse(title);
-        return {
-            ...urlData,
-            content: content || urlData.description // Use description as content if empty
-        };
+        const urlData = await parserClient.parseUrl(title);
+        if (urlData) {
+            return {
+                ...urlData,
+                content: content || urlData.content || urlData.description // Prioritize explicit content, then parsed content/desc
+            };
+        }
     }
 
     return {
@@ -36,33 +47,3 @@ export async function parseContent(input: string): Promise<ParsedContent> {
     };
 }
 
-async function mockUrlParse(url: string): Promise<ParsedContent> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const domain = new URL(url).hostname;
-
-    if (domain.includes("github.com")) {
-        return {
-            title: "GitHub - Repo Name",
-            description: "A repository description from GitHub.",
-            url,
-            image: "https://github.com/fluidicon.png"
-        };
-    }
-
-    if (domain.includes("youtube.com")) {
-        return {
-            title: "YouTube Video Title",
-            description: "Video description...",
-            url,
-            image: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg"
-        };
-    }
-
-    return {
-        title: `Page Title from ${domain}`,
-        description: "Meta description extracted from the page.",
-        url,
-    };
-}

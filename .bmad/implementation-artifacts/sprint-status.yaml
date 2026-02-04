@@ -101,7 +101,7 @@ development_status:
   epic-7: backlog
   7-1-oauth-integration: review
   7-2-couchdb-sync: review
-  7-3-url-parser: ready-for-dev
+  7-3-url-parser: review
   epic-7-retrospective: optional
 
   # Epic 8: 測試與安全性強化

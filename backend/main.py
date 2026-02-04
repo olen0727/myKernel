@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from app.core.config import get_settings
-from app.api.v1 import auth
+from app.api.v1 import auth, parser
 
 settings = get_settings()
 
@@ -27,6 +27,7 @@ app.add_middleware(
 
 # Include Routers
 app.include_router(auth.router)
+app.include_router(parser.router, prefix=settings.API_V1_STR, tags=["parser"])
 
 @app.get("/")
 async def root():
@@ -36,5 +37,5 @@ if __name__ == "__main__":
     import uvicorn
     # Note: Host and Port here are mainly for local non-docker run. 
     # Docker uses uvicorn main:app command directly.
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8888)
 

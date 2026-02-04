@@ -3,7 +3,7 @@ import { User } from '../types/models';
 const AUTH_TOKEN_KEY = 'kernel_auth_token';
 
 // @ts-ignore
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8888';
 
 export const AuthService = {
     loginWithGoogle: () => {
