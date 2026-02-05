@@ -3,6 +3,7 @@ import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { wrappedKeyEncryptionCryptoJsStorage } from 'rxdb/plugins/encryption-crypto-js';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
+import { RxDBJsonDumpPlugin } from 'rxdb/plugins/json-dump';
 import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
 import { syncCollection } from './replication';
 import { AuthService } from '../services/auth-service';
@@ -17,6 +18,7 @@ import { logSchema } from './schemas/log.schema';
 
 // Add the update plugin
 addRxPlugin(RxDBUpdatePlugin);
+addRxPlugin(RxDBJsonDumpPlugin);
 addRxPlugin(RxDBMigrationSchemaPlugin);
 
 // Enable dev mode plugins
