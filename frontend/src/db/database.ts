@@ -273,8 +273,10 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
         const isRecoverableError =
             err?.code === 'DB1' ||
             err?.code === 'DB6' ||
+            err?.code === 'DM4' || // Migration error
             err?.message?.includes('password') ||
-            err?.message?.includes('different schema');
+            err?.message?.includes('different schema') ||
+            err?.message?.includes('closed'); // Handle "RxStorageInstance is closed" errors
 
         // @ts-ignore
         const isDevMode = import.meta.env.DEV || import.meta.env.MODE === 'development';
