@@ -11,7 +11,7 @@ import { TipTapEditor } from "@/components/editor/TipTapEditor"
 import { useDebounce } from "@/hooks/use-debounce"
 import { services, LogService } from "@/services"
 import { useObservable } from "@/hooks/use-observable"
-import { Log } from "@/types/models"
+
 
 export default function JournalPage() {
     const { date } = useParams()
@@ -35,12 +35,12 @@ export default function JournalPage() {
         load();
     }, []);
 
-    const allLogs$ = useMemo(() => logService?.getAll$(), [logService]);
-    const allLogs = useObservable<Log[]>(allLogs$, []) || [];
+    const dailyNoteLog$ = useMemo(() => {
+        if (!logService || !dateStr) return undefined;
+        return logService.getDailyNote$(dateStr);
+    }, [logService, dateStr]);
 
-    const dailyNoteLog = useMemo(() => {
-        return allLogs.find(l => l.date === dateStr && l.action === 'daily_note');
-    }, [allLogs, dateStr]);
+    const dailyNoteLog = useObservable(dailyNoteLog$, undefined);
 
     // Load content when dailyNoteLog changes (or initially)
     // If we type, content state updates locally.
