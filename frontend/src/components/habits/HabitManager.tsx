@@ -37,7 +37,7 @@ export const HabitManager: React.FC<HabitManagerProps> = ({ areaId }) => {
     const habits = useMemo(() => {
         // Filter by areaId. Assuming Habit model has areaId.
         // It was used in mock-data-service, so should be safe.
-        return allHabits.filter(h => (h as any).areaId === areaId);
+        return allHabits.filter(h => h.areaId === areaId);
     }, [allHabits, areaId]);
 
     const handleToggleStatus = async (habitId: string) => {
@@ -47,11 +47,11 @@ export const HabitManager: React.FC<HabitManagerProps> = ({ areaId }) => {
 
         // Assuming 'status' is not yet in formal model interface but was in logic.
         // Let's assume we can cast or it will be added.
-        const currentStatus = (habit as any).status || 'active';
+        const currentStatus = habit.status || 'active';
         const newStatus = currentStatus === 'active' ? 'paused' : 'active';
 
         try {
-            await habitService.update(habitId, { status: newStatus } as any);
+            await habitService.update(habitId, { status: newStatus });
         } catch (e) {
             toast.error("更新失敗");
         }
@@ -126,7 +126,7 @@ export const HabitManager: React.FC<HabitManagerProps> = ({ areaId }) => {
                     </div>
                 ) : (
                     habits.map(habit => {
-                        const status = (habit as any).status || 'active';
+                        const status = habit.status || 'active';
                         return (
                             <div
                                 key={habit.id}

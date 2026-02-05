@@ -81,7 +81,7 @@ export const MetricInputList: React.FC<MetricInputListProps> = ({ date, readOnly
                 if (def.type === 'sleep' || def.id === 'sleep') {
                     return (
                         <SleepTracker
-                            key={def.id}
+                            key={`${def.id}-${dateStr}`}
                             date={date}
                             readOnly={readOnly}
                             initialSleepTime={metadata?.sleepTime}

@@ -115,6 +115,19 @@ export const SleepTracker: React.FC<SleepTrackerProps> = ({
     const [wakeTime, setWakeTime] = useState<string>(initialWakeTime || '')
     const [duration, setDuration] = useState<string | null>(null)
 
+    // Sync state with props when they change (e.g. data loaded from DB async)
+    useEffect(() => {
+        if (initialSleepTime !== undefined) {
+            setSleepTime(initialSleepTime)
+        }
+    }, [initialSleepTime])
+
+    useEffect(() => {
+        if (initialWakeTime !== undefined) {
+            setWakeTime(initialWakeTime)
+        }
+    }, [initialWakeTime])
+
     // Use a ref for onDataChange to avoid adding it to the dependency array of calculateDuration
     // This prevents infinite loops when the parent component recreates the callback on every render
     const onDataChangeRef = React.useRef(onDataChange)

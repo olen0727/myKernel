@@ -47,8 +47,10 @@ export interface Habit extends BaseModel {
     name: string;
     frequency: HabitFrequency;
     completedDates: string[];
+    areaId?: string;
     currentStreak?: number;
     maxStreak?: number;
+    status?: 'active' | 'paused' | 'archived';
 }
 
 export interface Metric extends BaseModel {

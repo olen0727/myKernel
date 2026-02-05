@@ -4,14 +4,15 @@ import { HabitHeatmap } from "@/components/dashboard/HabitHeatmap"
 import { MetricCharts } from "@/components/dashboard/MetricCharts"
 import { Brain, Inbox, Folder, ListTodo } from "lucide-react"
 import { useObservable } from "@/hooks/use-observable"
-import { services, ProjectService, HabitService, TaskService, ResourceService } from "@/services"
-import { Project, Habit, Task, Resource } from "@/types/models"
+import { services, ProjectService, HabitService, TaskService, ResourceService, AreaService } from "@/services"
+import { Project, Habit, Task, Resource, Area } from "@/types/models"
 
 const DashboardPage: React.FC = () => {
     const [projectService, setProjectService] = useState<ProjectService | undefined>();
     const [habitService, setHabitService] = useState<HabitService | undefined>();
     const [taskService, setTaskService] = useState<TaskService | undefined>();
     const [resourceService, setResourceService] = useState<ResourceService | undefined>();
+    const [areaService, setAreaService] = useState<AreaService | undefined>();
 
     useEffect(() => {
         const loadServices = async () => {
@@ -19,6 +20,7 @@ const DashboardPage: React.FC = () => {
             setHabitService(await services.habit);
             setTaskService(await services.task);
             setResourceService(await services.resource);
+            setAreaService(await services.area);
         };
         loadServices();
     }, []);
@@ -27,9 +29,23 @@ const DashboardPage: React.FC = () => {
     const habits$ = useMemo(() => habitService?.getAll$(), [habitService]);
     const tasks$ = useMemo(() => taskService?.getAll$(), [taskService]);
     const resources$ = useMemo(() => resourceService?.getAll$(), [resourceService]);
+    const areas$ = useMemo(() => areaService?.getAll$(), [areaService]);
 
     const projects = useObservable<Project[]>(projects$, []) || [];
     const habits = useObservable<Habit[]>(habits$, []) || [];
+    const areas = useObservable<Area[]>(areas$, []) || [];
+
+    // Filter habits:
+    // 1. Must not be paused or archived
+    // 2. Must not be an orphan (if it has an areaId, the area must exist)
+    const activeHabits = useMemo(() => {
+        const activeAreaIds = new Set(areas.map(a => a.id));
+        return habits.filter(h =>
+            (h.status !== 'paused' && h.status !== 'archived') &&
+            (!h.areaId || activeAreaIds.has(h.areaId))
+        );
+    }, [habits, areas]);
+
     const tasks = useObservable<Task[]>(tasks$, []) || [];
     const resources = useObservable<Resource[]>(resources$, []) || [];
 
@@ -72,7 +88,7 @@ const DashboardPage: React.FC = () => {
             </div>
 
             <div className="mt-8 grid grid-cols-1 gap-8">
-                <HabitHeatmap habits={habits} />
+                <HabitHeatmap habits={activeHabits} />
                 <MetricCharts />
             </div>
         </div>

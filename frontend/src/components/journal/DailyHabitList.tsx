@@ -4,9 +4,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
 import { Flame } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { services, HabitService } from '@/services'
+import { services, HabitService, AreaService } from '@/services'
 import { useObservable } from '@/hooks/use-observable'
-import { Habit } from '@/types/models'
+import { Habit, Area } from '@/types/models'
 
 interface DailyHabitListProps {
     date: Date
@@ -15,10 +15,12 @@ interface DailyHabitListProps {
 
 export const DailyHabitList: React.FC<DailyHabitListProps> = ({ date, readOnly }) => {
     const [habitService, setHabitService] = useState<HabitService | undefined>();
+    const [areaService, setAreaService] = useState<AreaService | undefined>();
 
     useEffect(() => {
         const load = async () => {
             setHabitService(await services.habit);
+            setAreaService(await services.area);
         };
         load();
     }, []);
@@ -26,23 +28,28 @@ export const DailyHabitList: React.FC<DailyHabitListProps> = ({ date, readOnly }
     const allHabits$ = useMemo(() => habitService?.getAll$(), [habitService]);
     const allHabits = useObservable<Habit[]>(allHabits$, []) || [];
 
+    const allAreas$ = useMemo(() => areaService?.getAll$(), [areaService]);
+    const allAreas = useObservable<Area[]>(allAreas$, []) || [];
+
     const dateStr = format(date, 'yyyy-MM-dd')
     const dayOfWeek = date.getDay() // 0-6 Sun-Sat
 
     const habits = useMemo(() => {
         // Filter habits relevant for today
-        // Assuming Habit model has days array for weekly
+        const activeAreaIds = new Set(allAreas.map(a => a.id));
+
         const filtered = allHabits.filter(h => {
+            // Status check
+            if (h.status === 'paused' || h.status === 'archived') return false;
+
+            // Orphan check
+            if (h.areaId && !activeAreaIds.has(h.areaId)) return false;
+
             // For now assume active if no status field in interface, or check if interface updated
-            // Model interface: Habit { name, frequency, completedDates, ... } No status?
-            // Assuming all habits are active.
+            // Model interface: Habit { name, frequency, completedDates, ... }
             if (h.frequency === 'daily') return true;
-            // Weekly logic if 'days' exists (it's not in the strict interface I saw in models.ts but implied by mock-data usages)
-            // The Interface I read in models.ts:
-            // export interface Habit extends BaseModel { name: string; frequency: HabitFrequency; completedDates: string[]; ... }
-            // Missing 'days'?
-            // mock-data-service usage: h.frequency === 'weekly' && h.days?.includes(...)
-            // I should cast or assume property exists for now.
+
+            // Weekly logic if 'days' exists
             if (h.frequency === 'weekly' && (h as any).days?.includes(dayOfWeek)) return true;
             return false;
         });
@@ -54,7 +61,7 @@ export const DailyHabitList: React.FC<DailyHabitListProps> = ({ date, readOnly }
             if (aCompleted === bCompleted) return a.name.localeCompare(b.name)
             return aCompleted ? 1 : -1
         });
-    }, [allHabits, dateStr, dayOfWeek]);
+    }, [allHabits, allAreas, dateStr, dayOfWeek]);
 
     const calculateStreak = (dates: string[], frequency: 'daily' | 'weekly', _days?: number[]): number => {
         // Simple daily streak for now
