@@ -23,9 +23,9 @@ addRxPlugin(RxDBMigrationSchemaPlugin);
 
 // Enable dev mode plugins
 // @ts-ignore - Vite env types might be missing in current TS config
-if (import.meta.env.DEV) {
-    addRxPlugin(RxDBDevModePlugin);
-}
+// if (import.meta.env.DEV) {
+//    addRxPlugin(RxDBDevModePlugin);
+// }
 
 // Type Definitions
 import { Project, Area, Task, Resource, Habit, Metric, Log } from '../types/models';

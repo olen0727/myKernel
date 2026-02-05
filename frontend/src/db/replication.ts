@@ -259,7 +259,8 @@ export const syncCollection = (
                 }
             }
         },
-        live: true,
+        live: false,
+        retryTime: 1000 * 60 * 60 * 24, // [FIX] Disable aggressive retry (set to 24 hours) to prevent spinning favicon on error
         waitForLeadership: false,
     });
 
