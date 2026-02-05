@@ -48,17 +48,23 @@ export function Workbench() {
     const allProjects = useObservable<Project[]>(projects$, []) || [];
 
     const doingTasks = React.useMemo(() =>
-        allTasks.filter(t => t.status === 'doing').map(t => ({
-            ...t,
-            projectName: allProjects.find(p => p.id === t.projectId)?.name
-        })),
+        allTasks
+            .filter(t => t.status === 'doing')
+            .filter(t => allProjects.some(p => p.id === t.projectId))
+            .map(t => ({
+                ...t,
+                projectName: allProjects.find(p => p.id === t.projectId)?.name
+            })),
         [allTasks, allProjects]);
 
     const todoTasks = React.useMemo(() =>
-        allTasks.filter(t => t.status === 'todo').map(t => ({
-            ...t,
-            projectName: allProjects.find(p => p.id === t.projectId)?.name
-        })),
+        allTasks
+            .filter(t => t.status === 'todo')
+            .filter(t => allProjects.some(p => p.id === t.projectId))
+            .map(t => ({
+                ...t,
+                projectName: allProjects.find(p => p.id === t.projectId)?.name
+            })),
         [allTasks, allProjects]);
 
     const [activeId, setActiveId] = React.useState<string | null>(null)
