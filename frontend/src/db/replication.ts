@@ -228,6 +228,11 @@ export const syncCollection = (
     // CouchDB _changes feed is complex, so for stability we use a simple poller
     // that triggers a pull run every X seconds.
     // This bypasses the EventSource/401 issues completely.
+
+    // [OPTIMIZATION] Focus-Only Sync Strategy
+    // Commented out automatic polling as per user request to reduce background network traffic.
+    // To restore background sync, uncomment the following block:
+    /*
     if (true) { // live mode
         setInterval(async () => {
             // Trigger a pull
@@ -238,6 +243,23 @@ export const syncCollection = (
                 replicationState.reSync();
             } catch (e) { }
         }, 10000); // Poll every 10 seconds
+    }
+    */
+
+    // NEW: Trigger sync ONLY when window gains focus
+    if (typeof window !== 'undefined' && true) { // live mode
+        const focusHandler = () => {
+            if (replicationState.isStopped()) {
+                window.removeEventListener('focus', focusHandler);
+                return;
+            }
+            // console.log(`👀 Window focused, triggering sync for [${collection.name}]`);
+            try {
+                // @ts-ignore
+                replicationState.reSync();
+            } catch (e) { }
+        };
+        window.addEventListener('focus', focusHandler);
     }
 
     // Error logging
