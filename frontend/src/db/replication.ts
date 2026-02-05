@@ -102,33 +102,48 @@ export const syncCollection = (
 
                         if (revsResponse.ok) {
                             const revsData = await revsResponse.json();
-                            const revMap = new Map();
+                            const revMap = new Map<string, { rev: string, deleted: boolean }>();
                             if (revsData.rows) {
                                 revsData.rows.forEach((row: any) => {
                                     if (row.value && row.value.rev) {
-                                        revMap.set(row.id, row.value.rev);
+                                        revMap.set(row.id, { rev: row.value.rev, deleted: !!row.value.deleted });
                                     }
                                 });
                             }
+                            console.log(`[Replication Debug] IDs: ${ids.join(',')}, RevMap size: ${revMap.size}`);
 
                             // Attach latest _rev from CouchDB;
                             // For docs not found (e.g. already deleted in CouchDB),
                             // remove _rev so CouchDB treats them as new inserts
                             preparedDocs.forEach((d: any) => {
-                                const currentRev = revMap.get(d._id);
-                                if (currentRev) {
-                                    d._rev = currentRev;
+                                const serverState = revMap.get(d._id);
+                                if (serverState) {
+                                    d._rev = serverState.rev;
+                                    // [OPTIMIZATION] If both local and server are deleted, skip pushing to avoid conflict loops
+                                    if (d._deleted && serverState.deleted) {
+                                        d._skipPush = true;
+                                        // console.log(`[Replication Debug] Skipping redundant delete for ${d._id}`);
+                                    }
                                 } else {
+                                    // console.warn(`No rev found for ${d._id} in revMap, treating as new`);
                                     delete d._rev;
                                 }
                             });
+                            // console.log('[Replication Debug] Prepared docs for push:', preparedDocs.map((d: any) => ({ id: d._id, rev: d._rev, deleted: d._deleted })));
                         }
                     } catch (e) {
                         console.warn("Failed to fetch revisions, attempting blind push...", e);
                     }
                 }
 
-                const body = { docs: preparedDocs };
+                // Filter out docs marked for skip
+                const docsToPush = preparedDocs.filter((d: any) => !d._skipPush);
+
+                if (docsToPush.length === 0) {
+                    return []; // Nothing to push, success
+                }
+
+                const body = { docs: docsToPush };
 
                 try {
                     const response = await fetch(url, {
@@ -177,12 +192,24 @@ export const syncCollection = (
                             const foundIds = new Set<string>();
                             if (allDocsData.rows) {
                                 allDocsData.rows.forEach((row: any) => {
+                                    // Handle existing documents
                                     if (row.doc) {
                                         const doc = row.doc;
                                         if (!doc[primaryPath] && doc._id) {
                                             doc[primaryPath] = doc._id;
                                         }
                                         masterDocs.push(doc);
+                                        foundIds.add(row.id);
+                                    }
+                                    // Handle deleted documents (Tombstones) found in _all_docs
+                                    // CouchDB returns { id: '...', key: '...', value: { rev: '...', deleted: true }, doc: null }
+                                    else if (row.value && row.value.deleted) {
+                                        masterDocs.push({
+                                            _id: row.id,
+                                            _rev: row.value.rev,
+                                            _deleted: true,
+                                            [primaryPath]: row.id
+                                        });
                                         foundIds.add(row.id);
                                     }
                                 });
