@@ -45,6 +45,13 @@ export const syncCollection = (
                     if (!response.ok) throw new Error('Pull failed: ' + response.statusText);
                     const data = await response.json();
 
+                    console.log(`[Replication Debug] Pull _changes for ${collection.name}:`, data.results.map((r: any) => ({
+                        id: r.id,
+                        deleted: r.deleted,
+                        docDeleted: r.doc?._deleted,
+                        changes: r.changes
+                    })));
+
                     const primaryPath = collection.schema.primaryPath;
 
                     const documents = data.results
@@ -55,6 +62,11 @@ export const syncCollection = (
                             // CouchDB uses _id, but RxDB schema might use 'id' or something else
                             if (!doc[primaryPath] && doc._id) {
                                 doc[primaryPath] = doc._id;
+                            }
+                            // [FIX] Ensure deleted documents are marked as such
+                            // CouchDB _changes with include_docs might return the doc body but we rely on row.deleted
+                            if (row.deleted) {
+                                doc._deleted = true;
                             }
                             return doc;
                         });

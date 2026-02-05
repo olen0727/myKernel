@@ -10,6 +10,12 @@ import {
 
 export class DataSeeder {
     static async seed() {
+        // [FIX] Prevent re-seeding on refresh if already seeded
+        if (typeof window !== 'undefined' && localStorage.getItem('kernel_has_seeded')) {
+            console.log('Seeding skipped (flag set)');
+            return;
+        }
+
         console.log('Starting Data Seeding Process...');
 
         try {
@@ -92,6 +98,9 @@ export class DataSeeder {
                 }
             }
 
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('kernel_has_seeded', 'true');
+            }
             console.log('Data Seeding Completed.');
         } catch (error) {
             console.error('Data Seeding Failed:', error);
