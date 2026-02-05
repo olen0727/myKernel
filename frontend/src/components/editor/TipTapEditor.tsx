@@ -345,6 +345,7 @@ export function TipTapEditor({ content, onChange, editable = true }: TipTapEdito
                 blockquote: false,
                 codeBlock: false,
                 horizontalRule: false,
+                link: false,
             }),
             Paragraph,
             Heading.configure({
