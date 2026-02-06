@@ -25,8 +25,6 @@ import {
     ChevronLeft,
     PlusCircle,
     Activity,
-    FileText,
-    Folder,
     ChevronDown,
     LogOut
 } from "lucide-react"
@@ -54,11 +52,7 @@ interface SidebarContentProps {
 
 
 
-const recentItems = [
-    { icon: Folder, label: "Kernel Development", type: "Project" },
-    { icon: FileText, label: "UX Research Note", type: "Resource" },
-    { icon: Layers, label: "Personal Growth", type: "Area" },
-]
+import { useRecents } from "@/hooks/use-recents"
 
 export function SidebarContent({ forceExpanded = false, onToggle }: SidebarContentProps) {
     const { isCollapsed: storeCollapsed, toggleSidebar } = useSidebarStore()
@@ -68,6 +62,9 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
 
     // Fetch Inbox Data
     const { count: inboxCount } = useInbox();
+
+    // Fetch Recent Items
+    const recentItems = useRecents();
 
     const navItems = [
         { icon: Layout, label: "Dashboard", href: "/dashboard" },
@@ -199,16 +196,24 @@ export function SidebarContent({ forceExpanded = false, onToggle }: SidebarConte
                                 </Button>
                             </CollapsibleTrigger>
                             <CollapsibleContent className="space-y-1 px-2">
-                                {recentItems.map((item, i) => (
-                                    <Button
-                                        key={i}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="w-full justify-start gap-3 px-3 h-9 text-muted-foreground hover:bg-primary hover:text-primary-foreground font-normal overflow-hidden"
-                                    >
-                                        <item.icon className="h-5 w-5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
-                                        <span className="truncate">{item.label}</span>
-                                    </Button>
+                                {recentItems.map((item) => (
+                                    <NavLink key={item.id} to={item.href}>
+                                        {({ isActive }) => (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={cn(
+                                                    "w-full justify-start gap-3 px-3 h-9 font-normal overflow-hidden transition-all",
+                                                    isActive
+                                                        ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
+                                                        : "text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+                                                )}
+                                            >
+                                                <item.icon className="h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
+                                                <span className="truncate">{item.label}</span>
+                                            </Button>
+                                        )}
+                                    </NavLink>
                                 ))}
                             </CollapsibleContent>
                         </Collapsible>
