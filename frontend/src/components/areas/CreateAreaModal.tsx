@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ImageUploader } from '@/components/common/ImageUploader'
 
 interface CreateAreaModalProps {
     isOpen: boolean
@@ -118,18 +119,11 @@ export const CreateAreaModal: React.FC<CreateAreaModalProps> = ({ isOpen, onClos
                                     ))}
                                 </div>
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-[200px] border-2 border-dashed rounded-lg bg-muted/30 p-4 text-center">
-                                    <div className="bg-background p-3 rounded-full mb-3 shadow-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-muted-foreground">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
-                                        </svg>
-                                    </div>
-                                    <p className="text-sm font-medium">點擊或拖放檔案以上傳</p>
-                                    <p className="text-xs text-muted-foreground mt-1">支援 JPG, PNG (最大 5MB)</p>
-                                    <p className="text-[10px] text-primary/60 mt-4 italic">
-                                        TODO: 實作 FileReader API 轉換 Base64 或對接 Storage 服務
-                                    </p>
-                                </div>
+                                <ImageUploader
+                                    value={selectedCover}
+                                    onChange={setSelectedCover}
+                                    className="h-[200px]"
+                                />
                             )}
                         </div>
                     </div>
