@@ -8,6 +8,11 @@ export class ProjectService extends BaseService<Project> {
         super(db, 'projects');
     }
 
+    async getCascadeInfo(id: string): Promise<{ taskCount: number }> {
+        const tasks = await this.db.tasks.find({ selector: { projectId: id } }).exec();
+        return { taskCount: tasks.length };
+    }
+
     async delete(id: string): Promise<void> {
         // Delete all associated tasks first
         const tasks = await this.db.tasks.find({ selector: { projectId: id } }).exec();

@@ -14,17 +14,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 
 type ProjectStatus = "active" | "paused" | "completed" | "archived"
@@ -47,7 +36,7 @@ interface ProjectSidebarProps {
 }
 
 export function ProjectSidebar({
-    projectName,
+    projectName: _projectName,
     status,
     area,
     dueDate,
@@ -141,28 +130,14 @@ export function ProjectSidebar({
                     封存專案 (Archive)
                 </Button>
 
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                            刪除專案 (Delete)
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>確定要刪除此專案嗎？</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                此操作無法復原。這將永久刪除專案「{projectName}」及其所有相關任務。
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>取消</AlertDialogCancel>
-                            <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                確定刪除
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                    variant="outline"
+                    className="w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={onDelete}
+                >
+                    <Trash2 className="h-4 w-4" />
+                    刪除專案 (Delete)
+                </Button>
             </div>
         </div>
     )

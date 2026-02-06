@@ -6,17 +6,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Trash2, Info } from 'lucide-react'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
 interface AreaSidebarProps {
     area: Area
@@ -64,28 +53,14 @@ export const AreaSidebar: React.FC<AreaSidebarProps> = ({ area, onUpdate, onDele
             </Card>
 
             <div className="pt-4">
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors">
-                            <Trash2 className="w-4 h-4" />
-                            刪除此領域
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>確定要刪除領域「{area.name}」嗎？</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                此動作無法復原。這將會移除此領域的分類標籤，但其下的專案與資源將不會被刪除，而是變回「未分類」。
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>取消</AlertDialogCancel>
-                            <AlertDialogAction onClick={onDelete} className="bg-destructive hover:bg-destructive/90">
-                                確認刪除
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                    variant="ghost"
+                    className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors"
+                    onClick={onDelete}
+                >
+                    <Trash2 className="w-4 h-4" />
+                    刪除此領域
+                </Button>
             </div>
         </div>
     )

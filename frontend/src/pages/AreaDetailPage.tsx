@@ -15,6 +15,17 @@ import { services, AreaService, ProjectService, ResourceService, TaskService, Ha
 import { useObservable } from '@/hooks/use-observable'
 import { Area, Project, Resource, Task, Habit } from '@/types/models'
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
 const AreaDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
@@ -24,6 +35,10 @@ const AreaDetailPage: React.FC = () => {
     const [resourceService, setResourceService] = useState<ResourceService | undefined>();
     const [taskService, setTaskService] = useState<TaskService | undefined>();
     const [habitService, setHabitService] = useState<HabitService | undefined>();
+
+    // Delete confirmation state
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [cascadeInfo, setCascadeInfo] = useState<{ projectCount: number, taskCount: number } | null>(null);
 
     useEffect(() => {
         const load = async () => {
@@ -92,7 +107,21 @@ const AreaDetailPage: React.FC = () => {
         }
     }
 
-    const handleDeleteArea = async () => {
+    const handleDeleteClick = async () => {
+        if (!id || !areaService) return;
+        try {
+            const info = await areaService.getCascadeInfo(id);
+            setCascadeInfo(info);
+            setDeleteConfirmOpen(true);
+        } catch (e) {
+            console.error(e);
+            // Fallback if generic error, still confirm but no count
+            setCascadeInfo({ projectCount: 0, taskCount: 0 });
+            setDeleteConfirmOpen(true);
+        }
+    }
+
+    const confirmDelete = async () => {
         if (!id || !areaService) return
         try {
             await areaService.delete(id);
@@ -101,6 +130,7 @@ const AreaDetailPage: React.FC = () => {
         } catch (e) {
             toast.error('刪除失敗')
         }
+        setDeleteConfirmOpen(false);
     }
 
     const handleCreateProject = async (values: any) => {
@@ -243,7 +273,7 @@ const AreaDetailPage: React.FC = () => {
                     <AreaSidebar
                         area={areaWithStats as any}
                         onUpdate={handleUpdateArea}
-                        onDelete={handleDeleteArea}
+                        onDelete={handleDeleteClick}
                     />
                 </div>
             </div>
@@ -267,6 +297,29 @@ const AreaDetailPage: React.FC = () => {
                 }}
                 onSubmit={(name, cover) => handleUpdateArea({ name, coverImage: cover })}
             />
+
+            <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>確定要刪除「{areaWithStats.name}」嗎？</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            此動作無法復原。這將會一併刪除此領域內的：
+                            {cascadeInfo && (
+                                <ul className="list-disc list-inside mt-2 text-muted-foreground">
+                                    <li>{cascadeInfo.projectCount} 個專案 (Projects)</li>
+                                    <li>{cascadeInfo.taskCount} 個任務 (Tasks)</li>
+                                </ul>
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
+                            確認刪除
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

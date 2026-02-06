@@ -39,6 +39,17 @@ import {
 import { TaskItem } from "@/components/tasks/TaskItem"
 
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
 export default function ProjectDetailPage() {
     const { id: projectId } = useParams<{ id: string }>()
     const navigate = useNavigate()
@@ -47,6 +58,11 @@ export default function ProjectDetailPage() {
     const [taskService, setTaskService] = React.useState<TaskService | undefined>();
     const [resourceService, setResourceService] = React.useState<ResourceService | undefined>();
     const [areaService, setAreaService] = React.useState<AreaService | undefined>();
+
+    // Delete confirmation state
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
+    const [cascadeInfo, setCascadeInfo] = React.useState<{ taskCount: number } | null>(null);
+
 
     React.useEffect(() => {
         const load = async () => {
@@ -169,6 +185,31 @@ export default function ProjectDetailPage() {
         // Not supported
     }
 
+    const handleDeleteClick = async () => {
+        if (!projectId || !projectService) return;
+        try {
+            const info = await projectService.getCascadeInfo(projectId);
+            setCascadeInfo(info);
+            setDeleteConfirmOpen(true);
+        } catch (e) {
+            console.error(e);
+            setCascadeInfo({ taskCount: 0 });
+            setDeleteConfirmOpen(true);
+        }
+    }
+
+    const confirmDelete = async () => {
+        if (!projectId || !projectService) return;
+        try {
+            await projectService.delete(projectId);
+            toast.success('專案已刪除');
+            navigate("/projects");
+        } catch (e) {
+            toast.error('刪除失敗');
+        }
+        setDeleteConfirmOpen(false);
+    }
+
     if (!project || !projectService) {
         return <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
     }
@@ -289,12 +330,7 @@ export default function ProjectDetailPage() {
                             onAreaChange={(areaId: string) => handleUpdateProject({ areaId })}
                             onDueDateChange={(dueDate: Date | undefined) => handleUpdateProject({ dueDate })}
                             onArchive={() => handleUpdateProject({ status: "archived" })}
-                            onDelete={() => {
-                                if (projectService) {
-                                    projectService.delete(project.id);
-                                    navigate("/projects");
-                                }
-                            }}
+                            onDelete={handleDeleteClick}
                             areas={areas}
                         />
                     </div>
@@ -316,6 +352,28 @@ export default function ProjectDetailPage() {
                         </div>
                     ) : null}
                 </DragOverlay>
+
+                <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>確定要刪除「{project.name}」嗎？</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                此動作無法復原。這將會一併刪除此專案內的：
+                                {cascadeInfo && (
+                                    <ul className="list-disc list-inside mt-2 text-muted-foreground">
+                                        <li>{cascadeInfo.taskCount} 個任務 (Tasks)</li>
+                                    </ul>
+                                )}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>取消</AlertDialogCancel>
+                            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
+                                確認刪除
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </DndContext>
     )
