@@ -249,7 +249,21 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
                 }
             },
             resources: { schema: resourceSchema },
-            habits: { schema: habitSchema },
+            habits: {
+                schema: habitSchema,
+                migrationStrategies: {
+                    1: (oldDoc: any) => {
+                        const newDoc = { ...oldDoc };
+                        // Ensure new fields exist
+                        newDoc.completedDates = newDoc.completedDates || [];
+                        newDoc.currentStreak = newDoc.currentStreak || 0;
+                        newDoc.maxStreak = newDoc.maxStreak || 0;
+                        newDoc.status = newDoc.status || 'active';
+                        // areaId might already exist "hiddenly" or be undefined
+                        return newDoc;
+                    }
+                }
+            },
             metrics: { schema: metricSchema },
             logs: { schema: logSchema, migrationStrategies: logMigrationStrategies },
         });

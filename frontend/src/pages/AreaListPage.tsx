@@ -39,11 +39,7 @@ const AreaListPage: React.FC = () => {
     const mappedAreas = useMemo(() => {
         return areas.map(area => {
             const projectCount = projects.filter(p => p.areaId === area.id).length;
-            // Habit model doesn't explicitly store areaId in the interface we saw earlier?
-            // Checking models.ts: Habit extends BaseModel. No areaId.
-            // If Habit lacks areaId, habitCount will be 0 or we need to check if habits are linked differently.
-            // Assuming 0 for now if no areaId in Habit.
-            const habitCount = 0;
+            const habitCount = habits.filter(h => h.areaId === area.id).length;
 
             return {
                 ...area,
