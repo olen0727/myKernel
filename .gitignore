@@ -36,5 +36,11 @@ dist/
 build/
 out/
 
+
 # Custom
 trash/
+*.stackdump
+tmp*
+.eslintcache
+.vercel
+couchdb/data/
