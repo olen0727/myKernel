@@ -1,8 +1,8 @@
 # Kernel Architecture Document
 
-**Version**: 1.0
+**Version**: 1.1
 **Status**: Approved
-**Last Updated**: 2026-01-12
+**Last Updated**: 2026-02-09
 
 ---
 
@@ -120,8 +120,8 @@ graph TB
 |----------|------------|---------|---------|-----------|
 | **Language** | TypeScript | 5.3.x | 主要開發語言 | 強型別確保資料模型安全 |
 | **Runtime** | Node.js | 20.x LTS | 開發環境運行時 | 長期支援版本 |
-| **Build Tool** | Vite | 5.4.x | 建構與開發伺服器 | 極速 HMR |
-| **Framework** | React | 18.3.x | UI 框架 | Functional Components + Hooks |
+| **Build Tool** | Vite | 5.3.x | 建構與開發伺服器 | 極速 HMR |
+| **Framework** | React | 19.2.x | UI 框架 | Functional Components + Hooks |
 | **Routing** | React Router | 6.x | SPA 路由 | 業界標準 |
 | **UI State** | Zustand | 4.x | 非持久化 UI 狀態 | 輕量、簡潔 |
 
@@ -144,7 +144,7 @@ graph TB
 
 | Category | Technology | Version | Purpose | Rationale |
 |----------|------------|---------|---------|-----------|
-| **Local DB** | RxDB | 15.x | 響應式本地資料庫 | 即時查詢流，Local-first 核心 |
+| **Local DB** | RxDB | 15.39.x | 響應式本地資料庫 | 即時查詢流，Local-first 核心 |
 | **Storage** | Dexie.js | 4.x | IndexedDB 適配器 | 高效能瀏覽器儲存 |
 | **Encryption** | RxDB Encryption | 15.x | 本地資料加密 | AES-256 |
 | **Remote Sync** | CouchDB | 3.3.x | 多裝置同步節點 | Master-Master Replication |
@@ -210,7 +210,7 @@ erDiagram
 | **User** | 系統核心身份實體 | plan: free/pro/founder |
 | **Resource** | 可保存、引用的內容單位 | pending → processed → archived |
 | **Project** | 具明確目標的工作單位 | active → completed/archived |
-| **Task** | 專案內可執行的行動單位 | isCompleted: boolean |
+| **Task** | 專案內可執行的行動單位 | status: todo/doing/done |
 | **Area** | 長期責任範圍/生活面向 | active / hidden |
 | **Habit** | 持續重複的行為承諾 | isActive: boolean |
 | **Journal** | 每日狀態與觀察容器 | 依日期唯一索引 |
@@ -433,38 +433,45 @@ kernel/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── ui/                 # shadcn/ui components
-│   │   │   ├── layout/             # AppLayout, Sidebar, TopBar
-│   │   │   ├── editor/             # TipTap editor
-│   │   │   ├── modals/             # QuickCaptureModal, etc.
-│   │   │   └── shared/             # EmptyState, LoadingSpinner
-│   │   ├── pages/                  # Page components
-│   │   ├── services/               # Service Layer
-│   │   ├── schemas/                # RxDB Schemas
-│   │   ├── hooks/                  # Custom Hooks
-│   │   ├── stores/                 # Zustand Stores
-│   │   ├── lib/                    # Utilities
-│   │   ├── types/                  # TypeScript types
-│   │   └── styles/                 # Global CSS
-│   ├── tests/
-│   ├── package.json
-│   └── vite.config.ts
+│   │   │   ├── ui/                 # shadcn/ui 基礎組件 (Button, Input, Card 等)
+│   │   │   ├── layout/             # 佈局組件 (AppLayout, Sidebar, TopBar)
+│   │   │   ├── editor/             # TipTap 編輯器組件
+│   │   │   ├── modals/             # 全域模態視窗 (QuickCaptureModal)
+│   │   │   ├── dashboard/          # 儀表板相關組件 (Widgets)
+│   │   │   ├── projects/           # 專案管理相關組件 (List, Board)
+│   │   │   ├── areas/              # 領域管理相關組件
+│   │   │   ├── resources/          # 資源管理相關組件 (Card, List)
+│   │   │   ├── journal/            # 日誌與習慣追蹤組件
+│   │   │   └── shared/             # 共用功能性組件 (EmptyState, LoadingSpinner)
+│   │   ├── pages/                  # 頁面路由組件 (對應 React Router)
+│   │   ├── services/               # 業務邏輯層 (封裝 RxDB 操作)
+│   │   ├── db/
+│   │   │   ├── schemas/            # RxDB 資料庫 Schema 定義
+│   │   │   └── database.ts         # 資料庫初始化與插件設定
+│   │   ├── hooks/                  # 自定義 React Hooks
+│   │   ├── stores/                 # Zustand 全域狀態管理
+│   │   ├── lib/                    # 工具函式庫 (utils)
+│   │   ├── types/                  # TypeScript 型別定義
+│   │   └── styles/                 # 全域樣式 (Tailwind imports)
+│   ├── tests/                      # 前端測試 (Unit/Integration/E2E)
+│   ├── package.json                # 前端依賴定義
+│   └── vite.config.ts              # Vite 建構設定
 ├── backend/
 │   ├── app/
-│   │   ├── api/v1/                 # API Routes
-│   │   ├── core/                   # Config, Security
-│   │   ├── services/               # Business Logic
-│   │   └── models/                 # Pydantic Models
-│   ├── tests/
-│   ├── requirements.txt
-│   └── Dockerfile
+│   │   ├── api/v1/                 # API 路由定義 (Endpoints)
+│   │   ├── core/                   # 核心設定 (Config, Security)
+│   │   ├── services/               # 後端業務邏輯
+│   │   └── models/                 # Pydantic 資料模型
+│   ├── tests/                      # 後端測試 (Pytest)
+│   ├── requirements.txt            # Python 依賴清單
+│   └── Dockerfile                  # 後端容器設定
 ├── docs/
-│   ├── architecture.md             # This file
-│   └── stories/                    # User Stories
+│   ├── architecture.md             # 本架構文件
+│   └── stories/                    # 使用者故事 (User Stories)
 ├── docker/
-│   └── couchdb/
-├── docker-compose.yml
-└── README.md
+│   └── couchdb/                    # CouchDB 設定檔
+├── docker-compose.yml              # Docker Compose 多容器編排設定
+└── README.md                       # 專案說明文件
 ```
 
 ---
