@@ -80,8 +80,8 @@ async def auth_google_callback(request: Request):
         data=user_data, expires_delta=access_token_expires
     )
 
-    # Redirect to frontend with REAL JWT
-    frontend_url = f"{settings.FRONTEND_URL}?token={access_token}"
+    # Redirect to frontend with REAL JWT (Fragment based)
+    frontend_url = f"{settings.FRONTEND_URL}#token={access_token}"
     return RedirectResponse(url=frontend_url)
 
 @router.get("/auth/github")
@@ -103,7 +103,7 @@ async def auth_github_callback(request: Request):
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     
-    frontend_url = f"{settings.FRONTEND_URL}?token={access_token}"
+    frontend_url = f"{settings.FRONTEND_URL}#token={access_token}"
     return RedirectResponse(url=frontend_url)
 
 @router.get("/api/v1/users/me")

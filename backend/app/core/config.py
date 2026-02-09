@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # CORS
-    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173"] # Strict CORS
 
     # Auth
     SECRET_KEY: str = "development_secret_key"
@@ -33,6 +33,11 @@ class Settings(BaseSettings):
         "env_file": ".env",
         "case_sensitive": True
     }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.SECRET_KEY == "development_secret_key":
+            print("WARNING: You are using the default SECRET_KEY. This is insecure for production.")
 
 @lru_cache()
 def get_settings():

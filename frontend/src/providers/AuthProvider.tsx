@@ -20,8 +20,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const initAuth = async () => {
             try {
                 // Check if we have a token from URL (OAuth Callback)
-                const urlParams = new URLSearchParams(window.location.search);
-                const tokenFromUrl = urlParams.get('token');
+                // [SECURITY FIX] Parse from Hash instead of Search to avoid leakage
+                const hash = window.location.hash;
+                const tokenFromUrl = hash.startsWith('#token=') ? hash.split('=')[1] : null;
 
                 if (tokenFromUrl) {
                     AuthService.handleCallback(tokenFromUrl);
