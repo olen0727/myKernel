@@ -1,0 +1,6 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="64" height="64" rx="16" fill="#0F172A"/>
+    <path d="M16 12V52H26L16 12Z" fill="#0EA5E9"/> <!-- Cyan Left -->
+    <path d="M48 12L20 32L34 32L54 12H48Z" fill="#F43F5E"/> <!-- Pink Top -->
+    <path d="M26 38L48 52H56L32 34L26 38Z" fill="#EAB308"/> <!-- Yellow Bottom -->
+</svg>

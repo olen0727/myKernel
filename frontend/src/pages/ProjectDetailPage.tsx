@@ -185,6 +185,13 @@ export default function ProjectDetailPage() {
         // Not supported
     }
 
+    const handleDeleteTask = async (_listId: string, taskId: string) => {
+        if (taskService) {
+            await taskService.delete(taskId);
+            toast.success("任務已刪除");
+        }
+    }
+
     const handleDeleteClick = async () => {
         if (!projectId || !projectService) return;
         try {
@@ -272,6 +279,7 @@ export default function ProjectDetailPage() {
                                                 onAddTask={handleAddTask}
                                                 onRenameList={handleRenameList}
                                                 onDeleteList={handleDeleteList}
+                                                onDeleteTask={handleDeleteTask}
                                             />
                                         ))}
                                     </div>

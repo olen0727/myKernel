@@ -122,6 +122,11 @@ export function Workbench() {
         await taskService.update(id, { title: newTitle });
     }
 
+    const handleDeleteTask = async (id: string) => {
+        if (!taskService) return;
+        await taskService.delete(id);
+    }
+
     return (
         <DndContext
             sensors={sensors}
@@ -142,6 +147,7 @@ export function Workbench() {
                         tasks={doingTasks}
                         onToggle={handleToggleTask}
                         onTitleChange={handleTitleChange}
+                        onDelete={handleDeleteTask}
                     />
                     <DroppableColumn
                         id="todo"
@@ -150,6 +156,7 @@ export function Workbench() {
                         isLast
                         onToggle={handleToggleTask}
                         onTitleChange={handleTitleChange}
+                        onDelete={handleDeleteTask}
                     />
                 </div>
             </div>
@@ -180,14 +187,16 @@ function DroppableColumn({
     tasks,
     isLast = false,
     onToggle,
-    onTitleChange
+    onTitleChange,
+    onDelete
 }: {
     id: string,
     title: string,
     tasks: any[],
     isLast?: boolean,
     onToggle: (id: string) => void,
-    onTitleChange: (id: string, title: string) => void
+    onTitleChange: (id: string, title: string) => void,
+    onDelete: (id: string) => void
 }) {
     const { setNodeRef, isOver } = useDroppable({ id })
 
@@ -212,6 +221,7 @@ function DroppableColumn({
                                 {...task}
                                 onToggle={onToggle}
                                 onTitleChange={onTitleChange}
+                                onDelete={onDelete}
                             />
                         ))}
                     </SortableContext>

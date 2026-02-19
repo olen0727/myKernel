@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Trash2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -87,6 +88,19 @@ export function TaskItem({
                 >
                     {projectName}
                 </Badge>
+            )}
+
+            {onDelete && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all rounded hover:bg-destructive/10"
+                    title="刪除任務"
+                >
+                    <Trash2 className="h-4 w-4" />
+                </button>
             )}
         </div>
     )

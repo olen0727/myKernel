@@ -26,6 +26,7 @@ export interface TaskListProps {
     onAddTask: (listId: string, title: string) => void
     onRenameList: (listId: string, newTitle: string) => void
     onDeleteList: (listId: string) => void
+    onDeleteTask: (listId: string, taskId: string) => void
 }
 
 export function TaskList({
@@ -37,6 +38,7 @@ export function TaskList({
     onAddTask,
     onRenameList,
     onDeleteList,
+    onDeleteTask,
 }: TaskListProps) {
     const [isEditingTitle, setIsEditingTitle] = React.useState(false)
     const [localTitle, setLocalTitle] = React.useState(title)
@@ -131,6 +133,7 @@ export function TaskList({
                             showProject={false}
                             onToggle={(taskId) => onTaskToggle(id, taskId)}
                             onTitleChange={(taskId, newTitle) => onTaskTitleChange(id, taskId, newTitle)}
+                            onDelete={(taskId) => onDeleteTask(id, taskId)}
                         />
                     ))}
                 </SortableContext>
