@@ -17,9 +17,8 @@ app = FastAPI(
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # Handle Proxy Headers (Ensures HTTPS is detected behind Caddy)
+# Note: Handled by uvicorn flags --proxy-headers and --forwarded-allow-ips in Dockerfile
 from starlette.middleware.errors import ServerErrorMiddleware
-from fastapi.middleware.proxy_headers import ProxyHeadersMiddleware
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 # Configure CORS
 app.add_middleware(
