@@ -75,7 +75,12 @@ async def auth_google_callback(request: Request):
 
 
     # Ensure User DBs exist
-    ensure_user_databases(user_data["sub"])
+    try:
+        ensure_user_databases(user_data["sub"])
+    except Exception as db_err:
+        print(f"ERROR: Failed to ensure user databases: {str(db_err)}")
+        # We continue even if DB creation fails so user can at least be authenticated, 
+        # but the frontend will likely show 404s until fixed.
 
     # Generate JWT
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
