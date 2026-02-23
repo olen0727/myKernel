@@ -13,14 +13,11 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Set up Session Middleware (Required for OAuth)
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
-
 # Handle Proxy Headers (Ensures HTTPS is detected behind Caddy)
 # Note: Handled by uvicorn flags --proxy-headers and --forwarded-allow-ips in Dockerfile
 from starlette.middleware.errors import ServerErrorMiddleware
 
-# Configure CORS
+# Configure CORS (Must be at the top level to handle OPTIONS preflight)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
@@ -28,6 +25,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Set up Session Middleware (Required for OAuth)
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # Include Routers
 app.include_router(auth.router)
