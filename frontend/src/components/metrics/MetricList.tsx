@@ -23,7 +23,7 @@ interface MetricListProps {
     onEdit: (metric: Metric) => void
 }
 
-export function MetricList({ metrics, onUpdate, onEdit, onArchive, onDelete }: MetricListProps) {
+export function MetricList({ metrics, onEdit, onArchive, onDelete }: MetricListProps) {
     const [deleteId, setDeleteId] = useState<string | null>(null)
 
     if (metrics.length === 0) return <div className="text-muted-foreground p-4 text-center border rounded-lg border-dashed">No metrics found.</div>

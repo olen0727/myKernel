@@ -1,11 +1,9 @@
-import * as React from "react"
 import { GripVertical } from "lucide-react"
 import {
     PanelGroup,
     Panel,
     PanelResizeHandle,
     type PanelGroupProps,
-    type PanelProps,
     type PanelResizeHandleProps,
 } from "react-resizable-panels"
 

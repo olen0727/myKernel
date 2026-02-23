@@ -24,7 +24,6 @@ export default function ResourceEditorPage() {
     const { id } = useParams()
     const navigate = useNavigate()
     const [data, setData] = useState<ResourceData | null>(null)
-    const [originalResource, setOriginalResource] = useState<Resource | null>(null)
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState<Date | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -56,7 +55,7 @@ export default function ResourceEditorPage() {
                     return
                 }
 
-                setOriginalResource(resource)
+
 
                 // Fetch linked project/area names if needed (Skipping for MVP speed, using IDs as names temporarily or empty)
                 // In a real app we would join efficiently. Here we construct LinkedItems from projectId/areaId.
@@ -106,7 +105,7 @@ export default function ResourceEditorPage() {
             setLastSaved(new Date())
 
             // Update local state to match
-            setOriginalResource(prev => prev ? { ...prev, ...updates } : null)
+
         } catch (err) {
             console.error(err)
             toast.error("Failed to save changes")

@@ -1,9 +1,5 @@
-import { BubbleMenu, BubbleMenuProps } from '@tiptap/react/menus'
+import { BubbleMenu } from '@tiptap/react/menus'
 import {
-    AlignLeft,
-    AlignCenter,
-    AlignRight,
-    Trash2,
     Plus,
     Minus,
     Columns,

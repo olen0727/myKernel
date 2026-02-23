@@ -23,13 +23,13 @@ export class DataSeeder {
                 await taskService.create({
                     title: 'Check out the new Dashboard',
                     projectId: p1.id,
-                    completed: false,
+                    status: 'todo'
                 });
 
                 await taskService.create({
                     title: 'Create your first real project',
                     projectId: p1.id,
-                    completed: false,
+                    status: 'todo'
                 });
 
                 console.log('Seeding complete.');

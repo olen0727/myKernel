@@ -307,7 +307,6 @@ export interface JournalEntry {
 class DataStore {
     private areas: Area[] = [...INITIAL_AREAS]
     private habits: Habit[] = [...HABITS]
-    private taskLists: TaskListGroup[] = [...INITIAL_TASK_LISTS]
     private metricEntries: MetricEntry[] = []
     private metricDefinitions: MetricDefinition[] = [...METRIC_DEFINITIONS]
     private journalEntries: JournalEntry[] = []
@@ -472,7 +471,6 @@ class DataStore {
 
     // Footprints
     getResourceFootprints(dateStr: string): ResourceFootprint[] {
-        const targetDate = new Date(dateStr)
         const footprints: ResourceFootprint[] = []
 
         // 1. Inbox Resources (using timestamp as creation/action time)
