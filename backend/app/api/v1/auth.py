@@ -84,8 +84,7 @@ async def auth_google_callback(request: Request):
     )
 
     # Redirect to frontend with REAL JWT (Fragment based)
-    # Landing on /login first ensures the hash isn't lost during root -> dashboard redirect
-    frontend_url = f"{settings.FRONTEND_URL}/login#token={access_token}"
+    frontend_url = f"{settings.FRONTEND_URL}/#token={access_token}"
     return RedirectResponse(url=frontend_url)
 
 @router.get("/auth/github")
