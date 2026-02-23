@@ -19,8 +19,7 @@ services:
 
   couchdb:
     image: couchdb:3.3
-    ports:
-      - "5984:5984"
+    # 移除直接對外的 5984 埠，改由 Caddy 透過 443 (HTTPS) 代理
     environment:
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
