@@ -4,6 +4,12 @@ set -e
 
 echo "🚀 開始初始化 VM 環境..."
 
+# 自動偵測系統 ID (ubuntu 或 debian)
+ID=$(grep -oP '(?<=^ID=).+' /etc/os-release | tr -d '"')
+
+# 移除舊的錯誤設定，避免 apt-get update 噴錯導致腳本中斷
+sudo rm -f /etc/apt/sources.list.d/docker.list
+
 # 更新系統包
 sudo apt-get update
 sudo apt-get install -y \
@@ -12,12 +18,11 @@ sudo apt-get install -y \
     gnupg \
     lsb-release
 
-# 加入 Docker 官方 GPG key
+# 加入 Docker 官方 GPG key (動態路徑)
 sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+curl -fsSL https://download.docker.com/linux/$ID/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-# 設定 Docker repository (自動偵測是 Debian 還是 Ubuntu)
-ID=$(grep -oP '(?<=^ID=).+' /etc/os-release | tr -d '"')
+# 設定 Docker repository
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$ID \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
