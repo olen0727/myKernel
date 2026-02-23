@@ -1,0 +1,8 @@
+api.seckernel.com {
+    reverse_proxy backend:8000
+    
+    # 增加日誌紀錄以便除錯
+    log {
+        output file /var/log/caddy/access.log
+    }
+}

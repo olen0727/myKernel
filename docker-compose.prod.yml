@@ -28,5 +28,19 @@ services:
       - couchdb_data:/opt/couchdb/data
       - ./couchdb/local.ini:/opt/couchdb/etc/local.d/docker-cors.ini
 
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+
 volumes:
   couchdb_data:
+  caddy_data:
+  caddy_config:
