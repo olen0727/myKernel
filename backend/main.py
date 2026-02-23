@@ -16,6 +16,11 @@ app = FastAPI(
 # Set up Session Middleware (Required for OAuth)
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
+# Handle Proxy Headers (Ensures HTTPS is detected behind Caddy)
+from starlette.middleware.errors import ServerErrorMiddleware
+from fastapi.middleware.proxy_headers import ProxyHeadersMiddleware
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
