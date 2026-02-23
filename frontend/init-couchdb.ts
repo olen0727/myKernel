@@ -1,8 +1,21 @@
 import axios from 'axios';
 
-const COUCHDB_URL = 'http://localhost:5984';
-const USER = 'admin';
-const PASSWORD = 'password';
+const COUCHDB_URL = process.env.VITE_COUCHDB_URL;
+const USER = process.env.VITE_COUCHDB_USER;
+const PASSWORD = process.env.VITE_COUCHDB_PASSWORD;
+
+if (!COUCHDB_URL || !USER || !PASSWORD) {
+    console.error('❌ Missing environment variables:');
+    if (!COUCHDB_URL) console.error('   - VITE_COUCHDB_URL is undefined');
+    if (!USER) console.error('   - VITE_COUCHDB_USER is undefined');
+    if (!PASSWORD) console.error('   - VITE_COUCHDB_PASSWORD is undefined');
+    process.exit(1);
+}
+
+// Assert variables are strings for axios usage
+const url: string = COUCHDB_URL;
+const user: string = USER;
+const password: string = PASSWORD;
 
 const COLLECTIONS = [
     'projects',
@@ -18,11 +31,11 @@ async function enableCors(auth: any) {
     console.log('🔓 Configuring CORS...');
     try {
         // 1. Get Node Name
-        const membership = await axios.get(`${COUCHDB_URL}/_membership`, { auth });
+        const membership = await axios.get(`${url}/_membership`, { auth });
         const nodeName = membership.data.all_nodes[0];
         console.log(`   📍 Targeting CouchDB Node: ${nodeName}`);
 
-        const configBase = `${COUCHDB_URL}/_node/${nodeName}/_config`;
+        const configBase = `${url}/_node/${nodeName}/_config`;
 
         // 2. Set Configs
         const configs = [
@@ -49,11 +62,11 @@ async function enableCors(auth: any) {
 
 async function initCouchDB() {
     console.log('🔄 Checking CouchDB databases...');
-    const auth = { username: USER, password: PASSWORD };
+    const auth = { username: user, password: password };
 
     try {
         // Check connection
-        await axios.get(COUCHDB_URL, { auth });
+        await axios.get(url, { auth });
         console.log('✅ Connected to CouchDB');
 
         // Enable CORS
@@ -61,7 +74,7 @@ async function initCouchDB() {
 
         for (const name of COLLECTIONS) {
             try {
-                await axios.put(`${COUCHDB_URL}/${name}`, {}, { auth });
+                await axios.put(`${url}/${name}`, {}, { auth });
                 console.log(`✅ Created database: ${name}`);
             } catch (err: any) {
                 if (err.response?.status === 412) {
