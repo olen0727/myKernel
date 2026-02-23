@@ -22,8 +22,8 @@ if [ ! -f .env ]; then
 fi
 
 # 啟動服務
-echo "🐳 正在使用 Docker Compose 啟動生產環境服務..."
-docker compose -f docker-compose.prod.yml up -d
+echo "🐳 正在使用 Docker Compose 啟動生產環境服務 (包含最新代碼編譯)..."
+docker compose -f docker-compose.prod.yml up -d --build
 
 echo "✅ 服務啟動指令已送出！"
 echo "🔍 您可以執行 'docker compose -f docker-compose.prod.yml ps' 查看狀態。"
