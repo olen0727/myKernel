@@ -18,7 +18,6 @@ import {
     defaultDropAnimationSideEffects,
 } from "@dnd-kit/core"
 import {
-    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
@@ -80,7 +79,7 @@ export function Workbench() {
 
     const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string)
 
-    const handleDragOver = (event: DragOverEvent) => {
+    const handleDragOver = (_event: DragOverEvent) => {
         // Visual feedback only, logic handled in DragEnd for database updates to avoid thrashing
     }
 
