@@ -43,7 +43,10 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 @router.get("/auth/google")
 async def login_google(request: Request):
     print("DEBUG: login_google endpoint hit!")
-    redirect_uri = request.url_for('auth_google_callback')
+    redirect_uri = str(request.url_for('auth_google_callback'))
+    if "seckernel.com" in redirect_uri:
+        redirect_uri = redirect_uri.replace("http://", "https://")
+        
     if not settings.GOOGLE_CLIENT_ID:
         raise HTTPException(status_code=500, detail="Google Client ID not configured")
     
