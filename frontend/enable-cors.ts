@@ -33,7 +33,7 @@ async function enableCors() {
                         const nodeUrl = `${COUCHDB_URL}/_node/${nodeName}/_config/${config.section}/${config.key}`;
                         await axios.put(nodeUrl, config.value, { auth });
                         console.log(`✅ Set (node: ${nodeName}) ${config.section}/${config.key} = ${config.value}`);
-                    } catch (subErr) {
+                    } catch (subErr: any) {
                         console.error(`❌ Failed to set ${config.key}:`, subErr.message);
                     }
                 } else {

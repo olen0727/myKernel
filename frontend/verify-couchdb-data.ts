@@ -24,7 +24,6 @@ async function verifyData() {
             const res = await axios.get(`${COUCHDB_URL}/${dbName}/_all_docs`, { auth });
 
             const totalRows = res.data.total_rows;
-            const offset = res.data.offset;
             console.log(`   ✅ Status: OK`);
             console.log(`   📊 Total Documents: ${totalRows}`);
 
