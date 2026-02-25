@@ -21,6 +21,7 @@ import {
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
+    arrayMove,
 } from "@dnd-kit/sortable"
 import { cn } from "@/lib/utils"
 
@@ -53,7 +54,8 @@ export function Workbench() {
             .map(t => ({
                 ...t,
                 projectName: allProjects.find(p => p.id === t.projectId)?.name
-            })),
+            }))
+            .sort((a, b) => (a.order || 0) - (b.order || 0)),
         [allTasks, allProjects]);
 
     const todoTasks = React.useMemo(() =>
@@ -63,7 +65,8 @@ export function Workbench() {
             .map(t => ({
                 ...t,
                 projectName: allProjects.find(p => p.id === t.projectId)?.name
-            })),
+            }))
+            .sort((a, b) => (a.order || 0) - (b.order || 0)),
         [allTasks, allProjects]);
 
     const [activeId, setActiveId] = React.useState<string | null>(null)
@@ -100,10 +103,48 @@ export function Workbench() {
 
         // Determine new status
         const newStatus = overContainer === "doing" ? 'doing' : 'todo';
-
-        // Only update if status changed
         const task = allTasks.find(t => t.id === activeId);
-        if (task && task.status !== newStatus) {
+
+        if (activeId !== overId) {
+            const targetList = newStatus === 'doing' ? doingTasks : todoTasks;
+
+            if (task?.status === newStatus) {
+                // Reordering within the same column
+                const oldIndex = targetList.findIndex(t => t.id === activeId);
+                const newIndex = targetList.findIndex(t => t.id === overId);
+                if (oldIndex !== -1 && newIndex !== -1) {
+                    const reordered = arrayMove(targetList, oldIndex, newIndex);
+                    reordered.forEach((t, i) => {
+                        if (t.order !== i) {
+                            taskService.update(t.id, { order: i });
+                        }
+                    });
+                }
+            } else if (task) {
+                // Moving between columns
+                const newIndex = targetList.findIndex(t => t.id === overId);
+                let updatedList = [...targetList];
+                const updatedTask = {
+                    ...task,
+                    status: newStatus as 'todo' | 'doing',
+                    projectName: allProjects.find(p => p.id === task.projectId)?.name
+                };
+
+                if (newIndex !== -1) {
+                    updatedList.splice(newIndex, 0, updatedTask);
+                } else {
+                    updatedList.push(updatedTask);
+                }
+
+                updatedList.forEach((t, i) => {
+                    if (t.id === activeId) {
+                        taskService.update(t.id, { status: newStatus, order: i });
+                    } else if (t.order !== i) {
+                        taskService.update(t.id, { order: i });
+                    }
+                });
+            }
+        } else if (task && task.status !== newStatus) {
             await taskService.update(activeId, { status: newStatus });
         }
 
@@ -119,6 +160,16 @@ export function Workbench() {
     const handleTitleChange = async (id: string, newTitle: string) => {
         if (!taskService) return;
         await taskService.update(id, { title: newTitle });
+    }
+
+    const handleUrgencyChange = async (id: string, urgency: 'orange' | 'red' | null) => {
+        if (!taskService) return;
+        await taskService.update(id, { urgency });
+    }
+
+    const handleTomatoesChange = async (id: string, tomatoes: number) => {
+        if (!taskService) return;
+        await taskService.update(id, { tomatoes });
     }
 
     const handleDeleteTask = async (id: string) => {
@@ -146,6 +197,8 @@ export function Workbench() {
                         tasks={doingTasks}
                         onToggle={handleToggleTask}
                         onTitleChange={handleTitleChange}
+                        onUrgencyChange={handleUrgencyChange}
+                        onTomatoesChange={handleTomatoesChange}
                         onDelete={handleDeleteTask}
                     />
                     <DroppableColumn
@@ -155,6 +208,8 @@ export function Workbench() {
                         isLast
                         onToggle={handleToggleTask}
                         onTitleChange={handleTitleChange}
+                        onUrgencyChange={handleUrgencyChange}
+                        onTomatoesChange={handleTomatoesChange}
                         onDelete={handleDeleteTask}
                     />
                 </div>
@@ -172,7 +227,7 @@ export function Workbench() {
                 {activeTask ? (
                     <div className="w-[300px] bg-background/70 backdrop-blur-sm border-2 border-primary/30 rounded-md shadow-2xl p-2 flex items-center gap-3 scale-95 origin-center rotate-1 transition-transform cursor-grabbing opacity-70">
                         <GripVertical className="h-4 w-4 text-primary" />
-                        <TaskItem {...activeTask} editable={false} />
+                        <TaskItem {...activeTask} editable={false} isWorkbench={true} />
                     </div>
                 ) : null}
             </DragOverlay>
@@ -187,6 +242,8 @@ function DroppableColumn({
     isLast = false,
     onToggle,
     onTitleChange,
+    onUrgencyChange,
+    onTomatoesChange,
     onDelete
 }: {
     id: string,
@@ -195,6 +252,8 @@ function DroppableColumn({
     isLast?: boolean,
     onToggle: (id: string) => void,
     onTitleChange: (id: string, title: string) => void,
+    onUrgencyChange: (id: string, urgency: 'orange' | 'red' | null) => void,
+    onTomatoesChange: (id: string, tomatoes: number) => void,
     onDelete: (id: string) => void
 }) {
     const { setNodeRef, isOver } = useDroppable({ id })
@@ -218,8 +277,11 @@ function DroppableColumn({
                             <SortableTaskItem
                                 key={task.id}
                                 {...task}
+                                isWorkbench={true}
                                 onToggle={onToggle}
                                 onTitleChange={onTitleChange}
+                                onUrgencyChange={onUrgencyChange}
+                                onTomatoesChange={onTomatoesChange}
                                 onDelete={onDelete}
                             />
                         ))}

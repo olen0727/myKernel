@@ -32,7 +32,7 @@ describe("TaskList", () => {
         fireEvent.change(input, { target: { value: "New Task" } })
         fireEvent.keyDown(input, { key: "Enter" })
 
-        expect(mockProps.onAddTask).toHaveBeenCalledWith("list-1", "New Task")
+        expect(mockProps.onAddTask).toHaveBeenCalledWith("list-1", "New Task", null, 1)
     })
 
     it("calls onRenameList when title is edited", () => {

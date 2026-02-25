@@ -164,12 +164,23 @@ export default function ProjectDetailPage() {
             await taskService.update(taskId, { title: newTitle });
     }
 
-    const handleAddTask = async (_listId: string, title: string) => {
+    const handleTaskUrgencyChange = async (_listId: string, taskId: string, urgency: 'orange' | 'red' | null) => {
+        if (taskService) await taskService.update(taskId, { urgency });
+    }
+
+    const handleTaskTomatoesChange = async (_listId: string, taskId: string, tomatoes: number) => {
+        if (taskService) await taskService.update(taskId, { tomatoes });
+    }
+
+    const handleAddTask = async (_listId: string, title: string, urgency?: 'orange' | 'red' | null, tomatoes?: number) => {
         if (!projectId || !taskService) return;
         await taskService.create({
             title,
             projectId,
             status: 'todo',
+            urgency: urgency || null,
+            tomatoes: tomatoes || 1,
+            order: tasks.length || 0,
             completed: undefined // Ensure no legacy field is sent if type allows
         } as any);
         toast.success("任務已建立");
@@ -276,6 +287,8 @@ export default function ProjectDetailPage() {
                                                 items={list.items as any}
                                                 onTaskToggle={handleTaskToggle}
                                                 onTaskTitleChange={handleTaskTitleChange}
+                                                onTaskUrgencyChange={handleTaskUrgencyChange}
+                                                onTaskTomatoesChange={handleTaskTomatoesChange}
                                                 onAddTask={handleAddTask}
                                                 onRenameList={handleRenameList}
                                                 onDeleteList={handleDeleteList}

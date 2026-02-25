@@ -23,7 +23,9 @@ export interface TaskListProps {
     items: TaskItemProps[]
     onTaskToggle: (listId: string, taskId: string) => void
     onTaskTitleChange: (listId: string, taskId: string, newTitle: string) => void
-    onAddTask: (listId: string, title: string) => void
+    onTaskUrgencyChange?: (listId: string, taskId: string, urgency: 'orange' | 'red' | null) => void
+    onTaskTomatoesChange?: (listId: string, taskId: string, tomatoes: number) => void
+    onAddTask: (listId: string, title: string, urgency?: 'orange' | 'red' | null, tomatoes?: number) => void
     onRenameList: (listId: string, newTitle: string) => void
     onDeleteList: (listId: string) => void
     onDeleteTask: (listId: string, taskId: string) => void
@@ -35,6 +37,8 @@ export function TaskList({
     items,
     onTaskToggle,
     onTaskTitleChange,
+    onTaskUrgencyChange,
+    onTaskTomatoesChange,
     onAddTask,
     onRenameList,
     onDeleteList,
@@ -44,6 +48,8 @@ export function TaskList({
     const [localTitle, setLocalTitle] = React.useState(title)
     const [isAddingTask, setIsAddingTask] = React.useState(false)
     const [newTaskTitle, setNewTaskTitle] = React.useState("")
+    const [newTaskUrgency, setNewTaskUrgency] = React.useState<'orange' | 'red' | null>(null)
+    const [newTaskTomatoes, setNewTaskTomatoes] = React.useState(1)
 
     const { setNodeRef, isOver } = useDroppable({
         id: id,
@@ -58,8 +64,11 @@ export function TaskList({
 
     const handleAddTask = () => {
         if (newTaskTitle.trim()) {
-            onAddTask(id, newTaskTitle.trim())
+            onAddTask(id, newTaskTitle.trim(), newTaskUrgency, newTaskTomatoes)
             setNewTaskTitle("")
+            setNewTaskUrgency(null)
+            setNewTaskTomatoes(1)
+            // Do not close adding task (setIsAddingTask(false)) because user might want to add multiple consecutively
         } else {
             setIsAddingTask(false)
         }
@@ -133,15 +142,17 @@ export function TaskList({
                             showProject={false}
                             onToggle={(taskId) => onTaskToggle(id, taskId)}
                             onTitleChange={(taskId, newTitle) => onTaskTitleChange(id, taskId, newTitle)}
+                            onUrgencyChange={(taskId, urgency) => onTaskUrgencyChange?.(id, taskId, urgency)}
+                            onTomatoesChange={(taskId, tomatoes) => onTaskTomatoesChange?.(id, taskId, tomatoes)}
                             onDelete={(taskId) => onDeleteTask(id, taskId)}
                         />
                     ))}
                 </SortableContext>
 
                 {isAddingTask ? (
-                    <div className="flex items-center gap-3 p-2 pl-10">
+                    <div className="flex items-center gap-2 p-1.5 pl-10 border border-border/50 rounded-md bg-muted/20">
                         <Input
-                            className="flex-1 h-7 text-sm py-1 px-2"
+                            className="flex-1 h-7 text-sm py-1 px-2 border-none bg-transparent focus-visible:ring-0 shadow-none"
                             placeholder="任務名稱..."
                             value={newTaskTitle}
                             onChange={(e) => setNewTaskTitle(e.target.value)}
@@ -149,6 +160,35 @@ export function TaskList({
                             onKeyDown={handleAddTaskKeyDown}
                             autoFocus
                         />
+                        <div className="flex items-center gap-3 shrink-0 pr-1" onPointerDown={(e) => e.preventDefault()}>
+                            <button
+                                type="button"
+                                onClick={() => setNewTaskUrgency(u => u === null ? 'orange' : u === 'orange' ? 'red' : null)}
+                                className={cn(
+                                    "w-3 h-3 rounded-full transition-colors",
+                                    newTaskUrgency === 'red' ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" :
+                                        newTaskUrgency === 'orange' ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]" :
+                                            "border border-muted-foreground/30 hover:bg-muted-foreground/20 bg-background"
+                                )}
+                                title="設定緊急程度"
+                            />
+                            <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map(v => (
+                                    <button
+                                        key={v}
+                                        type="button"
+                                        onClick={() => setNewTaskTomatoes(v)}
+                                        className={cn(
+                                            "text-[10px] transition-all",
+                                            newTaskTomatoes >= v ? "opacity-100 scale-100" : "opacity-30 scale-90 grayscale hover:grayscale-0 hover:opacity-70"
+                                        )}
+                                        title={`${v} 顆番茄`}
+                                    >
+                                        🍅
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <Button

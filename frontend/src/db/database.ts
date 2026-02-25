@@ -245,6 +245,13 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
                         }
                         delete newDoc.completed;
                         return newDoc;
+                    },
+                    2: (oldDoc: any) => {
+                        const newDoc = { ...oldDoc };
+                        newDoc.urgency = newDoc.urgency || null;
+                        newDoc.tomatoes = newDoc.tomatoes || 1;
+                        newDoc.order = newDoc.order || 0;
+                        return newDoc;
                     }
                 }
             },

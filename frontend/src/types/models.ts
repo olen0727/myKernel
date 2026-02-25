@@ -25,6 +25,9 @@ export interface Task extends BaseModel {
     title: string;
     status: 'todo' | 'doing' | 'done';
     projectId?: string;
+    urgency?: 'orange' | 'red' | null;
+    tomatoes?: number;
+    order?: number;
 }
 
 export type ResourceType = 'link' | 'note' | 'document';
