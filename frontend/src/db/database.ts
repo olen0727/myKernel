@@ -230,7 +230,18 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
         console.log('RxDB created, ensuring collections...');
         await cleanupDuplicateCollectionMeta(db, 'logs', logSchema.version);
         await db.addCollections({
-            projects: { schema: projectSchema },
+            projects: {
+                schema: projectSchema,
+                migrationStrategies: {
+                    1: (oldDoc: any) => {
+                        const newDoc = { ...oldDoc };
+                        newDoc.taskLists = newDoc.taskLists || [
+                            { id: 'default', title: '所有任務', order: 0 }
+                        ];
+                        return newDoc;
+                    }
+                }
+            },
             areas: { schema: areaSchema },
             tasks: {
                 schema: taskSchema,
@@ -263,6 +274,11 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
                     4: (oldDoc: any) => {
                         const newDoc = { ...oldDoc };
                         newDoc.completedAt = newDoc.completedAt || null;
+                        return newDoc;
+                    },
+                    5: (oldDoc: any) => {
+                        const newDoc = { ...oldDoc };
+                        newDoc.listId = newDoc.listId || 'default';
                         return newDoc;
                     }
                 }

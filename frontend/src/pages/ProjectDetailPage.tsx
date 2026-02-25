@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, ListTodo, Library, GripVertical, FileText, Link as LinkIcon, Loader2 } from "lucide-react"
+import { ArrowLeft, ListTodo, Library, GripVertical, FileText, Link as LinkIcon, Loader2, Plus } from "lucide-react"
 import { format } from "date-fns"
 import { zhTW } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
@@ -93,14 +93,19 @@ export default function ProjectDetailPage() {
 
     const [activeId, setActiveId] = React.useState<string | null>(null)
 
-    // Adapt flat tasks to TaskListGroup structure (Single Group for now)
+    const defaultLists = React.useMemo(() => [{ id: 'default', title: '所有任務', order: 0 }], []);
+    const projectTaskLists = React.useMemo(() => {
+        return project?.taskLists?.length ? [...project.taskLists].sort((a, b) => (a.order || 0) - (b.order || 0)) : defaultLists;
+    }, [project, defaultLists]);
+
+    // Adapt flat tasks to TaskListGroup structure
     const taskLists: TaskListGroupType[] = React.useMemo(() => {
-        return [{
-            id: 'default',
-            title: '所有任務',
-            items: tasks.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''))
-        }];
-    }, [tasks]);
+        return projectTaskLists.map(list => ({
+            id: list.id,
+            title: list.title,
+            items: tasks.filter(t => (t.listId || 'default') === list.id).sort((a, b) => (a.order || 0) - (b.order || 0))
+        }));
+    }, [tasks, projectTaskLists]);
 
     // --- Sensors ---
     const sensors = useSensors(
@@ -135,9 +140,73 @@ export default function ProjectDetailPage() {
         // Single list, simplified logic not strictly needed if only one container
     }
 
-    const handleDragEnd = (_event: DragEndEvent) => {
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event
+        if (!over || !taskService) {
+            setActiveId(null)
+            return
+        }
+
+        const activeId = active.id as string
+        const overId = over.id as string
+
+        let overListId = '';
+        const overTask = tasks.find(t => t.id === overId);
+        if (overTask) {
+            overListId = overTask.listId || 'default';
+        } else if (taskLists.some(l => l.id === overId)) {
+            overListId = overId;
+        }
+
+        if (!overListId) {
+            setActiveId(null);
+            return;
+        }
+
+        const activeTask = tasks.find(t => t.id === activeId);
+        if (!activeTask) {
+            setActiveId(null);
+            return;
+        }
+
+        const oldListId = activeTask.listId || 'default';
+        const isSameList = oldListId === overListId;
+
+        const listTasks = isSameList
+            ? tasks.filter(t => (t.listId || 'default') === oldListId).sort((a, b) => (a.order || 0) - (b.order || 0))
+            : tasks.filter(t => (t.listId || 'default') === overListId).sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        if (overTask) {
+            const overIndex = listTasks.findIndex(t => t.id === overId);
+
+            if (isSameList) {
+                const activeIndex = listTasks.findIndex(t => t.id === activeId);
+                const newArr = [...listTasks];
+                newArr.splice(activeIndex, 1);
+                newArr.splice(overIndex, 0, activeTask);
+
+                newArr.forEach((t, i) => {
+                    if (t.order !== i) taskService.update(t.id, { order: i });
+                });
+            } else {
+                const newArr = [...listTasks];
+                newArr.splice(overIndex, 0, activeTask);
+                newArr.forEach((t, i) => {
+                    if (t.id === activeId) {
+                        taskService.update(t.id, { listId: overListId, order: i });
+                    } else if (t.order !== i) {
+                        taskService.update(t.id, { order: i });
+                    }
+                });
+            }
+        } else {
+            if (!isSameList) {
+                const newOrder = listTasks.length;
+                taskService.update(activeId, { listId: overListId, order: newOrder });
+            }
+        }
+
         setActiveId(null)
-        // No persistence for reorder yet
     }
 
     // --- Handlers ---
@@ -178,28 +247,42 @@ export default function ProjectDetailPage() {
         if (taskService) await taskService.update(taskId, { tomatoes });
     }
 
-    const handleAddTask = async (_listId: string, title: string, urgency?: 'orange' | 'red' | null, tomatoes?: number) => {
+    const handleAddTask = async (listId: string, title: string, urgency?: 'orange' | 'red' | null, tomatoes?: number) => {
         if (!projectId || !taskService) return;
+        const listItemsCount = taskLists.find(l => l.id === listId)?.items.length || 0;
         await taskService.create({
             title,
             projectId,
+            listId,
             status: 'todo',
             urgency: urgency || null,
             tomatoes: tomatoes || 1,
-            order: tasks.length || 0,
+            order: listItemsCount,
             completed: undefined // Ensure no legacy field is sent if type allows
         } as any);
-        toast.success("任務已建立");
     }
 
-
-
-    const handleRenameList = (_listId: string, _newTitle: string) => {
-        // Not supported
+    const handleAddList = async () => {
+        if (!projectId || !projectService || !project) return;
+        const newId = `list_${Date.now()}`;
+        const newLists = [...(project.taskLists || defaultLists), { id: newId, title: "新任務清單", order: (project.taskLists?.length || 1) }];
+        await handleUpdateProject({ taskLists: newLists });
     }
 
-    const handleDeleteList = (_listId: string) => {
-        // Not supported
+    const handleRenameList = async (listId: string, newTitle: string) => {
+        if (!project) return;
+        const newLists = (project.taskLists || defaultLists).map(l => l.id === listId ? { ...l, title: newTitle } : l);
+        await handleUpdateProject({ taskLists: newLists });
+    }
+
+    const handleDeleteList = async (listId: string) => {
+        if (!project) return;
+        if ((project.taskLists || defaultLists).length <= 1) {
+            toast.error("至少需保留一個任務清單");
+            return;
+        }
+        const newLists = (project.taskLists || defaultLists).filter(l => l.id !== listId);
+        await handleUpdateProject({ taskLists: newLists });
     }
 
     const handleDeleteTask = async (_listId: string, taskId: string) => {
@@ -284,23 +367,34 @@ export default function ProjectDetailPage() {
                                 </TabsList>
 
                                 <TabsContent value="tasks" className="space-y-8 min-h-[400px]">
-                                    <div className="space-y-4">
+                                    <div className="space-y-6 pb-6">
                                         {taskLists.map(list => (
-                                            <TaskList
-                                                key={list.id}
-                                                id={list.id}
-                                                title={list.title}
-                                                items={list.items as any}
-                                                onTaskToggle={handleTaskToggle}
-                                                onTaskTitleChange={handleTaskTitleChange}
-                                                onTaskUrgencyChange={handleTaskUrgencyChange}
-                                                onTaskTomatoesChange={handleTaskTomatoesChange}
-                                                onAddTask={handleAddTask}
-                                                onRenameList={handleRenameList}
-                                                onDeleteList={handleDeleteList}
-                                                onDeleteTask={handleDeleteTask}
-                                            />
+                                            <div key={list.id} className="w-full bg-muted/30 rounded-xl">
+                                                <TaskList
+                                                    id={list.id}
+                                                    title={list.title}
+                                                    items={list.items as any}
+                                                    onTaskToggle={handleTaskToggle}
+                                                    onTaskTitleChange={handleTaskTitleChange}
+                                                    onTaskUrgencyChange={handleTaskUrgencyChange}
+                                                    onTaskTomatoesChange={handleTaskTomatoesChange}
+                                                    onAddTask={handleAddTask}
+                                                    onRenameList={handleRenameList}
+                                                    onDeleteList={handleDeleteList}
+                                                    onDeleteTask={handleDeleteTask}
+                                                />
+                                            </div>
                                         ))}
+                                        <div className="w-full">
+                                            <Button
+                                                variant="outline"
+                                                className="w-full justify-start h-12 text-muted-foreground hover:text-primary gap-2 bg-background/50 border-dashed"
+                                                onClick={handleAddList}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                                新增任務清單
+                                            </Button>
+                                        </div>
                                     </div>
                                 </TabsContent>
 

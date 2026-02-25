@@ -2,7 +2,7 @@ import { RxJsonSchema } from 'rxdb';
 
 export const projectSchema: RxJsonSchema<any> = {
     title: 'project schema',
-    version: 0,
+    version: 1,
     primaryKey: 'id',
     type: 'object',
     properties: {
@@ -29,6 +29,18 @@ export const projectSchema: RxJsonSchema<any> = {
         },
         areaId: {
             type: 'string'
+        },
+        taskLists: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    id: { type: 'string' },
+                    title: { type: 'string' },
+                    order: { type: 'number' }
+                },
+                required: ['id', 'title']
+            }
         },
         createdAt: {
             type: 'string',

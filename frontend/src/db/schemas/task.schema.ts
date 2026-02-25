@@ -2,7 +2,7 @@ import { RxJsonSchema } from 'rxdb';
 
 export const taskSchema: RxJsonSchema<any> = {
     title: 'task schema',
-    version: 4,
+    version: 5,
     primaryKey: 'id',
     type: 'object',
     properties: {
@@ -20,6 +20,10 @@ export const taskSchema: RxJsonSchema<any> = {
         },
         projectId: {
             type: 'string'
+        },
+        listId: {
+            type: 'string',
+            default: 'default'
         },
         urgency: {
             type: ['string', 'null'],

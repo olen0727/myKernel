@@ -13,6 +13,7 @@ export interface Project extends BaseModel {
     status: ProjectStatus;
     progress: number;
     areaId?: string;
+    taskLists?: { id: string; title: string; order?: number }[];
 }
 
 export interface Area extends BaseModel {
@@ -25,6 +26,7 @@ export interface Task extends BaseModel {
     title: string;
     status: 'todo' | 'doing' | 'done' | 'checked';
     projectId?: string;
+    listId?: string;
     urgency?: 'orange' | 'red' | null;
     tomatoes?: number;
     order?: number;
