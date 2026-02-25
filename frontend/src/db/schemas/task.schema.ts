@@ -2,7 +2,7 @@ import { RxJsonSchema } from 'rxdb';
 
 export const taskSchema: RxJsonSchema<any> = {
     title: 'task schema',
-    version: 3,
+    version: 4,
     primaryKey: 'id',
     type: 'object',
     properties: {
@@ -41,6 +41,10 @@ export const taskSchema: RxJsonSchema<any> = {
         },
         updatedAt: {
             type: 'string',
+            format: 'date-time'
+        },
+        completedAt: {
+            type: ['string', 'null'],
             format: 'date-time'
         }
     },

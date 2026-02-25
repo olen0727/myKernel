@@ -259,6 +259,11 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
                             newDoc.status = 'checked';
                         }
                         return newDoc;
+                    },
+                    4: (oldDoc: any) => {
+                        const newDoc = { ...oldDoc };
+                        newDoc.completedAt = newDoc.completedAt || null;
+                        return newDoc;
                     }
                 }
             },

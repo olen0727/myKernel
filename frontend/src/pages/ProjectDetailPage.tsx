@@ -155,7 +155,13 @@ export default function ProjectDetailPage() {
         const task = tasks.find(t => t.id === taskId);
         if (task && taskService) {
             const newStatus = task.status === 'checked' ? 'todo' : 'checked';
-            await taskService.update(taskId, { status: newStatus });
+            const updates: any = { status: newStatus };
+            if (newStatus === 'checked' && !task.completedAt) {
+                updates.completedAt = new Date().toISOString();
+            } else if (newStatus === 'todo') {
+                updates.completedAt = null;
+            }
+            await taskService.update(taskId, updates);
         }
     }
 

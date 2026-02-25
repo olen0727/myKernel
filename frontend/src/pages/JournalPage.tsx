@@ -152,7 +152,7 @@ export default function JournalPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <h2 className="text-xl font-semibold tracking-tight">Resource Footprints</h2>
+                            <h2 className="text-xl font-semibold tracking-tight">Footprints</h2>
                             <FootprintList date={currentDate} />
                         </div>
                     </div>

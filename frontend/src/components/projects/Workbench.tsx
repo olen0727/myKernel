@@ -139,14 +139,26 @@ export function Workbench() {
 
                 updatedList.forEach((t, i) => {
                     if (t.id === activeId) {
-                        taskService.update(t.id, { status: newStatus, order: i });
+                        const updates: any = { status: newStatus, order: i };
+                        if (newStatus === 'done' && task.status !== 'done') {
+                            updates.completedAt = new Date().toISOString();
+                        } else {
+                            updates.completedAt = null;
+                        }
+                        taskService.update(t.id, updates);
                     } else if (t.order !== i) {
                         taskService.update(t.id, { order: i });
                     }
                 });
             }
         } else if (task && task.status !== newStatus) {
-            await taskService.update(activeId, { status: newStatus });
+            const updates: any = { status: newStatus };
+            if (newStatus === 'done') {
+                updates.completedAt = new Date().toISOString();
+            } else {
+                updates.completedAt = null;
+            }
+            await taskService.update(activeId, updates);
         }
 
         setActiveId(null)
@@ -157,7 +169,13 @@ export function Workbench() {
         const task = allTasks.find(t => t.id === id);
         if (task) {
             const newStatus = task.status === 'done' ? 'doing' : 'done';
-            await taskService.update(id, { status: newStatus });
+            const updates: any = { status: newStatus };
+            if (newStatus === 'done' && !task.completedAt) {
+                updates.completedAt = new Date().toISOString();
+            } else if (newStatus === 'doing') {
+                updates.completedAt = null;
+            }
+            await taskService.update(id, updates);
         }
     }
 
