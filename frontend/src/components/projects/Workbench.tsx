@@ -51,7 +51,7 @@ export function Workbench() {
     const doingTasks = React.useMemo(() =>
         allTasks
             .filter(t => t.status === 'doing' || t.status === 'done')
-            .filter(t => allProjects.some(p => p.id === t.projectId))
+            .filter(t => allProjects.some(p => p.id === t.projectId && p.status !== 'paused'))
             .map(t => ({
                 ...t,
                 projectName: allProjects.find(p => p.id === t.projectId)?.name
@@ -62,7 +62,7 @@ export function Workbench() {
     const todoTasks = React.useMemo(() =>
         allTasks
             .filter(t => t.status === 'todo')
-            .filter(t => allProjects.some(p => p.id === t.projectId))
+            .filter(t => allProjects.some(p => p.id === t.projectId && p.status !== 'paused'))
             .map(t => ({
                 ...t,
                 projectName: allProjects.find(p => p.id === t.projectId)?.name
