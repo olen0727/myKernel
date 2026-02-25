@@ -1,5 +1,26 @@
 import * as React from "react"
 import { Trash2 } from "lucide-react"
+
+const TomatoIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+    >
+        <circle cx="12" cy="13" r="8" />
+        <path d="M12 3v4" />
+        <path d="M12 7c-2 0-4-1-5-2" />
+        <path d="M12 7c2 0 4-1 5-2" />
+        <path d="M12 7c-1 2-1 3-1.5 4" />
+        <path d="M12 7c1 2 1 3 1.5 4" />
+        <path d="M7.5 12a5 5 0 0 1 1.5-3" />
+    </svg>
+)
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -102,7 +123,7 @@ export function TaskItem({
                     className={cn(
                         "w-2.5 h-2.5 rounded-full transition-colors shrink-0",
                         urgency === 'red' ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" :
-                            urgency === 'orange' ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]" :
+                            urgency === 'orange' ? "bg-[#ff9500] shadow-[0_0_8px_rgba(255,149,0,0.5)]" :
                                 editable ? "border border-muted-foreground/30 hover:bg-muted-foreground/20" : "opacity-0"
                     )}
                     title="切換緊急程度 (無 -> 橘 -> 紅)"
@@ -111,7 +132,7 @@ export function TaskItem({
 
                 {isWorkbench ? (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap bg-muted/30 px-1.5 py-0.5 rounded">
-                        <span>🍅</span>
+                        <TomatoIcon className="w-3.5 h-3.5 text-primary fill-primary/20" />
                         <span className="font-medium">x {tomatoes}</span>
                     </div>
                 ) : (
@@ -125,11 +146,11 @@ export function TaskItem({
                                 }}
                                 disabled={!editable}
                                 className={cn(
-                                    "text-xs transition-all",
-                                    tomatoes >= v ? "opacity-100 scale-100" : "opacity-30 scale-90 grayscale hover:grayscale-0 hover:opacity-70"
+                                    "transition-all",
+                                    tomatoes >= v ? "text-primary opacity-100 scale-100" : "text-muted-foreground opacity-30 scale-90 hover:opacity-70 hover:text-primary/70"
                                 )}
                             >
-                                🍅
+                                <TomatoIcon className={cn("w-3.5 h-3.5", tomatoes >= v ? "fill-primary/20" : "fill-none opacity-60 grayscale")} />
                             </button>
                         ))}
                     </div>
