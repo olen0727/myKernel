@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { format, isSameDay } from "date-fns"
 import { cn } from "@/lib/utils"
-import { FileText, Link as LinkIcon, NotebookPen, ExternalLink, CheckCircle2 } from "lucide-react"
+import { FileText, Link as LinkIcon, NotebookPen, CheckCircle2 } from "lucide-react"
 import { services, ResourceService, TaskService } from "@/services"
 import { useObservable } from "@/hooks/use-observable"
 import { Resource, Task } from "@/types/models"
@@ -134,17 +134,12 @@ export function FootprintList({ date }: FootprintListProps) {
                                 <div className="text-muted-foreground group-hover:text-primary transition-colors">
                                     {getIcon(fp.type)}
                                 </div>
-                                <div className="flex-1 min-w-0 space-y-1">
+                                <div className="flex-1 min-w-0 flex flex-col justify-center space-y-1">
                                     <div className="flex items-center justify-between gap-2">
-                                        <label className="text-xs truncate">{fp.title}</label>
-                                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                            {format(fp.timestamp, "HH:mm")}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
+                                        <label className="text-xs truncate cursor-pointer">{fp.title}</label>
                                         <span
                                             className={cn(
-                                                "text-[10px] px-1.5 py-0.5 rounded-full font-medium uppercase tracking-wider",
+                                                "text-[10px] px-1.5 py-0.5 rounded-full font-medium uppercase tracking-wider shrink-0",
                                                 fp.action === "created"
                                                     ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
                                                     : "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400"
@@ -152,15 +147,12 @@ export function FootprintList({ date }: FootprintListProps) {
                                         >
                                             {fp.action}
                                         </span>
-                                        {fp.summary && (
-                                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                                {fp.summary}
-                                            </p>
-                                        )}
                                     </div>
-                                </div>
-                                <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                                    {fp.summary && (
+                                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                            {fp.summary}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         ))}
