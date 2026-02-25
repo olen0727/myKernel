@@ -292,7 +292,7 @@ function DroppableColumn({
                 isOver && "bg-accent/10"
             )}
         >
-            <div className="flex items-center justify-between px-6 py-3 bg-muted/10 border-b">
+            <div className="h-9 flex items-center justify-between px-6 py-3 bg-muted/10 border-b">
                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{title}</h3>
                 {headerAction}
             </div>

@@ -87,6 +87,16 @@ export default function ProjectListPage() {
         }
     }
 
+    const handleStatusChange = async (projectId: string, newStatus: ProjectStatus) => {
+        if (!projectService) return;
+        try {
+            await projectService.update(projectId, { status: newStatus });
+            toast.success("專案狀態已更新");
+        } catch (error) {
+            toast.error("更新專案狀態失敗");
+        }
+    }
+
     if (!projectService || !areaService || !taskService) {
         return <div className="h-full flex items-center justify-center">Loading Projects...</div>
     }
@@ -136,6 +146,7 @@ export default function ProjectListPage() {
                                         key={project.id}
                                         {...project}
                                         onClick={() => navigate(`/projects/${project.id}`)}
+                                        onStatusChange={handleStatusChange}
                                     />
                                 ))}
                             </div>

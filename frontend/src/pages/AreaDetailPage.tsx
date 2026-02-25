@@ -148,6 +148,16 @@ const AreaDetailPage: React.FC = () => {
         }
     }
 
+    const handleProjectStatusChange = async (projectId: string, newStatus: Project['status']) => {
+        if (!projectService) return;
+        try {
+            await projectService.update(projectId, { status: newStatus });
+            toast.success("專案狀態已更新");
+        } catch (error) {
+            toast.error("更新專案狀態失敗");
+        }
+    }
+
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <AreaHeader
@@ -201,6 +211,7 @@ const AreaDetailPage: React.FC = () => {
                                                 doneTasks={done}
                                                 totalTasks={total}
                                                 onClick={() => navigate(`/projects/${project.id}`)}
+                                                onStatusChange={handleProjectStatusChange}
                                             />
                                         )
                                     })

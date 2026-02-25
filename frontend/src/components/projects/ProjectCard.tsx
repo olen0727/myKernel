@@ -1,27 +1,38 @@
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, Play, Pause, CheckCircle2, Archive } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { ProjectStatus } from "@/types/models"
 
 export interface ProjectCardProps {
     id: string
     name: string
     area: string
-    status: "active" | "paused" | "completed" | "archived"
+    status: ProjectStatus
     doneTasks: number
     totalTasks: number
     onClick?: () => void
+    onStatusChange?: (id: string, status: ProjectStatus) => void
 }
 
 export function ProjectCard({
+    id,
     name,
     area,
     status,
     doneTasks,
     totalTasks,
-    onClick
+    onClick,
+    onStatusChange
 }: ProjectCardProps) {
     const progress = totalTasks > 0 ? (doneTasks / totalTasks) * 100 : 0
 
@@ -39,9 +50,34 @@ export function ProjectCard({
                         {area}
                     </Badge>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                {onStatusChange && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem onClick={() => onStatusChange(id, 'active')}>
+                                <Play className="w-4 h-4 mr-2" />
+                                設為 Active (進行中)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onStatusChange(id, 'paused')}>
+                                <Pause className="w-4 h-4 mr-2" />
+                                設為 Paused (已暫停)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onStatusChange(id, 'completed')}>
+                                <CheckCircle2 className="w-4 h-4 mr-2" />
+                                設為 Completed (已完成)
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onStatusChange(id, 'archived')}>
+                                <Archive className="w-4 h-4 mr-2" />
+                                設為 Archived (封存)
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
