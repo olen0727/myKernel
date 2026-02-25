@@ -252,6 +252,13 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
                         newDoc.tomatoes = newDoc.tomatoes || 1;
                         newDoc.order = newDoc.order || 0;
                         return newDoc;
+                    },
+                    3: (oldDoc: any) => {
+                        const newDoc = { ...oldDoc };
+                        if (oldDoc.status === 'done') {
+                            newDoc.status = 'checked';
+                        }
+                        return newDoc;
                     }
                 }
             },

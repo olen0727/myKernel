@@ -24,6 +24,7 @@ import {
     arrayMove,
 } from "@dnd-kit/sortable"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 import { TaskService, ProjectService, services } from "@/services"
 import { useObservable } from "@/hooks/use-observable"
@@ -49,7 +50,7 @@ export function Workbench() {
 
     const doingTasks = React.useMemo(() =>
         allTasks
-            .filter(t => t.status === 'doing')
+            .filter(t => t.status === 'doing' || t.status === 'done')
             .filter(t => allProjects.some(p => p.id === t.projectId))
             .map(t => ({
                 ...t,
@@ -102,8 +103,8 @@ export function Workbench() {
         if (!overContainer) return;
 
         // Determine new status
-        const newStatus = overContainer === "doing" ? 'doing' : 'todo';
         const task = allTasks.find(t => t.id === activeId);
+        const newStatus = overContainer === "todo" ? 'todo' : (task?.status === 'done' ? 'done' : 'doing');
 
         if (activeId !== overId) {
             const targetList = newStatus === 'doing' ? doingTasks : todoTasks;
@@ -126,7 +127,7 @@ export function Workbench() {
                 let updatedList = [...targetList];
                 const updatedTask = {
                     ...task,
-                    status: newStatus as 'todo' | 'doing',
+                    status: newStatus as 'todo' | 'doing' | 'done',
                     projectName: allProjects.find(p => p.id === task.projectId)?.name
                 };
 
@@ -153,8 +154,19 @@ export function Workbench() {
 
     const handleToggleTask = async (id: string) => {
         if (!taskService) return;
-        // If in workbench, toggling means completing it
-        await taskService.update(id, { status: 'done' });
+        const task = allTasks.find(t => t.id === id);
+        if (task) {
+            const newStatus = task.status === 'done' ? 'doing' : 'done';
+            await taskService.update(id, { status: newStatus });
+        }
+    }
+
+    const handleCheckTasks = async () => {
+        if (!taskService) return;
+        const tasksToCheck = doingTasks.filter(t => t.status === 'done');
+        for (const t of tasksToCheck) {
+            await taskService.update(t.id, { status: 'checked' });
+        }
     }
 
     const handleTitleChange = async (id: string, newTitle: string) => {
@@ -195,6 +207,17 @@ export function Workbench() {
                         id="doing"
                         title="Do Today 焦點"
                         tasks={doingTasks}
+                        headerAction={
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs px-3"
+                                onClick={handleCheckTasks}
+                                disabled={!doingTasks.some(t => t.status === 'done')}
+                            >
+                                Check Tasks
+                            </Button>
+                        }
                         onToggle={handleToggleTask}
                         onTitleChange={handleTitleChange}
                         onUrgencyChange={handleUrgencyChange}
@@ -240,6 +263,7 @@ function DroppableColumn({
     title,
     tasks,
     isLast = false,
+    headerAction,
     onToggle,
     onTitleChange,
     onUrgencyChange,
@@ -250,6 +274,7 @@ function DroppableColumn({
     title: string,
     tasks: any[],
     isLast?: boolean,
+    headerAction?: React.ReactNode,
     onToggle: (id: string) => void,
     onTitleChange: (id: string, title: string) => void,
     onUrgencyChange: (id: string, urgency: 'orange' | 'red' | null) => void,
@@ -267,8 +292,9 @@ function DroppableColumn({
                 isOver && "bg-accent/10"
             )}
         >
-            <div className="px-6 py-3 bg-muted/10 border-b">
+            <div className="flex items-center justify-between px-6 py-3 bg-muted/10 border-b">
                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{title}</h3>
+                {headerAction}
             </div>
             <ScrollArea className="flex-1 p-4">
                 <div className="space-y-1">

@@ -23,7 +23,7 @@ export interface Area extends BaseModel {
 
 export interface Task extends BaseModel {
     title: string;
-    status: 'todo' | 'doing' | 'done';
+    status: 'todo' | 'doing' | 'done' | 'checked';
     projectId?: string;
     urgency?: 'orange' | 'red' | null;
     tomatoes?: number;

@@ -30,7 +30,7 @@ export interface TaskItemProps {
     id: string
     title: string
     projectName?: string
-    status: 'todo' | 'doing' | 'done'
+    status: 'todo' | 'doing' | 'done' | 'checked'
     urgency?: 'orange' | 'red' | null
     tomatoes?: number
     onToggle?: (id: string) => void
@@ -80,11 +80,33 @@ export function TaskItem({
 
     return (
         <div className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded-md transition-colors group">
-            <Checkbox
-                id={`task-${id}`}
-                checked={status === 'done'}
-                onCheckedChange={() => onToggle?.(id)}
-            />
+            {isWorkbench && status === 'todo' ? (
+                <Checkbox
+                    id={`task-${id}`}
+                    checked={false}
+                    disabled={true}
+                    className="mt-0.5 opacity-50 cursor-not-allowed"
+                />
+            ) : isWorkbench ? (
+                <Checkbox
+                    id={`task-${id}`}
+                    checked={status === 'done'}
+                    onCheckedChange={() => onToggle?.(id)}
+                    disabled={!editable}
+                    className={cn(
+                        "mt-0.5 transition-all",
+                        status === 'done' && "opacity-50"
+                    )}
+                />
+            ) : (
+                <Checkbox
+                    id={`task-${id}`}
+                    checked={status === 'checked' || status === 'done'}
+                    onCheckedChange={() => onToggle?.(id)}
+                    disabled={!editable}
+                    className="mt-0.5 transition-all"
+                />
+            )}
             {isEditing && editable ? (
                 <Input
                     className="flex-1 h-7 text-sm py-1 px-2"
@@ -99,7 +121,7 @@ export function TaskItem({
                     htmlFor={`task-${id}`}
                     className={cn(
                         "flex-1 text-sm font-medium leading-none cursor-pointer",
-                        status === 'done' && "line-through text-muted-foreground"
+                        (status === 'done' || status === 'checked') && "line-through text-muted-foreground"
                     )}
                     onClick={(e) => {
                         if (editable) {

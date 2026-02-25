@@ -154,7 +154,7 @@ export default function ProjectDetailPage() {
     const handleTaskToggle = async (_listId: string, taskId: string) => {
         const task = tasks.find(t => t.id === taskId);
         if (task && taskService) {
-            const newStatus = task.status === 'done' ? 'todo' : 'done';
+            const newStatus = task.status === 'checked' ? 'todo' : 'checked';
             await taskService.update(taskId, { status: newStatus });
         }
     }
