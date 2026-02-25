@@ -79,7 +79,7 @@ export function TaskItem({
     }
 
     return (
-        <div className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded-md transition-colors group">
+        <div className="flex items-center gap-3 p-1 hover:bg-muted/50 rounded-md transition-colors group">
             {isWorkbench && status === 'todo' ? (
                 <Checkbox
                     id={`task-${id}`}
@@ -120,7 +120,7 @@ export function TaskItem({
                 <label
                     htmlFor={`task-${id}`}
                     className={cn(
-                        "flex-1 text-sm font-medium leading-none cursor-pointer",
+                        "flex-1 text-xs font-medium leading-none cursor-pointer",
                         (status === 'done' || status === 'checked') && "line-through text-muted-foreground"
                     )}
                     onClick={(e) => {
