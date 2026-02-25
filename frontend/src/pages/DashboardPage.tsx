@@ -51,7 +51,15 @@ const DashboardPage: React.FC = () => {
 
     // Calculations
     const activeProjects = projects.filter(p => p.status === 'active').length;
-    const pendingTasks = tasks.filter(t => t.status !== 'done').length;
+
+    // Match Workbench logic: include 'todo' and 'doing', exclude 'done'/'checked' AND exclude paused projects
+    const pendingTasks = tasks.filter(t => {
+        if (t.status === 'done' || t.status === 'checked') return false;
+        const proj = projects.find(p => p.id === t.projectId);
+        if (!proj) return false; // Exclude ghost tasks or tasks without a valid project
+        if (proj.status === 'paused') return false;
+        return true;
+    }).length;
 
     // Inbox: Resources with no project/area
     const inboxCount = resources.filter(r => !r.projectId && !r.areaId).length;
