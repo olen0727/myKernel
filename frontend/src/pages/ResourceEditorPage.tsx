@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Cloud, CheckCircle2 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { services, ResourceService } from "@/services"
+import { services, ResourceService, ProjectService, AreaService } from "@/services"
 import { Resource } from "@/types/models"
 
 // Helper to adapt DB Resource to UI format
@@ -30,12 +30,15 @@ export default function ResourceEditorPage() {
 
     // Service Instance
     const [resourceService, setResourceService] = useState<ResourceService | null>(null)
+    const [projectService, setProjectService] = useState<ProjectService | null>(null)
+    const [areaService, setAreaService] = useState<AreaService | null>(null)
 
     // Initialize Service
     useEffect(() => {
         const init = async () => {
-            const svc = await services.resource
-            setResourceService(svc)
+            setResourceService(await services.resource)
+            setProjectService(await services.project)
+            setAreaService(await services.area)
         }
         init()
     }, [])
@@ -43,7 +46,7 @@ export default function ResourceEditorPage() {
     // Load Data
     useEffect(() => {
         const loadResource = async () => {
-            if (!id || !resourceService) return
+            if (!id || !resourceService || !projectService || !areaService) return
 
             try {
                 setIsLoading(true)
@@ -60,15 +63,21 @@ export default function ResourceEditorPage() {
                 // Fetch linked project/area names if needed (Skipping for MVP speed, using IDs as names temporarily or empty)
                 // In a real app we would join efficiently. Here we construct LinkedItems from projectId/areaId.
                 const linkedItems: DispatchItem[] = []
-                if (resource.projectId) {
-                    // Ideally fetch project name. For now let's hope we can optimize later.
-                    // We'll leave the name generic or empty if we don't fetch it, 
-                    // but to show it in UI we might need a separate fetch.
-                    // Let's do a quick hack: if connected, show generic badge until we load names.
-                    linkedItems.push({ id: resource.projectId, name: "Project", type: "project" })
+                if (resource.projectIds && resource.projectIds.length > 0) {
+                    for (const pid of resource.projectIds) {
+                        const p = await projectService.getById(pid);
+                        if (p) {
+                            linkedItems.push({ id: pid, name: p.name, type: "project" })
+                        }
+                    }
                 }
-                if (resource.areaId) {
-                    linkedItems.push({ id: resource.areaId, name: "Area", type: "area" })
+                if (resource.areaIds && resource.areaIds.length > 0) {
+                    for (const aid of resource.areaIds) {
+                        const a = await areaService.getById(aid);
+                        if (a) {
+                            linkedItems.push({ id: aid, name: a.name, type: "area" })
+                        }
+                    }
                 }
 
                 // If we really want names, we can fetch them here. 
@@ -92,7 +101,7 @@ export default function ResourceEditorPage() {
         }
 
         loadResource()
-    }, [id, resourceService, navigate])
+    }, [id, resourceService, projectService, areaService, navigate])
 
 
     // Generic Update Handler
@@ -149,12 +158,12 @@ export default function ResourceEditorPage() {
         // Or both? Schema details: projectId, areaId. 
         // So we extract the first project and first area found.
 
-        const project = selectedItems.find(i => i.type === 'project')
-        const area = selectedItems.find(i => i.type === 'area')
+        const projectIds = selectedItems.filter(i => i.type === 'project').map(i => i.id)
+        const areaIds = selectedItems.filter(i => i.type === 'area').map(i => i.id)
 
         const updates: Partial<Resource> = {
-            projectId: project?.id || undefined, // undefined to remove? or null? RxDB might prefer null or empty
-            areaId: area?.id || undefined
+            projectIds: projectIds,
+            areaIds: areaIds
         }
 
         setData(prev => prev ? { ...prev, linkedItems: selectedItems } : null)
