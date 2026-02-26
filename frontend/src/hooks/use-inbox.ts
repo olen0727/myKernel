@@ -20,7 +20,7 @@ export function useInbox() {
     const inboxResources = useMemo(() => {
         return allResources.filter(r => {
             const isArchived = r.status === 'archived';
-            const isProcessed = r.status === 'processed' || (r.projectId || r.areaId);
+            const isProcessed = r.status === 'processed' || (r.projectIds?.length || r.areaIds?.length);
             return !isArchived && !isProcessed;
         }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     }, [allResources]);

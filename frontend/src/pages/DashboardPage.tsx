@@ -62,7 +62,7 @@ const DashboardPage: React.FC = () => {
     }).length;
 
     // Inbox: Resources with no project/area
-    const inboxCount = resources.filter(r => !r.projectId && !r.areaId).length;
+    const inboxCount = resources.filter(r => (!r.projectIds || r.projectIds.length === 0) && (!r.areaIds || r.areaIds.length === 0)).length;
 
     // Brain-Sync Days: Habits where name includes '日記' or completed dates of all?
     // Using the 'Journal' habit's completed streak or count.
