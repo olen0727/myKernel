@@ -219,7 +219,7 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
     }
 
     const dbConfig = {
-        name: 'kernel_db_v2',
+        name: 'kernel_db',
         storage,
         password,
         ignoreDuplicate: true, // Useful for HMR
@@ -283,7 +283,19 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
                     }
                 }
             },
-            resources: { schema: resourceSchema },
+            resources: {
+                schema: resourceSchema,
+                migrationStrategies: {
+                    1: (oldDoc: any) => {
+                        const newDoc = { ...oldDoc };
+                        newDoc.projectIds = oldDoc.projectId ? [oldDoc.projectId] : [];
+                        newDoc.areaIds = oldDoc.areaId ? [oldDoc.areaId] : [];
+                        delete newDoc.projectId;
+                        delete newDoc.areaId;
+                        return newDoc;
+                    }
+                }
+            },
             habits: {
                 schema: habitSchema,
                 migrationStrategies: {
@@ -325,6 +337,7 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
             err?.code === 'DB1' ||
             err?.code === 'DB6' ||
             err?.code === 'DM4' || // Migration error
+            err?.code === 'EN3' || // Encrypted properties without password
             err?.message?.includes('password') ||
             err?.message?.includes('different schema') ||
             err?.message?.includes('closed'); // Handle "RxStorageInstance is closed" errors
@@ -339,10 +352,10 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
             try {
                 // Must remove using the exact name and storage
                 console.log('🧹 Attempting to clean up old database...');
-                await removeRxDatabase('kernel_db_v2', storage);
+                await removeRxDatabase('kernel_db', storage);
 
                 // ALSO try removing with raw Dexie storage just in case the wrapper didn't clean up the underlying IDB completely
-                await removeRxDatabase('kernel_db_v2', getRxStorageDexie());
+                await removeRxDatabase('kernel_db', getRxStorageDexie());
 
                 console.log('✅ Old database removed. Recreating...');
 
@@ -359,13 +372,36 @@ export const createDatabase = async (password?: string): Promise<KernelDatabase>
                         const idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
                         if (!idb) throw new Error('IndexedDB not available');
 
-                        const req = idb.deleteDatabase('kernel_db_v2');
-                        req.onsuccess = () => resolve();
-                        req.onerror = () => reject(req.error);
-                        req.onblocked = () => console.warn('⚠️ Native deletion blocked. Close other tabs!');
+                        // Attempt to close existing connections first if possible
+                        try {
+                            const dbReq = idb.open('kernel_db');
+                            dbReq.onsuccess = (e: any) => {
+                                const db = e.target.result;
+                                db.close();
+                                const req = idb.deleteDatabase('kernel_db');
+                                req.onsuccess = () => resolve();
+                                req.onerror = () => reject(req.error);
+                                req.onblocked = () => {
+                                    console.warn('⚠️ Native deletion blocked. Attempting to proceed anyway...');
+                                    resolve(); // Assume success if blocked by another tab
+                                };
+                            };
+                            dbReq.onerror = () => {
+                                // Fallback if open fails
+                                const req = idb.deleteDatabase('kernel_db');
+                                req.onsuccess = () => resolve();
+                                req.onerror = () => reject(req.error);
+                            }
+                        } catch (e) {
+                            const req = idb.deleteDatabase('kernel_db');
+                            req.onsuccess = () => resolve();
+                            req.onerror = () => reject(req.error);
+                        }
                     });
 
                     console.log('✅ Manual deletion successful. Retrying init...');
+                    // Add a small delay to allow IDB to fully release locks
+                    await new Promise(resolve => setTimeout(resolve, 500));
                     db = await init();
                     console.log('✅ Database reset and recreated successfully (via native nuke).');
                 } catch (finalErr) {

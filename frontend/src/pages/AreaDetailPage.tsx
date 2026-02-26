@@ -64,7 +64,7 @@ const AreaDetailPage: React.FC = () => {
     const allHabits = useObservable<Habit[]>(allHabits$, []) || [];
 
     const relatedProjects = useMemo(() => allProjects.filter(p => p.areaId === id), [allProjects, id]);
-    const relatedResources = useMemo(() => allResources.filter(r => r.areaId === id), [allResources, id]);
+    const relatedResources = useMemo(() => allResources.filter(r => r.areaIds?.includes(id!)), [allResources, id]);
     // Assuming Habit has areaId, loosely typed for now as interface might not be updated
     const relatedHabits = useMemo(() => allHabits.filter(h => (h as any).areaId === id), [allHabits, id]);
 

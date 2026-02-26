@@ -41,8 +41,8 @@ export interface Resource extends BaseModel {
     url?: string;
     content?: string;
     context?: string;
-    projectId?: string;
-    areaId?: string;
+    projectIds?: string[];
+    areaIds?: string[];
     status?: 'inbox' | 'processed' | 'archived';
     tags?: string[];
 }

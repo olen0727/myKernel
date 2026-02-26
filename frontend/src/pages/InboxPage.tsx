@@ -11,6 +11,8 @@ import { services, ResourceService } from "@/services"
 import { useObservable } from "@/hooks/use-observable"
 import { useNavigate } from "react-router-dom"
 import { Resource } from "@/types/models"
+import { DispatchItem } from "@/components/resources/DispatchModal"
+import { Check } from "lucide-react"
 
 export const InboxPage: React.FC = () => {
     const navigate = useNavigate();
@@ -34,7 +36,7 @@ export const InboxPage: React.FC = () => {
             // Or explicitly status === 'inbox' (if we set it)
             // Default is inbox if context missing.
             const isArchived = r.status === 'archived';
-            const isProcessed = r.status === 'processed' || (r.projectId || r.areaId);
+            const isProcessed = r.status === 'processed' || ((r.projectIds && r.projectIds.length > 0) || (r.areaIds && r.areaIds.length > 0));
 
             return !isArchived && !isProcessed;
         }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
@@ -65,6 +67,31 @@ export const InboxPage: React.FC = () => {
             })
         } catch (e) {
             toast.error("刪除失敗");
+        }
+    }
+
+    const handleDispatch = async (id: string, selectedItems: DispatchItem[]) => {
+        if (!resourceService) return;
+        try {
+            const r = allResources.find(res => res.id === id);
+
+            // Extract Project IDs and Area IDs from selected items
+            const projectIds = selectedItems.filter(i => i.type === 'project').map(i => i.id);
+            const areaIds = selectedItems.filter(i => i.type === 'area').map(i => i.id);
+
+            await resourceService.update(id, {
+                status: 'processed',
+                projectIds,
+                areaIds
+            });
+
+            toast.success("資源分流成功", {
+                description: `已將「${r?.title}」標記為已處理並關聯至 ${selectedItems.length} 個目標。`,
+                // eslint-disable-next-line react/jsx-no-undef
+                icon: <Check className="w-4 h-4 text-primary" />
+            });
+        } catch (e) {
+            toast.error("分流更新失敗");
         }
     }
 
@@ -120,6 +147,7 @@ export const InboxPage: React.FC = () => {
                                     resource={resource}
                                     onArchive={handleArchive}
                                     onDelete={handleDelete}
+                                    onDispatch={handleDispatch}
                                 />
                             ))}
                         </div>

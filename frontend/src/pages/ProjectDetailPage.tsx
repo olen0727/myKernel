@@ -88,7 +88,7 @@ export default function ProjectDetailPage() {
     // For resources, filter client side for MVP
     const allResources = useObservable<Resource[]>(allResources$, []) || [];
     const projectResources = React.useMemo(() =>
-        allResources.filter(r => r.projectId === projectId || r.context === projectId),
+        allResources.filter(r => r.projectIds?.includes(projectId!) || r.context === projectId),
         [allResources, projectId]);
 
     const [activeId, setActiveId] = React.useState<string | null>(null)
@@ -404,6 +404,7 @@ export default function ProjectDetailPage() {
                                             {projectResources.map((resource) => (
                                                 <div
                                                     key={resource.id}
+                                                    onClick={() => navigate(`/resources/${resource.id}`)}
                                                     className="group flex items-start gap-4 p-4 rounded-xl border border-border/50 hover:border-border hover:bg-muted/30 transition-all cursor-pointer"
                                                 >
                                                     <div className={`mt-0.5 p-2.5 rounded-lg flex items-center justify-center ${resource.type === "note"

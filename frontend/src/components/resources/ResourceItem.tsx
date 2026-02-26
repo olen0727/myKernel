@@ -9,8 +9,7 @@ import {
     Trash2,
     ExternalLink,
     ChevronRight,
-    FolderPlus,
-    CheckCircle2
+    FolderPlus
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -50,13 +49,15 @@ interface ResourceItemProps {
     onArchive: (id: string) => void
     onDelete: (id: string) => void
     onStatusChange?: (id: string, status: ResourceStatus) => void
+    onDispatch?: (id: string, selectedItems: DispatchItem[]) => void
 }
 
 export const ResourceItem: React.FC<ResourceItemProps> = ({
     resource,
     onArchive,
     onDelete,
-    onStatusChange
+    onStatusChange,
+    onDispatch
 }) => {
     const navigate = useNavigate()
     const [isDispatchOpen, setIsDispatchOpen] = React.useState(false)
@@ -66,14 +67,13 @@ export const ResourceItem: React.FC<ResourceItemProps> = ({
     const linkedItems = resource.linkedItems ?? []
 
     const handleConfirmDispatch = (selectedItems: DispatchItem[]) => {
-        console.log(`Dispatching resource ${resource.id} to:`, selectedItems)
-        toast.success("資源分流成功", {
-            description: `已將「${resource.title}」標記為已處理並關聯至 ${selectedItems.length} 個目標。`,
-            icon: <CheckCircle2 className="w-4 h-4 text-primary" />
-        })
-        // Auto-change status to processed if currently inbox (H5 fix)
-        if (resource.status === "inbox" && onStatusChange) {
-            onStatusChange(resource.id, "processed")
+        if (onDispatch) {
+            onDispatch(resource.id, selectedItems)
+        } else {
+            // Fallback for pages that only provide onStatusChange but not onDispatch
+            if (resource.status === "inbox" && onStatusChange) {
+                onStatusChange(resource.id, "processed")
+            }
         }
     }
 

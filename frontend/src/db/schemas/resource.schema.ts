@@ -2,7 +2,7 @@ import { RxJsonSchema } from 'rxdb';
 
 export const resourceSchema: RxJsonSchema<any> = {
     title: 'resource schema',
-    version: 0,
+    version: 1,
     primaryKey: 'id',
     type: 'object',
     properties: {
@@ -37,11 +37,17 @@ export const resourceSchema: RxJsonSchema<any> = {
             type: 'string',
             format: 'date-time'
         },
-        projectId: {
-            type: 'string'
+        projectIds: {
+            type: 'array',
+            items: {
+                type: 'string'
+            }
         },
-        areaId: {
-            type: 'string'
+        areaIds: {
+            type: 'array',
+            items: {
+                type: 'string'
+            }
         },
         status: {
             type: 'string',
@@ -54,6 +60,5 @@ export const resourceSchema: RxJsonSchema<any> = {
             }
         }
     },
-    required: ['id', 'title', 'createdAt'],
-    encrypted: ['content']
+    required: ['id', 'title', 'createdAt']
 };

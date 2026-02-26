@@ -41,20 +41,24 @@ export default function ResourceLibraryPage() {
     // Map DB resources to Component resources
     const mappedResources = useMemo(() => {
         return allResources.map(r => {
-            const linkedItems = [];
-            if (r.projectId) {
-                const p = allProjects.find(p => p.id === r.projectId);
-                if (p) linkedItems.push({ id: p.id, name: p.name, type: 'project' as const });
+            const linkedItems: { id: string, name: string, type: 'project' | 'area' }[] = [];
+            if (r.projectIds && r.projectIds.length > 0) {
+                r.projectIds.forEach(pid => {
+                    const p = allProjects.find(p => p.id === pid);
+                    if (p) linkedItems.push({ id: p.id, name: p.name, type: 'project' as const });
+                });
             }
-            if (r.areaId) {
-                const a = allAreas.find(a => a.id === r.areaId);
-                if (a) linkedItems.push({ id: a.id, name: a.name, type: 'area' as const });
+            if (r.areaIds && r.areaIds.length > 0) {
+                r.areaIds.forEach(aid => {
+                    const a = allAreas.find(a => a.id === aid);
+                    if (a) linkedItems.push({ id: a.id, name: a.name, type: 'area' as const });
+                });
             }
 
             // Infer status if missing
             let status = r.status as ResourceStatus;
             if (!status) {
-                if (!r.projectId && !r.areaId) status = 'inbox';
+                if ((!r.projectIds || r.projectIds.length === 0) && (!r.areaIds || r.areaIds.length === 0)) status = 'inbox';
                 else status = 'processed';
             }
 

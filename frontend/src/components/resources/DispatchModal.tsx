@@ -12,6 +12,9 @@ import { Badge } from "@/components/ui/badge"
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Check, Folder, Layers, X, MoveHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { services, ProjectService, AreaService } from "@/services"
+import { useObservable } from "@/hooks/use-observable"
+import { Project, Area } from "@/types/models"
 
 export interface DispatchItem {
     id: string
@@ -26,21 +29,6 @@ interface DispatchModalProps {
     initialSelected?: DispatchItem[]
 }
 
-// Mock Data for Projects and Areas
-const MOCK_PROJECTS: DispatchItem[] = [
-    { id: "p1", name: "Kernel Development", type: "project" },
-    { id: "p2", name: "Home Renovation", type: "project" },
-    { id: "p3", name: "Fitness Goal 2026", type: "project" },
-]
-
-const MOCK_AREAS: DispatchItem[] = [
-    { id: "a1", name: "Work", type: "area" },
-    { id: "a2", name: "Personal", type: "area" },
-    { id: "a3", name: "Health", type: "area" },
-]
-
-const ALL_ITEMS = [...MOCK_PROJECTS, ...MOCK_AREAS]
-
 export function DispatchModal({
     isOpen,
     onOpenChange,
@@ -51,12 +39,38 @@ export function DispatchModal({
         initialSelected.map(item => item.id)
     )
 
+    const [projectService, setProjectService] = React.useState<ProjectService | undefined>()
+    const [areaService, setAreaService] = React.useState<AreaService | undefined>()
+
+    React.useEffect(() => {
+        const load = async () => {
+            setProjectService(await services.project)
+            setAreaService(await services.area)
+        }
+        load()
+    }, [])
+
+    const projects$ = React.useMemo(() => projectService?.getAll$(), [projectService])
+    const areas$ = React.useMemo(() => areaService?.getAll$(), [areaService])
+
+    const dbProjects = useObservable<Project[]>(projects$, []) || []
+    const dbAreas = useObservable<Area[]>(areas$, []) || []
+
+    const mappedProjects: DispatchItem[] = React.useMemo(() =>
+        dbProjects.map(p => ({ id: p.id, name: p.name, type: "project" })), [dbProjects])
+
+    const mappedAreas: DispatchItem[] = React.useMemo(() =>
+        dbAreas.map(a => ({ id: a.id, name: a.name, type: "area" })), [dbAreas])
+
+    const allItems = React.useMemo(() => [...mappedProjects, ...mappedAreas], [mappedProjects, mappedAreas])
+
     // L1: Reset state when modal opens/closes
     React.useEffect(() => {
         if (isOpen) {
             setSelectedIds(initialSelected.map(item => item.id))
         }
-    }, [isOpen, initialSelected])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen])
 
     const toggleSelection = (id: string) => {
         setSelectedIds((prev) =>
@@ -66,7 +80,7 @@ export function DispatchModal({
 
     const handleConfirm = () => {
         // Return full item objects, not just IDs
-        const selectedItems = ALL_ITEMS.filter(item => selectedIds.includes(item.id))
+        const selectedItems = allItems.filter(item => selectedIds.includes(item.id))
         onConfirm(selectedItems)
         onOpenChange(false)
     }
@@ -79,7 +93,7 @@ export function DispatchModal({
         onOpenChange(open)
     }
 
-    const selectedItems = ALL_ITEMS.filter(item => selectedIds.includes(item.id))
+    const selectedItems = allItems.filter(item => selectedIds.includes(item.id))
 
     return (
         <CommandDialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -121,9 +135,10 @@ export function DispatchModal({
                 <CommandList className="flex-1">
                     <CommandEmpty>找不到相符的項目。</CommandEmpty>
                     <CommandGroup heading="Projects">
-                        {MOCK_PROJECTS.map((project) => (
+                        {mappedProjects.map((project) => (
                             <CommandItem
                                 key={project.id}
+                                value={project.name}
                                 onSelect={() => toggleSelection(project.id)}
                                 className="flex items-center justify-between py-3 cursor-pointer"
                             >
@@ -139,9 +154,10 @@ export function DispatchModal({
                     </CommandGroup>
                     <CommandSeparator />
                     <CommandGroup heading="Areas">
-                        {MOCK_AREAS.map((area) => (
+                        {mappedAreas.map((area) => (
                             <CommandItem
                                 key={area.id}
+                                value={area.name}
                                 onSelect={() => toggleSelection(area.id)}
                                 className="flex items-center justify-between py-3 cursor-pointer"
                             >
