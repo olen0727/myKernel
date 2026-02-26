@@ -98,7 +98,7 @@ export function FilterBar({
                     <SelectContent>
                         <SelectItem value="all">全部 All</SelectItem>
                         <SelectItem value="processed">已處理 Processed</SelectItem>
-                        <SelectItem value="archived">已歸檔 Archived</SelectItem>
+                        <SelectItem value="archived">已封存 Archived</SelectItem>
                         <SelectItem value="inbox">收件匣 Inbox</SelectItem>
                     </SelectContent>
                 </Select>

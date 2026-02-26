@@ -115,7 +115,7 @@ export default function ResourceLibraryPage() {
         if (!resourceService) return;
         try {
             await resourceService.update(id, { status: 'archived' });
-            toast.success("資源已歸檔");
+            toast.success("資源已封存");
         } catch (e) {
             toast.error("操作失敗");
         }

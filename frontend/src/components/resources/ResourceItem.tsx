@@ -179,7 +179,7 @@ export const ResourceItem: React.FC<ResourceItemProps> = ({
                                 e.stopPropagation()
                                 onArchive(resource.id)
                             }}
-                            title="歸檔"
+                            title="封存"
                         >
                             <Archive className="w-4 h-4" />
                         </Button>
@@ -214,7 +214,7 @@ export const ResourceItem: React.FC<ResourceItemProps> = ({
                 <ContextMenuSeparator />
                 <ContextMenuItem onClick={() => onArchive(resource.id)}>
                     <Archive className="mr-2 h-4 w-4 opacity-60" />
-                    <span>歸檔 (E)</span>
+                    <span>封存 (E)</span>
                 </ContextMenuItem>
                 <ContextMenuItem
                     onClick={() => onDelete(resource.id)}

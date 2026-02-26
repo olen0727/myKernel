@@ -45,12 +45,12 @@ export const InboxPage: React.FC = () => {
         try {
             const r = allResources.find(res => res.id === id);
             await resourceService.update(id, { status: 'archived' });
-            toast.success("資源已歸檔", {
+            toast.success("資源已封存", {
                 description: `「${r?.title}」已移至封存庫。`,
                 icon: <Archive className="w-4 h-4 text-primary" />
             })
         } catch (e) {
-            toast.error("歸檔失敗");
+            toast.error("封存失敗");
         }
     }
 

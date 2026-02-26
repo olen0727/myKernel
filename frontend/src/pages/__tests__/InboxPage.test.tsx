@@ -57,7 +57,7 @@ vi.mock("@/components/resources/ResourceItem", () => ({
     ResourceItem: ({ resource, onArchive, onDelete }: any) => (
         <div data-testid="resource-item">
             <span>{resource.title}</span>
-            <button title="歸檔" onClick={() => onArchive(resource.id)}>归档</button>
+            <button title="封存" onClick={() => onArchive(resource.id)}>封存</button>
             <button title="刪除" onClick={() => onDelete(resource.id)}>删除</button>
         </div>
     ),
