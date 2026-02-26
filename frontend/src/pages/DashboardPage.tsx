@@ -4,8 +4,8 @@ import { HabitHeatmap } from "@/components/dashboard/HabitHeatmap"
 import { MetricCharts } from "@/components/dashboard/MetricCharts"
 import { Brain, Inbox, Folder, ListTodo } from "lucide-react"
 import { useObservable } from "@/hooks/use-observable"
-import { services, ProjectService, HabitService, TaskService, ResourceService, AreaService } from "@/services"
-import { Project, Habit, Task, Resource, Area } from "@/types/models"
+import { services, ProjectService, HabitService, TaskService, ResourceService, AreaService, LogService } from "@/services"
+import { Project, Habit, Task, Resource, Area, Log } from "@/types/models"
 
 const DashboardPage: React.FC = () => {
     const [projectService, setProjectService] = useState<ProjectService | undefined>();
@@ -13,6 +13,7 @@ const DashboardPage: React.FC = () => {
     const [taskService, setTaskService] = useState<TaskService | undefined>();
     const [resourceService, setResourceService] = useState<ResourceService | undefined>();
     const [areaService, setAreaService] = useState<AreaService | undefined>();
+    const [logService, setLogService] = useState<LogService | undefined>();
 
     useEffect(() => {
         const loadServices = async () => {
@@ -21,6 +22,7 @@ const DashboardPage: React.FC = () => {
             setTaskService(await services.task);
             setResourceService(await services.resource);
             setAreaService(await services.area);
+            setLogService(await services.log);
         };
         loadServices();
     }, []);
@@ -30,10 +32,12 @@ const DashboardPage: React.FC = () => {
     const tasks$ = useMemo(() => taskService?.getAll$(), [taskService]);
     const resources$ = useMemo(() => resourceService?.getAll$(), [resourceService]);
     const areas$ = useMemo(() => areaService?.getAll$(), [areaService]);
+    const logs$ = useMemo(() => logService?.getAll$(), [logService]);
 
     const projects = useObservable<Project[]>(projects$, []) || [];
     const habits = useObservable<Habit[]>(habits$, []) || [];
     const areas = useObservable<Area[]>(areas$, []) || [];
+    const logs = useObservable<Log[]>(logs$, []) || [];
 
     // Filter habits:
     // 1. Must not be paused or archived
@@ -64,10 +68,13 @@ const DashboardPage: React.FC = () => {
     // Inbox: Resources with no project/area
     const inboxCount = resources.filter(r => (!r.projectIds || r.projectIds.length === 0) && (!r.areaIds || r.areaIds.length === 0)).length;
 
-    // Brain-Sync Days: Habits where name includes '日記' or completed dates of all?
-    // Using the 'Journal' habit's completed streak or count.
-    const journalHabit = habits.find(h => h.name?.includes('日記') || h.name?.includes('Journal'));
-    const brainSyncDays = journalHabit ? (journalHabit.completedDates?.length || 0) : 0;
+    // Brain-Sync Days: Unique dates where action === 'daily_note'
+    const brainSyncDays = useMemo(() => {
+        const uniqueDates = new Set(
+            logs.filter(l => l.action === 'daily_note').map(l => l.date)
+        );
+        return uniqueDates.size;
+    }, [logs]);
 
     const stats = [
         { title: "腦同步天數 (Brain-Sync Days)", value: brainSyncDays, description: "寫過日記的總天數", icon: Brain },
@@ -97,7 +104,7 @@ const DashboardPage: React.FC = () => {
 
             <div className="mt-8 grid grid-cols-1 gap-8">
                 <HabitHeatmap habits={activeHabits} />
-                <MetricCharts />
+                <MetricCharts tasks={tasks} />
             </div>
         </div>
     )

@@ -9,10 +9,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDb } from "@/providers/DbProvider"
 import { LogService } from "@/services"
 import { format, subDays, parseISO } from "date-fns"
+import { Task } from "@/types/models"
 
 // --- Types & Constants ---
 
-type TimeRange = "7d" | "30d" | "90d" | "1y"
+type TimeRange = "7d" | "30d"
 
 // --- Components ---
 
@@ -30,8 +31,8 @@ const CustomTooltip = ({ active, payload, label, unit }: any) => {
     return null
 }
 
-export const MetricCharts: React.FC = () => {
-    const [range, setRange] = useState<TimeRange>("30d")
+export const MetricCharts: React.FC<{ tasks?: Task[] }> = ({ tasks = [] }) => {
+    const [range, setRange] = useState<TimeRange>("7d")
     const db = useDb();
 
     const logService = useMemo(() => new LogService(db), [db]);
@@ -50,27 +51,20 @@ export const MetricCharts: React.FC = () => {
     // Or we simply use logService.getEntries(metricId) which returns Promise<Log[]>.
 
     const [weightLogs, setWeightLogs] = useState<any[]>([]);
-    const [focusLogs, setFocusLogs] = useState<any[]>([]);
+    const [pomodoroLogs, setPomodoroLogs] = useState<any[]>([]);
     const [sleepLogs, setSleepLogs] = useState<any[]>([]);
 
     useEffect(() => {
         const loadData = async () => {
-            // Find metrics by ID (from DataSeeder)
-            // Weight is NOT in DataSeeder defaults? Defaults: mood, energy, sleep, focus.
-            // Let's use 'energy' instead of 'weight' for the first chart example if weight not found.
-
             const daysMap = {
                 "7d": 7,
                 "30d": 30,
-                "90d": 90,
-                "1y": 365
             };
             const days = daysMap[range];
             const sinceDate = subDays(new Date(), days).toISOString().split('T')[0];
 
             // Helper to process logs
             const processLogs = async (metricId: string) => {
-                // service.getEntries returns all. We filter by date client side for MVP.
                 const logs = await logService.getEntries(metricId);
                 return logs
                     .filter(l => l.date >= sinceDate)
@@ -83,13 +77,26 @@ export const MetricCharts: React.FC = () => {
             };
 
             // 1. Weight or Energy
-            // DataSeeder has 'energy' (1-5 rating). Let's use it as line chart.
             const wLogs = await processLogs('energy');
             setWeightLogs(wLogs);
 
-            // 2. Focus
-            const fLogs = await processLogs('focus');
-            setFocusLogs(fLogs);
+            // 2. Pomodoros (from Tasks)
+            const pLogs = [];
+            for (let i = days; i >= 0; i--) {
+                const d = subDays(new Date(), i);
+                const dateStr = format(d, 'yyyy-MM-dd');
+                const dayTasks = tasks.filter(t =>
+                    (t.status === 'done' || t.status === 'checked') &&
+                    t.completedAt && t.completedAt.startsWith(dateStr)
+                );
+                const sum = dayTasks.reduce((acc, t) => acc + (t.tomatoes || 0), 0);
+                pLogs.push({
+                    date: dateStr,
+                    label: format(d, 'MM/dd'),
+                    value: sum
+                });
+            }
+            setPomodoroLogs(pLogs);
 
             // 3. Sleep
             const sLogs = await processLogs('sleep');
@@ -99,7 +106,7 @@ export const MetricCharts: React.FC = () => {
         if (db) {
             loadData();
         }
-    }, [db, range, logService]); // Re-run when range changes
+    }, [db, range, logService, tasks]);
 
 
     return (
@@ -110,11 +117,9 @@ export const MetricCharts: React.FC = () => {
                     趨勢分析
                 </h2>
                 <Tabs value={range} onValueChange={(v) => setRange(v as TimeRange)} className="w-auto">
-                    <TabsList className="grid grid-cols-4 w-[240px] bg-muted/50">
+                    <TabsList className="grid grid-cols-2 w-[160px] bg-muted/50">
                         <TabsTrigger value="7d" className="text-[10px] font-bold uppercase">7D</TabsTrigger>
                         <TabsTrigger value="30d" className="text-[10px] font-bold uppercase">30D</TabsTrigger>
-                        <TabsTrigger value="90d" className="text-[10px] font-bold uppercase">90D</TabsTrigger>
-                        <TabsTrigger value="1y" className="text-[10px] font-bold uppercase">1Y</TabsTrigger>
                     </TabsList>
                 </Tabs>
             </div>
@@ -135,7 +140,6 @@ export const MetricCharts: React.FC = () => {
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
                                     <XAxis
                                         dataKey="label"
-                                        hide={range === "1y"}
                                         fontSize={10}
                                         tickMargin={10}
                                         axisLine={false}
@@ -160,41 +164,40 @@ export const MetricCharts: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                {/* 2. Area Chart - Focus */}
+                {/* 2. Area Chart - Pomodoros */}
                 <Card className="border-none shadow-md bg-card/50 backdrop-blur-sm overflow-hidden">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-bold flex items-center justify-between opacity-80">
-                            <span>專注度評分 (Rating)</span>
-                            <span className="text-[10px] font-normal px-2 py-0.5 bg-orange-500/10 text-orange-600 rounded-full">1-10</span>
+                            <span>產能 (Pomodoro)</span>
+                            <span className="text-[10px] font-normal px-2 py-0.5 bg-red-500/10 text-red-600 rounded-full">TOMATOES</span>
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="h-[200px] pt-4">
-                        {focusLogs.length > 0 ? (
+                        {pomodoroLogs.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={focusLogs}>
+                                <AreaChart data={pomodoroLogs}>
                                     <defs>
-                                        <linearGradient id="colorFocus" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                                        <linearGradient id="colorPomodoro" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
                                     <XAxis
                                         dataKey="label"
-                                        hide={range === "1y"}
                                         fontSize={10}
                                         tickMargin={10}
                                         axisLine={false}
                                         tickLine={false}
                                     />
-                                    <YAxis hide domain={[0, 10]} />
-                                    <Tooltip content={<CustomTooltip unit="pts" />} />
+                                    <YAxis hide domain={[0, 'auto']} />
+                                    <Tooltip content={<CustomTooltip unit="🍅" />} />
                                     <Area
                                         type="monotone"
                                         dataKey="value"
-                                        stroke="hsl(var(--primary))"
+                                        stroke="#ef4444"
                                         fillOpacity={1}
-                                        fill="url(#colorFocus)"
+                                        fill="url(#colorPomodoro)"
                                         strokeWidth={3}
                                         animationDuration={1000}
                                     />
@@ -222,7 +225,6 @@ export const MetricCharts: React.FC = () => {
                                     <XAxis
                                         dataKey="label"
                                         name="date"
-                                        hide={range === "1y"}
                                         fontSize={10}
                                         axisLine={false}
                                         tickLine={false}
