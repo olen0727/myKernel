@@ -54,6 +54,7 @@ interface CreateProjectModalProps {
     onSubmit: (values: z.infer<typeof formSchema>) => void
     defaultValues?: Partial<z.infer<typeof formSchema>>
     areas: Area[]
+    fixedAreaId?: string
 }
 
 export function CreateProjectModal({
@@ -62,6 +63,7 @@ export function CreateProjectModal({
     onSubmit,
     defaultValues,
     areas,
+    fixedAreaId,
 }: CreateProjectModalProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -119,7 +121,7 @@ export function CreateProjectModal({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>所屬領域 (Area)</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value} disabled={!!fixedAreaId}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="請選擇領域..." />

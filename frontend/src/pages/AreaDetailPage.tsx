@@ -290,13 +290,14 @@ const AreaDetailPage: React.FC = () => {
             </div>
 
             <CreateProjectModal
-                areas={[]}
+                areas={[areaWithStats as any]}
                 open={isCreateProjectOpen}
                 onOpenChange={setIsCreateProjectOpen}
                 onSubmit={handleCreateProject}
                 defaultValues={{
-                    area: areaWithStats?.name || ''
+                    area: areaWithStats?.id || ''
                 }}
+                fixedAreaId={areaWithStats?.id}
             />
 
             <CreateAreaModal
