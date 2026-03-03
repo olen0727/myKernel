@@ -12,6 +12,13 @@ import { DbProvider } from '@/providers/DbProvider'
 import { AuthProvider } from '@/providers/AuthProvider'
 import './index.css'
 
+if (import.meta.env.DEV) {
+    const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+    if (favicon) {
+        favicon.href = '/favicon-dev.svg';
+    }
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
