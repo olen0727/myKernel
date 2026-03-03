@@ -79,62 +79,64 @@ export function TaskItem({
     }
 
     return (
-        <div className="flex items-center gap-3 p-1 hover:bg-muted/50 rounded-md transition-colors group">
-            {isWorkbench && status === 'todo' ? (
-                <Checkbox
-                    id={`task-${id}`}
-                    checked={false}
-                    disabled={true}
-                    className="mt-0.5 opacity-50 cursor-not-allowed"
-                />
-            ) : isWorkbench ? (
-                <Checkbox
-                    id={`task-${id}`}
-                    checked={status === 'done'}
-                    onCheckedChange={() => onToggle?.(id)}
-                    disabled={!editable}
-                    className={cn(
-                        "mt-0.5 transition-all",
-                        status === 'done' && "opacity-50"
-                    )}
-                />
-            ) : (
-                <Checkbox
-                    id={`task-${id}`}
-                    checked={status === 'checked' || status === 'done'}
-                    onCheckedChange={() => onToggle?.(id)}
-                    disabled={!editable}
-                    className="mt-0.5 transition-all"
-                />
-            )}
-            {isEditing && editable ? (
-                <Input
-                    className="flex-1 h-7 text-sm py-1 px-2"
-                    value={localTitle}
-                    onChange={(e) => setLocalTitle(e.target.value)}
-                    onBlur={handleBlur}
-                    onKeyDown={handleKeyDown}
-                    autoFocus
-                />
-            ) : (
-                <label
-                    htmlFor={`task-${id}`}
-                    className={cn(
-                        "flex-1 text-xs font-medium leading-none cursor-pointer",
-                        (status === 'done' || status === 'checked') && "line-through text-muted-foreground"
-                    )}
-                    onClick={(e) => {
-                        if (editable) {
-                            e.preventDefault()
-                            setIsEditing(true)
-                        }
-                    }}
-                >
-                    {title}
-                </label>
-            )}
+        <div className="flex flex-col gap-1 md:flex-row md:items-center p-1 hover:bg-muted/50 rounded-md transition-colors group">
+            <div className="flex items-center gap-3">
+                {isWorkbench && status === 'todo' ? (
+                    <Checkbox
+                        id={`task-${id}`}
+                        checked={false}
+                        disabled={true}
+                        className="mt-0.5 opacity-50 cursor-not-allowed shrink-0"
+                    />
+                ) : isWorkbench ? (
+                    <Checkbox
+                        id={`task-${id}`}
+                        checked={status === 'done'}
+                        onCheckedChange={() => onToggle?.(id)}
+                        disabled={!editable}
+                        className={cn(
+                            "mt-0.5 transition-all shrink-0",
+                            status === 'done' && "opacity-50"
+                        )}
+                    />
+                ) : (
+                    <Checkbox
+                        id={`task-${id}`}
+                        checked={status === 'checked' || status === 'done'}
+                        onCheckedChange={() => onToggle?.(id)}
+                        disabled={!editable}
+                        className="mt-0.5 transition-all shrink-0"
+                    />
+                )}
+                {isEditing && editable ? (
+                    <Input
+                        className="flex-1 h-7 text-sm py-1 px-2"
+                        value={localTitle}
+                        onChange={(e) => setLocalTitle(e.target.value)}
+                        onBlur={handleBlur}
+                        onKeyDown={handleKeyDown}
+                        autoFocus
+                    />
+                ) : (
+                    <label
+                        htmlFor={`task-${id}`}
+                        className={cn(
+                            "flex-1 text-xs font-medium leading-normal cursor-pointer",
+                            (status === 'done' || status === 'checked') && "line-through text-muted-foreground"
+                        )}
+                        onClick={(e) => {
+                            if (editable) {
+                                e.preventDefault()
+                                setIsEditing(true)
+                            }
+                        }}
+                    >
+                        {title}
+                    </label>
+                )}
+            </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 ml-7 md:ml-auto">
                 <button
                     onClick={(e) => {
                         e.preventDefault();
@@ -177,29 +179,29 @@ export function TaskItem({
                         ))}
                     </div>
                 )}
+
+                {showProject && projectName && (
+                    <Badge
+                        variant="outline"
+                        className="text-[10px] px-1.5 py-0 h-4 font-medium bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors shrink-0 max-w-[100px] truncate"
+                    >
+                        {projectName}
+                    </Badge>
+                )}
+
+                {onDelete && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(id);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 md:opacity-0 p-1 text-muted-foreground hover:text-destructive transition-all rounded hover:bg-destructive/10 -ml-1"
+                        title="刪除任務"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </button>
+                )}
             </div>
-
-            {showProject && projectName && (
-                <Badge
-                    variant="outline"
-                    className="text-[10px] px-1.5 py-0 h-4 font-medium bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors shrink-0 max-w-[100px] truncate"
-                >
-                    {projectName}
-                </Badge>
-            )}
-
-            {onDelete && (
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all rounded hover:bg-destructive/10"
-                    title="刪除任務"
-                >
-                    <Trash2 className="h-4 w-4" />
-                </button>
-            )}
         </div>
     )
 }

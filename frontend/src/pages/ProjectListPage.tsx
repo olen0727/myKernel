@@ -116,27 +116,27 @@ export default function ProjectListPage() {
                 {/* Bottom: Project List */}
                 <ResizablePanel defaultSize={60}>
                     <div className="h-full flex flex-col bg-muted/5">
-                        <div className="flex items-center justify-between px-6 py-6 scroll-m-20">
-                            <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-4 px-4 md:px-6 py-4 md:py-6 scroll-m-20">
+                            <div className="flex items-center justify-between">
                                 <h1 className="text-2xl font-bold tracking-tight">Projects 專案清單</h1>
-                                <div className="flex items-center gap-2 mt-2">
-                                    {(["active", "paused", "completed", "archived", "all"] as FilterStatus[]).map((status) => (
-                                        <Button
-                                            key={status}
-                                            variant={filterStatus === status ? "secondary" : "ghost"}
-                                            size="sm"
-                                            onClick={() => setFilterStatus(status)}
-                                            className="h-7 px-3 text-xs capitalize"
-                                        >
-                                            {status}
-                                        </Button>
-                                    ))}
-                                </div>
+                                <Button size="sm" className="gap-2 shrink-0 ml-2" onClick={() => setIsModalOpen(true)}>
+                                    <Plus className="h-4 w-4" />
+                                    New Project
+                                </Button>
                             </div>
-                            <Button size="sm" className="gap-2" onClick={() => setIsModalOpen(true)}>
-                                <Plus className="h-4 w-4" />
-                                New Project
-                            </Button>
+                            <div className="flex flex-wrap items-center gap-2 mt-1 md:mt-0">
+                                {(["active", "paused", "completed", "archived", "all"] as FilterStatus[]).map((status) => (
+                                    <Button
+                                        key={status}
+                                        variant={filterStatus === status ? "secondary" : "ghost"}
+                                        size="sm"
+                                        onClick={() => setFilterStatus(status)}
+                                        className="h-7 px-3 text-xs capitalize"
+                                    >
+                                        {status}
+                                    </Button>
+                                ))}
+                            </div>
                         </div>
 
                         <ScrollArea className="flex-1 px-6 pb-6 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">

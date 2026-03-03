@@ -8,7 +8,8 @@ import {
     DragOverlay,
     closestCorners,
     KeyboardSensor,
-    PointerSensor,
+    MouseSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     DragEndEvent,
@@ -73,7 +74,8 @@ export function Workbench() {
     const [activeId, setActiveId] = React.useState<string | null>(null)
 
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     )
 
@@ -220,7 +222,7 @@ export function Workbench() {
                     <h2 className="text-lg font-semibold tracking-tight">Workbench 工作台</h2>
                 </div>
 
-                <div className="flex flex-1 overflow-hidden">
+                <div className="flex flex-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory">
                     <DroppableColumn
                         id="doing"
                         title={`Do Today 焦點 (${doingTasks.length} x ${doingTasks.reduce((acc, t) => acc + (t.tomatoes || 0), 0)})`}
@@ -305,7 +307,7 @@ function DroppableColumn({
         <div
             ref={setNodeRef}
             className={cn(
-                "flex-1 flex flex-col transition-colors",
+                "flex-1 flex flex-col transition-colors min-w-[85vw] sm:min-w-[300px] md:min-w-0 snap-center md:snap-none shrink-0 md:shrink",
                 !isLast && "border-r",
                 isOver && "bg-accent/10"
             )}
