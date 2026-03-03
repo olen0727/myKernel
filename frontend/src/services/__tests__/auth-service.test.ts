@@ -22,11 +22,6 @@ describe('AuthService', () => {
         expect(mockLocation.href).toContain('/auth/google');
     });
 
-    it('should redirect to github auth endpoint', () => {
-        AuthService.loginWithGitHub();
-        expect(mockLocation.href).toContain('/auth/github');
-    });
-
     it('should store token on handling callback', () => {
         const token = 'test-jwt-token';
         AuthService.handleCallback(token);

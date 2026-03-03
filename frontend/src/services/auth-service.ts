@@ -10,10 +10,6 @@ export const AuthService = {
         window.location.href = `${API_URL}/auth/google`;
     },
 
-    loginWithGitHub: () => {
-        window.location.href = `${API_URL}/auth/github`;
-    },
-
     handleCallback: (token: string) => {
         localStorage.setItem(AUTH_TOKEN_KEY, token);
     },

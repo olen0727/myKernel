@@ -6,7 +6,6 @@ interface AuthContextType {
     user: User | null;
     isLoading: boolean;
     loginWithGoogle: () => void;
-    loginWithGitHub: () => void;
     logout: () => void;
 }
 
@@ -52,14 +51,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const loginWithGoogle = () => AuthService.loginWithGoogle();
-    const loginWithGitHub = () => AuthService.loginWithGitHub();
     const logout = () => {
         AuthService.logout();
         setUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, loginWithGoogle, loginWithGitHub, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, loginWithGoogle, logout }}>
             {children}
         </AuthContext.Provider>
     );

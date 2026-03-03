@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/providers/AuthProvider"
-import { Github, Mail } from "lucide-react"
+import { Mail } from "lucide-react"
 import { Navigate } from "react-router-dom"
 
 export default function LoginPage() {
-    const { user, isLoading, loginWithGoogle, loginWithGitHub } = useAuth()
+    const { user, isLoading, loginWithGoogle } = useAuth()
 
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-screen bg-background">Loading...</div>
@@ -28,10 +28,6 @@ export default function LoginPage() {
                     <Button variant="outline" className="w-full" onClick={loginWithGoogle}>
                         <Mail className="mr-2 h-4 w-4" />
                         Continue with Google
-                    </Button>
-                    <Button variant="outline" className="w-full" onClick={loginWithGitHub}>
-                        <Github className="mr-2 h-4 w-4" />
-                        Continue with GitHub
                     </Button>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
