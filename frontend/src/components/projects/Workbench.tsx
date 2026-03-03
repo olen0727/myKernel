@@ -223,7 +223,7 @@ export function Workbench() {
                 <div className="flex flex-1 overflow-hidden">
                     <DroppableColumn
                         id="doing"
-                        title="Do Today 焦點"
+                        title={`Do Today 焦點 (${doingTasks.length} x ${doingTasks.reduce((acc, t) => acc + (t.tomatoes || 0), 0)})`}
                         tasks={doingTasks}
                         headerAction={
                             <Button
