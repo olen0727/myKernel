@@ -213,9 +213,9 @@ export default function ResourceEditorPage() {
     if (!data) return <div className="p-8">Resource not found</div>
 
     return (
-        <div className="flex h-full max-h-[calc(100vh-64px)] overflow-hidden">
+        <div className="flex flex-col lg:flex-row h-full max-h-[calc(100vh-64px)] overflow-y-auto lg:overflow-hidden">
             {/* Main Content */}
-            <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <div className="flex-1 flex flex-col lg:overflow-hidden">
                 {/* Header */}
                 <div className="px-8 py-4 border-b flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-4">
@@ -245,7 +245,7 @@ export default function ResourceEditorPage() {
                 </div>
 
                 {/* Editor Scroll Area */}
-                <div className="flex-1 overflow-y-auto px-12 py-8 max-w-4xl mx-auto w-full">
+                <div className="flex-1 lg:overflow-y-auto px-12 py-8 max-w-4xl mx-auto w-full">
                     <TipTapEditor
                         content={data.content}
                         onChange={handleContentChange}
@@ -266,7 +266,7 @@ export default function ResourceEditorPage() {
             </div>
 
             {/* Right Sidebar */}
-            <div className="shrink-0 h-full overflow-y-auto">
+            <div className="w-full lg:w-80 shrink-0 lg:h-full lg:overflow-y-auto lg:border-l p-6 bg-muted/10">
                 <ResourceSidebar
                     status={data.status}
                     tags={data.tags}

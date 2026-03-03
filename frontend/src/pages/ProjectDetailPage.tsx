@@ -341,9 +341,9 @@ export default function ProjectDetailPage() {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-hidden flex h-full">
+                <div className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row h-full">
                     {/* Main Content: 70% */}
-                    <div className="w-[70%] overflow-y-auto p-8 custom-scrollbar">
+                    <div className="w-full lg:w-[70%] lg:overflow-y-auto p-4 md:p-8 custom-scrollbar">
                         <div className="max-w-4xl mx-auto space-y-10">
                             <ProjectHeader
                                 title={project.name}
@@ -442,7 +442,7 @@ export default function ProjectDetailPage() {
                     </div>
 
                     {/* Sidebar: 30% */}
-                    <div className="w-[30%] min-w-[280px] max-w-[400px] overflow-y-auto py-8 pr-8">
+                    <div className="w-full lg:w-[30%] min-w-0 lg:min-w-[280px] lg:max-w-[400px] lg:overflow-y-auto px-4 md:px-0 py-4 md:py-8 lg:pr-8">
                         <ProjectSidebar
                             projectName={project.name}
                             status={project.status}

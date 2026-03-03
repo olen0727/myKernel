@@ -48,20 +48,20 @@ export const AreaSidebar: React.FC<AreaSidebarProps> = ({ area, onUpdate, onDele
                             onCheckedChange={(checked) => onUpdate({ status: checked ? 'active' : 'hidden' })}
                         />
                     </div>
-
+                    <div className="pt-4">
+                        <Button
+                            variant="ghost"
+                            className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors"
+                            onClick={onDelete}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            刪除此領域
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
 
-            <div className="pt-4">
-                <Button
-                    variant="ghost"
-                    className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors"
-                    onClick={onDelete}
-                >
-                    <Trash2 className="w-4 h-4" />
-                    刪除此領域
-                </Button>
-            </div>
+
         </div>
     )
 }
