@@ -341,16 +341,7 @@ const serializeTaskList = (node: any, depth = 0) => {
     return items.join("\n")
 }
 
-const serializeBlockChildren = (node: any) => {
-    const fragments: string[] = []
-    const children = node.content?.content || node.content || []
-    const iterate = typeof node.forEach === "function" ? (cb: any) => node.forEach(cb) : (cb: any) => children.forEach(cb)
 
-    iterate((child: any) => {
-        fragments.push(serializeBlock(child))
-    })
-    return fragments.join("\n")
-}
 
 const serializeBlock = (node: any): string => {
     switch (node.type?.name) {
