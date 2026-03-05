@@ -27,6 +27,7 @@ import './editor.css'
 // New Imports
 import { BlockMenu } from './extensions/BlockMenu'
 import { useState, useEffect, useRef } from 'react'
+import { Extension } from '@tiptap/core'
 
 
 
@@ -56,32 +57,10 @@ const parseMarkdown = (markdown: string) => {
     let inCodeBlock = false
     let codeBlockLang = ""
     let codeBuffer: string[] = []
-    let listBuffer: { ordered: boolean; taskList: boolean; items: string[] } | null = null
     let quoteBuffer: string[] = []
 
-    const flushList = () => {
-        if (!listBuffer) return
-        const tag = listBuffer.ordered ? "ol" : "ul"
-        const attrs = listBuffer.taskList ? ' data-type="taskList"' : ""
-        const items = listBuffer.items.map((item) => {
-            if (listBuffer?.taskList) {
-                const match = item.match(/^\s*\[([xX ])\]\s+(.*)$/)
-                const checked = match?.[1]?.toLowerCase() === "x"
-                const content = parseInlineMarkdown(match?.[2] || item)
-                return `<li data-type="taskItem" data-checked="${checked}"><p>${content}</p></li>`
-            }
-            return `<li><p>${parseInlineMarkdown(item)}</p></li>`
-        }).join("")
-        blocks.push(`<${tag}${attrs}>${items}</${tag}>`)
-        listBuffer = null
-    }
-
-    const flushQuote = () => {
-        if (!quoteBuffer.length) return
-        const content = quoteBuffer.map((line) => `<p>${parseInlineMarkdown(line)}</p>`).join("")
-        blocks.push(`<blockquote>${content}</blockquote>`)
-        quoteBuffer = []
-    }
+    let listStack: { indent: number, type: 'ul' | 'ol' | 'taskList' }[] = []
+    let lastWasListItem = false
 
     const flushCode = () => {
         if (!inCodeBlock) return
@@ -93,13 +72,65 @@ const parseMarkdown = (markdown: string) => {
         codeBuffer = []
     }
 
+    const flushQuote = () => {
+        if (!quoteBuffer.length) return
+        const content = quoteBuffer.map((line) => `<p>${parseInlineMarkdown(line)}</p>`).join("")
+        blocks.push(`<blockquote>${content}</blockquote>`)
+        quoteBuffer = []
+    }
+
+    const closeListToIndent = (indent: number) => {
+        while (listStack.length > 0 && listStack[listStack.length - 1].indent >= indent) {
+            const popped = listStack.pop()!
+            if (lastWasListItem) {
+                blocks.push(`</li>`)
+                lastWasListItem = false
+            }
+            blocks.push(`</${popped.type === 'ol' ? 'ol' : 'ul'}>`)
+        }
+    }
+
+    const closeAllLists = () => closeListToIndent(0)
+
+    const openListIfNeeded = (indent: number, type: 'ul' | 'ol' | 'taskList') => {
+        if (listStack.length > 0 && listStack[listStack.length - 1].indent > indent) {
+            closeListToIndent(indent + 1)
+        }
+
+        const currentList = listStack.length > 0 ? listStack[listStack.length - 1] : null
+
+        if (!currentList || currentList.indent < indent) {
+            listStack.push({ indent, type })
+            const attrs = type === 'taskList' ? ' data-type="taskList"' : ''
+            const tag = type === 'ol' ? 'ol' : 'ul'
+            blocks.push(`<${tag}${attrs}>`)
+            lastWasListItem = false
+            return true
+        } else if (currentList.indent === indent) {
+            if (currentList.type !== type) {
+                closeListToIndent(indent + 1)
+                if (lastWasListItem) { blocks.push(`</li>`); lastWasListItem = false }
+
+                const popped = listStack.pop()!
+                blocks.push(`</${popped.type === 'ol' ? 'ol' : 'ul'}>`)
+
+                listStack.push({ indent, type })
+                const attrs = type === 'taskList' ? ' data-type="taskList"' : ''
+                const tag = type === 'ol' ? 'ol' : 'ul'
+                blocks.push(`<${tag}${attrs}>`)
+            }
+            return false
+        }
+        return false
+    }
+
     lines.forEach((line) => {
         const codeFenceMatch = line.match(/^```\s*(\w+)?\s*$/)
         if (codeFenceMatch) {
             if (inCodeBlock) {
                 flushCode()
             } else {
-                flushList()
+                closeAllLists()
                 flushQuote()
                 inCodeBlock = true
                 codeBlockLang = codeFenceMatch[1] || ""
@@ -113,71 +144,85 @@ const parseMarkdown = (markdown: string) => {
         }
 
         if (!line.trim()) {
-            flushList()
+            closeAllLists()
             flushQuote()
             return
         }
 
         const headingMatch = line.match(/^(#{1,3})\s+(.*)$/)
         if (headingMatch) {
-            flushList()
+            closeAllLists()
             flushQuote()
             const level = headingMatch[1].length
             blocks.push(`<h${level}>${parseInlineMarkdown(headingMatch[2])}</h${level}>`)
             return
         }
 
-        if (/^>\s?/.test(line)) {
-            flushList()
-            quoteBuffer.push(line.replace(/^>\s?/, ""))
+        if (/^>\s?/.test(line.trim())) {
+            closeAllLists()
+            quoteBuffer.push(line.replace(/^\s*>\s?/, ""))
             return
         }
 
         if (/^---+$/.test(line.trim())) {
-            flushList()
+            closeAllLists()
             flushQuote()
             blocks.push("<hr />")
             return
         }
 
-        const taskMatch = line.match(/^-\s+\[[xX ]\]\s+(.*)$/)
+        const spacesMatch = line.match(/^(\s*)/)
+        const indent = spacesMatch ? spacesMatch[1].replace(/\t/g, "    ").length : 0
+        const trimmed = line.trim()
+
+        const taskMatch = trimmed.match(/^-\s+\[([xX ])\]\s+(.*)$/)
         if (taskMatch) {
-            if (!listBuffer || !listBuffer.taskList) {
-                flushList()
-                listBuffer = { ordered: false, taskList: true, items: [] }
-            }
-            listBuffer.items.push(line.replace(/^-\s+/, ""))
+            flushQuote()
+            closeListToIndent(indent + 1)
+            openListIfNeeded(indent, 'taskList')
+
+            if (lastWasListItem) blocks.push(`</li>`)
+
+            const checked = taskMatch[1].toLowerCase() === "x"
+            blocks.push(`<li data-type="taskItem" data-checked="${checked}"><p>${parseInlineMarkdown(taskMatch[2])}</p>`)
+            lastWasListItem = true
             return
         }
 
-        const unorderedMatch = line.match(/^(?:-|\*)\s+(.*)$/)
-        if (unorderedMatch) {
-            if (!listBuffer || listBuffer.ordered) {
-                flushList()
-                listBuffer = { ordered: false, taskList: false, items: [] }
-            }
-            listBuffer.items.push(unorderedMatch[1])
+        const unorderedMatch = trimmed.match(/^(?:-|\*)\s+(.*)$/)
+        if (unorderedMatch && !trimmed.startsWith("- [")) {
+            flushQuote()
+            closeListToIndent(indent + 1)
+            openListIfNeeded(indent, 'ul')
+
+            if (lastWasListItem) blocks.push(`</li>`)
+
+            blocks.push(`<li><p>${parseInlineMarkdown(unorderedMatch[1])}</p>`)
+            lastWasListItem = true
             return
         }
 
-        const orderedMatch = line.match(/^\d+\.\s+(.*)$/)
+        const orderedMatch = trimmed.match(/^\d+\.\s+(.*)$/)
         if (orderedMatch) {
-            if (!listBuffer || !listBuffer.ordered) {
-                flushList()
-                listBuffer = { ordered: true, taskList: false, items: [] }
-            }
-            listBuffer.items.push(orderedMatch[1])
+            flushQuote()
+            closeListToIndent(indent + 1)
+            openListIfNeeded(indent, 'ol')
+
+            if (lastWasListItem) blocks.push(`</li>`)
+
+            blocks.push(`<li><p>${parseInlineMarkdown(orderedMatch[1])}</p>`)
+            lastWasListItem = true
             return
         }
 
-        flushList()
+        closeAllLists()
         flushQuote()
         blocks.push(`<p>${parseInlineMarkdown(line)}</p>`)
     })
 
-    flushList()
-    flushQuote()
+    closeAllLists()
     flushCode()
+    flushQuote()
 
     return blocks.join("")
 }
@@ -232,72 +277,79 @@ const serializeInline = (node: any): string => {
     return ""
 }
 
-const serializeList = (node: any, ordered: boolean) => {
+const serializeList = (node: any, ordered: boolean, depth = 0) => {
     const items: string[] = []
-    if (typeof node.forEach === "function") {
-        let index = 0
-        node.forEach((item: any) => {
-            const prefix = ordered ? `${index + 1}. ` : "- "
-            const content = serializeBlockChildren(item)
-            items.push(`${prefix}${content}`)
-            index += 1
+    const indent = "  ".repeat(depth)
+
+    const children = node.content?.content || node.content || []
+    let index = 0
+    const iterate = typeof node.forEach === "function" ? (cb: any) => node.forEach(cb) : (cb: any) => children.forEach(cb)
+
+    iterate((item: any) => {
+        const prefix = ordered ? `${index + 1}. ` : "- "
+
+        let content = ""
+        const itemChildren = item.content?.content || item.content || []
+        const iterateItem = typeof item.forEach === "function" ? (cb: any) => item.forEach(cb) : (cb: any) => itemChildren.forEach(cb)
+
+        iterateItem((child: any) => {
+            if (child.type?.name === 'bulletList') {
+                content += "\n" + serializeList(child, false, depth + 1)
+            } else if (child.type?.name === 'orderedList') {
+                content += "\n" + serializeList(child, true, depth + 1)
+            } else if (child.type?.name === 'taskList') {
+                content += "\n" + serializeTaskList(child, depth + 1)
+            } else {
+                const blockStr = serializeBlock(child)
+                content += (content ? "\n" + indent + "  " : "") + blockStr
+            }
         })
-    } else if (Array.isArray(node.content)) {
-        node.content.forEach((item: any, index: number) => {
-            const prefix = ordered ? `${index + 1}. ` : "- "
-            const content = serializeBlockChildren(item)
-            items.push(`${prefix}${content}`)
+        items.push(`${indent}${prefix}${content.trimStart()}`)
+        index += 1
+    })
+    return items.join("\n")
+}
+
+const serializeTaskList = (node: any, depth = 0) => {
+    const items: string[] = []
+    const indent = "  ".repeat(depth)
+
+    const children = node.content?.content || node.content || []
+    const iterate = typeof node.forEach === "function" ? (cb: any) => node.forEach(cb) : (cb: any) => children.forEach(cb)
+
+    iterate((item: any) => {
+        const checked = item.attrs?.checked ? "x" : " "
+
+        let content = ""
+        const itemChildren = item.content?.content || item.content || []
+        const iterateItem = typeof item.forEach === "function" ? (cb: any) => item.forEach(cb) : (cb: any) => itemChildren.forEach(cb)
+
+        iterateItem((child: any) => {
+            if (child.type?.name === 'bulletList') {
+                content += "\n" + serializeList(child, false, depth + 1)
+            } else if (child.type?.name === 'orderedList') {
+                content += "\n" + serializeList(child, true, depth + 1)
+            } else if (child.type?.name === 'taskList') {
+                content += "\n" + serializeTaskList(child, depth + 1)
+            } else {
+                const blockStr = serializeBlock(child)
+                content += (content ? "\n" + indent + "  " : "") + blockStr
+            }
         })
-    } else if (node.content?.content) {
-        node.content.content.forEach((item: any, index: number) => {
-            const prefix = ordered ? `${index + 1}. ` : "- "
-            const content = serializeBlockChildren(item)
-            items.push(`${prefix}${content}`)
-        })
-    }
+        items.push(`${indent}- [${checked}] ${content.trimStart()}`)
+    })
     return items.join("\n")
 }
 
 const serializeBlockChildren = (node: any) => {
     const fragments: string[] = []
-    if (typeof node.forEach === "function") {
-        node.forEach((child: any) => {
-            fragments.push(serializeBlock(child))
-        })
-    } else if (Array.isArray(node.content)) {
-        node.content.forEach((child: any) => {
-            fragments.push(serializeBlock(child))
-        })
-    } else if (node.content?.content) {
-        node.content.content.forEach((child: any) => {
-            fragments.push(serializeBlock(child))
-        })
-    }
-    return fragments.join("\n")
-}
+    const children = node.content?.content || node.content || []
+    const iterate = typeof node.forEach === "function" ? (cb: any) => node.forEach(cb) : (cb: any) => children.forEach(cb)
 
-const serializeTaskList = (node: any) => {
-    const items: string[] = []
-    if (typeof node.forEach === "function") {
-        node.forEach((item: any) => {
-            const checked = item.attrs?.checked ? "x" : " "
-            const content = serializeInline(item)
-            items.push(`- [${checked}] ${content}`)
-        })
-    } else if (Array.isArray(node.content)) {
-        node.content.forEach((item: any) => {
-            const checked = item.attrs?.checked ? "x" : " "
-            const content = serializeInline(item)
-            items.push(`- [${checked}] ${content}`)
-        })
-    } else if (node.content?.content) {
-        node.content.content.forEach((item: any) => {
-            const checked = item.attrs?.checked ? "x" : " "
-            const content = serializeInline(item)
-            items.push(`- [${checked}] ${content}`)
-        })
-    }
-    return items.join("\n")
+    iterate((child: any) => {
+        fragments.push(serializeBlock(child))
+    })
+    return fragments.join("\n")
 }
 
 const serializeBlock = (node: any): string => {
@@ -316,11 +368,11 @@ const serializeBlock = (node: any): string => {
         case "horizontalRule":
             return "---"
         case "bulletList":
-            return serializeList(node, false)
+            return serializeList(node, false, 0)
         case "orderedList":
-            return serializeList(node, true)
+            return serializeList(node, true, 0)
         case "taskList":
-            return serializeTaskList(node)
+            return serializeTaskList(node, 0)
         case "image":
             return serializeInline(node)
         default:
@@ -328,6 +380,40 @@ const serializeBlock = (node: any): string => {
     }
 }
 
+
+const IndentListStyleHandler = Extension.create({
+    name: 'indentListStyleHandler',
+    addKeyboardShortcuts() {
+        return {
+            Tab: () => {
+                if (this.editor.isActive('listItem')) {
+                    const wasOrdered = this.editor.isActive('orderedList')
+                    if (wasOrdered) {
+                        return this.editor.chain()
+                            .sinkListItem('listItem')
+                            .toggleList('bulletList', 'listItem')
+                            .run()
+                    } else {
+                        return this.editor.commands.sinkListItem('listItem')
+                    }
+                }
+                if (this.editor.isActive('taskItem')) {
+                    if (this.editor.commands.sinkListItem('taskItem')) return true
+                }
+                return false
+            },
+            'Shift-Tab': () => {
+                if (this.editor.isActive('listItem')) {
+                    if (this.editor.commands.liftListItem('listItem')) return true
+                }
+                if (this.editor.isActive('taskItem')) {
+                    if (this.editor.commands.liftListItem('taskItem')) return true
+                }
+                return false
+            }
+        }
+    }
+})
 
 interface TipTapEditorProps {
     content: string
@@ -425,6 +511,7 @@ export function TipTapEditor({ content, onChange, editable = true }: TipTapEdito
             TableHeader,
             TableCell,
             configureSlashCommand(),
+            IndentListStyleHandler,
 
         ],
         content: parseMarkdown(content),
