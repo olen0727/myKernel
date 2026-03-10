@@ -39,7 +39,9 @@ const escapeHtml = (value: string) =>
         .replace(/'/g, "&#39;")
 
 const parseInlineMarkdown = (value: string) => {
-    let html = escapeHtml(value)
+    let safeValue = value.replace(/<br\s*\/?>/gi, "___BR_PLACEHOLDER___")
+    let html = escapeHtml(safeValue)
+    html = html.replace(/___BR_PLACEHOLDER___/g, "<br>")
     html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
@@ -252,6 +254,10 @@ const serializeInline = (node: any): string => {
             })
         }
         return text
+    }
+
+    if (node.type?.name === "hardBreak") {
+        return "<br>"
     }
 
     if (node.isTextblock || node.isInline) {
