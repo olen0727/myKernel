@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, X, Image as ImageIcon, Link as LinkIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -145,13 +145,35 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         // 2. Check for Text (URL)
         const text = e.clipboardData.getData('text');
         if (text) {
-            // Simple heuristic to check if it might be a valid URL without regex complexity
             if (text.startsWith('http://') || text.startsWith('https://')) {
                 const handled = await fetchImageFromUrl(text);
                 if (handled) e.preventDefault();
             }
         }
-    }, [processImage, fetchImageFromUrl]);
+    }, [processImage, fetchImageFromUrl, value]); // Added 'value' dependency so we don't paste when we already have an image
+
+    // Listen for paste anywhere on the window
+    useEffect(() => {
+        const handleGlobalPaste = (e: ClipboardEvent) => {
+            // Only process paste if we don't already have an image
+            if (value) return;
+
+            // Check if we are typing in an input field (so we don't steal paste from text inputs)
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+                return;
+            }
+
+            // Mock a React.ClipboardEvent structure for our handlePaste
+            handlePaste({
+                preventDefault: () => e.preventDefault(),
+                clipboardData: e.clipboardData,
+            } as unknown as React.ClipboardEvent);
+        };
+
+        window.addEventListener('paste', handleGlobalPaste);
+        return () => window.removeEventListener('paste', handleGlobalPaste);
+    }, [handlePaste, value]);
 
     const handleRemove = () => {
         onChange('');
@@ -190,10 +212,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    // Capture paste events in the container
-                    onPaste={handlePaste}
                     onClick={() => inputRef.current?.click()}
-                    tabIndex={0} // Make div focusable to receive paste
                 >
                     <input
                         ref={inputRef}
