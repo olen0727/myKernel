@@ -197,7 +197,7 @@ const AreaDetailPage: React.FC = () => {
                                 {relatedProjects.length > 0 ? (
                                     relatedProjects.map(project => {
                                         const pTasks = allTasks.filter(t => t.projectId === project.id);
-                                        const done = pTasks.filter(t => t.status === 'done').length;
+                                        const done = pTasks.filter(t => t.status === 'done' || t.status === 'checked').length;
                                         const total = pTasks.length;
                                         const areaName = areaWithStats.name;
 

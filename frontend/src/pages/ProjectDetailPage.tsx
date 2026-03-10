@@ -127,7 +127,7 @@ export default function ProjectDetailPage() {
     // --- Stats ---
     const taskStats = React.useMemo(() => {
         const total = tasks.length
-        const done = tasks.filter(t => t.status === 'done').length
+        const done = tasks.filter(t => t.status === 'done' || t.status === 'checked').length
         return { done, total }
     }, [tasks])
 
@@ -223,7 +223,8 @@ export default function ProjectDetailPage() {
     const handleTaskToggle = async (_listId: string, taskId: string) => {
         const task = tasks.find(t => t.id === taskId);
         if (task && taskService) {
-            const newStatus = task.status === 'checked' ? 'todo' : 'checked';
+            const isCompleted = task.status === 'checked' || task.status === 'done';
+            const newStatus = isCompleted ? 'todo' : 'checked';
             const updates: any = { status: newStatus };
             if (newStatus === 'checked' && !task.completedAt) {
                 updates.completedAt = new Date().toISOString();

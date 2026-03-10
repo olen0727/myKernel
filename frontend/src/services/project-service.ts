@@ -30,7 +30,7 @@ export class ProjectService extends BaseService<Project> {
             return;
         }
 
-        const completed = tasks.filter((t: any) => t.status === 'done').length;
+        const completed = tasks.filter((t: any) => t.status === 'done' || t.status === 'checked').length;
         const progress = Math.round((completed / tasks.length) * 100);
 
         await this.update(projectId, { progress });
