@@ -161,11 +161,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     return (
         <div className={className}>
             {value ? (
-                <div className="relative group rounded-md overflow-hidden border border-border bg-muted/30">
+                <div className="relative group rounded-md overflow-hidden border border-border bg-muted/30 h-full">
                     <img
                         src={value}
                         alt="Preview"
-                        className="w-full max-h-[300px] object-contain mx-auto"
+                        className="w-full h-full object-cover mx-auto"
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <Button
