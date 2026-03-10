@@ -67,7 +67,6 @@ export const MetricItem: React.FC<MetricItemProps> = ({ definition, value, onCha
 
     const getIcon = () => {
         switch (definition.id) {
-            case 'mood': return <Star className="w-4 h-4" />
             case 'energy': return <Zap className="w-4 h-4" />
             case 'sleep': return <Moon className="w-4 h-4" />
             case 'focus': return <Target className="w-4 h-4" />

@@ -288,10 +288,8 @@ export interface MetricEntry {
 }
 
 export const METRIC_DEFINITIONS: MetricDefinition[] = [
-    { id: 'mood', name: '心情 (Mood)', type: 'rating', min: 1, max: 5, status: 'active', isSystem: true },
     { id: 'energy', name: '能量 (Energy)', type: 'rating', min: 1, max: 5, status: 'active', isSystem: true },
     { id: 'sleep', name: '睡眠 (Sleep)', type: 'number', min: 0, max: 24, step: 0.5, unit: 'hrs', status: 'active', isSystem: true },
-    { id: 'focus', name: '專注度 (Focus)', type: 'rating', min: 1, max: 10, status: 'active', isSystem: false },
 ]
 
 // --- Journal Mock Data ---

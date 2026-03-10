@@ -10,6 +10,23 @@ import {
 
 export class DataSeeder {
     static async seed() {
+        // 即使已經 seeded 也要跑的 migration
+        console.log('Running migrations...');
+        try {
+            const metricService = await services.metric;
+            const metrics = await metricService.getAll();
+            const deprecatedMetricIds = ['mood'];
+            for (const id of deprecatedMetricIds) {
+                const exists = metrics.find((m: any) => m.id === id);
+                if (exists) {
+                    await metricService.delete(id);
+                    console.log(`Deleted deprecated metric: ${id}`);
+                }
+            }
+        } catch (err) {
+            console.warn('Failed to clean up deprecated metrics:', err);
+        }
+
         // [FIX] Prevent re-seeding on refresh if already seeded
         if (typeof window !== 'undefined' && localStorage.getItem('kernel_has_seeded')) {
             console.log('Seeding skipped (flag set)');
@@ -91,6 +108,7 @@ export class DataSeeder {
             // Metrics
             const metricService = await services.metric;
             const metrics = await metricService.getAll();
+
             if (metrics.length === 0) {
                 console.log('Seeding Metrics...');
                 for (const metric of METRIC_DEFINITIONS) {
